@@ -102,15 +102,23 @@ export function Home() {
       </section>
 
       {/* Integrations Section */}
-      <Integrations />
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9 }}
+        whileInView={{ opacity: 1, scale: 1 }}
+        viewport={{ once: true, amount: 0.2 }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
+      >
+        <Integrations />
+      </motion.div>
 
       {/* Problem Section */}
       <section className="py-20 px-4 sm:px-6 lg:px-8 bg-white dark:bg-gray-900">
         <div className="max-w-7xl mx-auto">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
+            initial={{ opacity: 0, scale: 0.8, y: 50 }}
+            whileInView={{ opacity: 1, scale: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
             className="text-center mb-16"
           >
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
@@ -120,20 +128,27 @@ export function Home() {
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
-              { icon: DollarSign, title: t('problem.moneyStuck'), color: 'text-red-500' },
-              { icon: AlertTriangle, title: t('problem.stockouts'), color: 'text-orange-500' },
-              { icon: FileSpreadsheet, title: t('problem.excelForecasting'), color: 'text-yellow-500' },
-              { icon: Eye, title: t('problem.noVisibility'), color: 'text-blue-500' },
+              { img: 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png', title: t('problem.moneyStuck'), extraClass: 'grayscale sepia hue-rotate-[320deg] saturate-[5000%] brightness-110 drop-shadow-md' },
+              { img: 'https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Symbols/Warning.png', title: t('problem.stockouts') },
+              { img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/73/Microsoft_Excel_2013-2019_logo.svg/1200px-Microsoft_Excel_2013-2019_logo.svg.png', title: t('problem.excelForecasting') },
+              { img: 'https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Magnifying%20Glass%20Tilted%20Right.png', title: t('problem.noVisibility') },
             ].map((problem, index) => (
               <motion.div
                 key={index}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
+                initial={{ opacity: 0, scale: 0.8, y: 40 }}
+                whileInView={{ opacity: 1, scale: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.2 }}
+                transition={{ delay: index * 0.1, duration: 0.5, type: "spring", stiffness: 100 }}
               >
-                <Card className="p-6 hover:shadow-lg transition-shadow border-2 dark:border-gray-800">
-                  <problem.icon className={`w-12 h-12 ${problem.color} mb-4`} />
+                <Card className="p-6 hover:shadow-lg transition-shadow border-2 dark:border-gray-800 group">
+                  <div className="w-16 h-16 mb-4 group-hover:scale-110 group-hover:-translate-y-2 transition-transform duration-300">
+                    <img
+                      src={problem.img}
+                      alt={problem.title}
+                      className={`w-full h-full drop-shadow-xl ${problem.extraClass || ''}`}
+                      loading="lazy"
+                    />
+                  </div>
                   <h3 className="font-semibold text-gray-900 dark:text-white">{problem.title}</h3>
                 </Card>
               </motion.div>
@@ -147,9 +162,10 @@ export function Home() {
         <div className="max-w-7xl mx-auto">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <motion.div
-              initial={{ opacity: 0, x: -50 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
+              initial={{ opacity: 0, scale: 0.8, x: -50 }}
+              whileInView={{ opacity: 1, scale: 1, x: 0 }}
+              viewport={{ once: true, amount: 0.3 }}
+              transition={{ duration: 0.6, type: "spring", stiffness: 80 }}
             >
               <img
                 src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=600&fit=crop"
@@ -159,9 +175,10 @@ export function Home() {
             </motion.div>
 
             <motion.div
-              initial={{ opacity: 0, x: 50 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
+              initial={{ opacity: 0, scale: 0.8, x: 50 }}
+              whileInView={{ opacity: 1, scale: 1, x: 0 }}
+              viewport={{ once: true, amount: 0.3 }}
+              transition={{ duration: 0.6, type: "spring", stiffness: 80 }}
             >
               <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-6">
                 Connect Once. Get AI-Powered Insights Forever.
@@ -182,9 +199,10 @@ export function Home() {
       <section className="py-20 px-4 sm:px-6 lg:px-8 bg-white dark:bg-gray-900">
         <div className="max-w-7xl mx-auto">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
+            initial={{ opacity: 0, scale: 0.8, y: 50 }}
+            whileInView={{ opacity: 1, scale: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
             className="text-center mb-16"
           >
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
@@ -197,24 +215,24 @@ export function Home() {
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
             {[
-              { icon: TrendingDown, title: t('features.deadStock'), desc: 'Identify products blocking your cash' },
-              { icon: Brain, title: t('features.aiForecasting'), desc: 'Predict future demand with 95% accuracy' },
-              { icon: Bell, title: t('features.reorder'), desc: 'Never run out of bestsellers' },
-              { icon: Package, title: t('features.blockedCapital'), desc: 'See exactly where your money is stuck' },
+              { img: 'https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Chart%20Decreasing.png', title: t('features.deadStock'), desc: 'Identify products blocking your cash' },
+              { img: 'https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Body%20parts/Brain.png', title: t('features.aiForecasting'), desc: 'Predict future demand with 95% accuracy' },
+              { img: 'https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Bell.png', title: t('features.reorder'), desc: 'Never run out of bestsellers' },
+              { img: 'https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Package.png', title: t('features.blockedCapital'), desc: 'See exactly where your money is stuck' },
             ].map((feature, index) => (
               <motion.div
                 key={index}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                whileHover={{ y: -5, scale: 1.02 }}
+                initial={{ opacity: 0, scale: 0.5, y: 50 }}
+                whileInView={{ opacity: 1, scale: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.2 }}
+                transition={{ delay: index * 0.1, duration: 0.5, type: "spring", stiffness: 120 }}
+                whileHover={{ y: -10, scale: 1.05 }}
                 className="col-span-1"
               >
                 <Card className="p-8 h-full hover:shadow-2xl transition-all duration-300 border border-gray-100 dark:border-gray-800 bg-gradient-to-br from-white to-gray-50/50 dark:from-gray-900 dark:to-gray-800/50 relative overflow-hidden group">
                   <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-[rgb(var(--accent-primary))]/10 to-[rgb(var(--accent-secondary))]/10 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-500"></div>
-                  <div className="w-14 h-14 rounded-2xl bg-white dark:bg-gray-800 shadow-sm border border-gray-100 dark:border-gray-700 flex items-center justify-center mb-6 relative z-10 group-hover:rotate-6 transition-transform">
-                    <feature.icon className="w-7 h-7 text-[rgb(var(--accent-primary))]" />
+                  <div className="w-20 h-20 flex items-center justify-center mb-6 relative z-10 group-hover:rotate-6 group-hover:scale-110 transition-transform duration-300">
+                    <img src={feature.img} alt={feature.title} className="w-full h-full drop-shadow-2xl" loading="lazy" />
                   </div>
                   <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3 relative z-10">{feature.title}</h3>
                   <p className="text-gray-600 dark:text-gray-400 relative z-10 leading-relaxed">{feature.desc}</p>
@@ -227,9 +245,10 @@ export function Home() {
 
           {/* Advanced Features Grid */}
           <motion.div
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
+            initial={{ opacity: 0, scale: 0.9, y: 30 }}
+            whileInView={{ opacity: 1, scale: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 0.6, type: "spring", stiffness: 100 }}
             className="bg-gradient-to-br from-gray-50 to-white dark:from-gray-800 dark:to-gray-900 rounded-3xl p-8 md:p-12"
           >
             <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-8 text-center">
@@ -256,11 +275,12 @@ export function Home() {
               ].map((feature, index) => (
                 <motion.div
                   key={index}
-                  initial={{ opacity: 0, scale: 0.9 }}
+                  initial={{ opacity: 0, scale: 0.5 }}
                   whileInView={{ opacity: 1, scale: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: index * 0.05 }}
-                  className="flex items-center gap-2 p-3 bg-white dark:bg-gray-800 rounded-lg shadow-sm"
+                  viewport={{ once: true, amount: 0.5 }}
+                  transition={{ delay: index * 0.05, type: "spring", stiffness: 150 }}
+                  className="flex items-center gap-2 p-3 bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-default"
+                  whileHover={{ scale: 1.05, y: -2 }}
                 >
                   <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0" />
                   <span className="text-sm text-gray-700 dark:text-gray-300">{feature}</span>
@@ -275,9 +295,10 @@ export function Home() {
       <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-[rgb(var(--accent-primary))] to-[rgb(var(--accent-secondary))] text-white">
         <div className="max-w-4xl mx-auto text-center">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
+            initial={{ opacity: 0, scale: 0.8, y: 30 }}
+            whileInView={{ opacity: 1, scale: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
           >
             <h2 className="text-3xl md:text-4xl font-bold mb-6">
               How Much Cash Can You Recover?
@@ -308,10 +329,10 @@ export function Home() {
             ].map((stat, index) => (
               <motion.div
                 key={index}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
+                initial={{ opacity: 0, scale: 0.5, y: 30 }}
+                whileInView={{ opacity: 1, scale: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.3 }}
+                transition={{ delay: index * 0.1, duration: 0.5, type: "spring" }}
                 className="text-center"
               >
                 <div className="text-4xl md:text-5xl font-bold text-[rgb(var(--accent-primary))] mb-2">
@@ -328,9 +349,10 @@ export function Home() {
       <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gray-50 dark:bg-gray-800">
         <div className="max-w-3xl mx-auto">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
+            initial={{ opacity: 0, scale: 0.8, y: 30 }}
+            whileInView={{ opacity: 1, scale: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
             className="text-center mb-12"
           >
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
@@ -346,12 +368,12 @@ export function Home() {
             ].map((faq, index) => (
               <motion.div
                 key={index}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
+                initial={{ opacity: 0, scale: 0.8, y: 30 }}
+                whileInView={{ opacity: 1, scale: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.2 }}
+                transition={{ delay: index * 0.1, duration: 0.4, ease: "easeOut" }}
               >
-                <Card className="p-6">
+                <Card className="p-6 hover:shadow-md transition-all duration-300 hover:-translate-y-1">
                   <h3 className="font-semibold text-gray-900 dark:text-white mb-2">{faq.q}</h3>
                   <p className="text-gray-600 dark:text-gray-400">{faq.a}</p>
                 </Card>
@@ -365,9 +387,10 @@ export function Home() {
       <section className="py-20 px-4 sm:px-6 lg:px-8 bg-white dark:bg-gray-900">
         <div className="max-w-4xl mx-auto text-center">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
+            initial={{ opacity: 0, scale: 0.8, y: 30 }}
+            whileInView={{ opacity: 1, scale: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
           >
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-6">
               Ready to Free Your Cash?
