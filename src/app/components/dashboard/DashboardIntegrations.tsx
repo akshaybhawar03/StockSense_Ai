@@ -32,7 +32,7 @@ export function DashboardIntegrations() {
         {
             id: 'meesho',
             name: 'meesho',
-            logoUrl: 'https://upload.wikimedia.org/wikipedia/commons/8/8c/Meesho_Logo_Full.png',
+            logoUrl: '/logos/meesho.svg',
             connected: false
         },
         {
@@ -113,7 +113,9 @@ export function DashboardIntegrations() {
                                         </div>
                                     )}
                                     {integration.id === 'meesho' && (
-                                        <div className="text-[#f43397] font-bold text-3xl tracking-wide lowercase">meesho</div>
+                                        <div className="flex items-center justify-center p-2 w-full h-full">
+                                            <img src="/logos/meesho.svg" alt="Meesho" className="max-w-[120px] max-h-12 w-auto h-auto object-contain" />
+                                        </div>
                                     )}
                                     {integration.id === 'flipkart' && (
                                         <div className="flex items-center">

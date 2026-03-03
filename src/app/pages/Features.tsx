@@ -204,8 +204,8 @@ export function Features() {
                 logo: <img src="/logos/shopify.svg" alt="Shopify Logo" className="w-12 h-auto object-contain dark:drop-shadow-[0_0_2px_rgba(255,255,255,0.8)]" />
               },
               {
-                name: 'Amazon',
-                logo: <img src="/logos/amazon.svg" alt="Amazon Logo" className="w-12 h-auto object-contain dark:drop-shadow-[0_0_2px_rgba(255,255,255,1)]" />
+                name: 'Amazon India',
+                logo: <img src="/logos/amazon-in.svg" alt="Amazon Logo" className="w-20 h-auto object-contain dark:brightness-0 dark:invert" />
               },
               {
                 name: 'Flipkart',

@@ -81,39 +81,22 @@ export function Navbar() {
           {/* Right Side Actions */}
           <div className="flex items-center space-x-3">
             {/* Language Switcher */}
-            <div className="relative">
+            <div className="relative flex items-center gap-1">
               <button
-                onClick={() => setShowLangMenu(!showLangMenu)}
-                className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                onClick={() => {
+                  const langs = ['en', 'hi', 'mr'];
+                  const currentIndex = langs.indexOf(language);
+                  const nextIndex = (currentIndex + 1) % langs.length;
+                  setLanguage(langs[nextIndex] as any);
+                }}
+                className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors flex items-center gap-2 group"
+                title="Change Language"
               >
                 <Globe className="w-5 h-5 text-gray-700 dark:text-gray-300" />
+                <span className="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase w-5 text-center transition-all">
+                  {language}
+                </span>
               </button>
-              <AnimatePresence>
-                {showLangMenu && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    className="absolute right-0 mt-2 w-32 bg-white dark:bg-gray-800 rounded-lg shadow-lg py-2"
-                  >
-                    {['en', 'hi', 'mr'].map((lang) => (
-                      <button
-                        key={lang}
-                        onClick={() => {
-                          setLanguage(lang as any);
-                          setShowLangMenu(false);
-                        }}
-                        className={`w-full px-4 py-2 text-left text-sm ${language === lang
-                          ? 'bg-[rgb(var(--accent-primary))]/10 text-[rgb(var(--accent-primary))]'
-                          : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-                          }`}
-                      >
-                        {lang === 'en' ? 'English' : lang === 'hi' ? 'हिन्दी' : 'मराठी'}
-                      </button>
-                    ))}
-                  </motion.div>
-                )}
-              </AnimatePresence>
             </div>
 
             {/* Theme Toggle */}

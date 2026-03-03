@@ -8,6 +8,7 @@ import { Dashboard } from './pages/Dashboard';
 import { Contact } from './pages/Contact';
 import { Demo } from './pages/Demo';
 import { Login } from './pages/Login';
+import { Register } from './pages/Register';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { DashboardLayout } from './components/dashboard/DashboardLayout';
 import { DashboardIntegrations } from './components/dashboard/DashboardIntegrations';
@@ -16,6 +17,8 @@ import { InventoryManager } from './components/dashboard/InventoryManager';
 import { AIForecastEngine } from './components/dashboard/AIForecastEngine';
 import { AlertsPage } from './components/dashboard/AlertsPage';
 import { DataProvider } from './contexts/DataContext';
+import { SmartInventory } from './pages/SmartInventory';
+import { SmartDashboard } from './pages/SmartDashboard';
 
 export const router = createBrowserRouter([
   {
@@ -29,6 +32,7 @@ export const router = createBrowserRouter([
       { path: 'contact', Component: Contact },
       { path: 'demo', Component: Demo },
       { path: 'login', Component: Login },
+      { path: 'register', Component: Register },
     ],
   },
   {
@@ -48,6 +52,8 @@ export const router = createBrowserRouter([
       { path: 'alerts', element: <AlertsPage /> },
       { path: 'integrations', Component: DashboardIntegrations },
       { path: 'settings', Component: DashboardSettings },
+      { path: 'smart-inventory', Component: SmartInventory },
+      { path: 'smart-dashboard', Component: SmartDashboard },
     ],
   },
 ]);

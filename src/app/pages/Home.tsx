@@ -62,21 +62,34 @@ export function Home() {
                 </Button>
               </div>
 
-              {/* Platform Badges */}
-              <div className="flex flex-wrap gap-6 items-center">
-                <span className="text-sm text-gray-600 dark:text-gray-400">Trusted by sellers on:</span>
-                <div className="flex flex-wrap gap-4">
-                  <div className="px-4 py-2 bg-white dark:bg-gray-800 rounded-lg shadow-sm border dark:border-gray-700">
-                    <span className="font-semibold text-green-600">Shopify</span>
-                  </div>
-                  <div className="px-4 py-2 bg-white dark:bg-gray-800 rounded-lg shadow-sm border dark:border-gray-700">
-                    <span className="font-semibold text-orange-600">Amazon</span>
-                  </div>
-                  <div className="px-4 py-2 bg-white dark:bg-gray-800 rounded-lg shadow-sm border dark:border-gray-700">
-                    <span className="font-semibold text-blue-600">Flipkart</span>
-                  </div>
-                  <div className="px-4 py-2 bg-white dark:bg-gray-800 rounded-lg shadow-sm border dark:border-gray-700">
-                    <span className="font-semibold text-emerald-600">AO</span>
+              {/* Platform Badges with Infinite Marquee */}
+              <div className="mt-8 rounded-2xl bg-white/5 dark:bg-gray-900/50 backdrop-blur-md border border-white/20 dark:border-gray-800 shadow-[0_8px_32px_0_rgba(31,38,135,0.07)] overflow-hidden relative w-full">
+                {/* Gradient Fades for seamless edges */}
+                <div className="absolute left-0 top-0 bottom-0 w-16 bg-gradient-to-r from-gray-50 dark:from-gray-900 to-transparent z-10 hidden sm:block"></div>
+                <div className="absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-gray-50 dark:from-gray-900 to-transparent z-10 hidden sm:block"></div>
+
+                {/* Marquee Track */}
+                <div className="flex overflow-hidden relative items-center py-4">
+                  <div className="flex animate-marquee min-w-full items-center gap-12 whitespace-nowrap will-change-transform pr-12">
+                    {/* First Set */}
+                    <img src="/logos/amazon-in.svg" alt="Amazon India" className="h-10 w-auto object-contain dark:brightness-0 dark:invert" />
+                    <img src="/logos/shopify.svg" alt="Shopify" className="h-12 w-auto object-contain dark:brightness-0 dark:invert" />
+                    <img src="/logos/google.svg" alt="Google Ads" className="h-10 w-auto object-contain dark:brightness-0 dark:invert" />
+                    <img src="/logos/meta.svg" alt="Meta" className="h-10 w-auto object-contain dark:brightness-0 dark:invert" />
+                    <img src="/logos/meesho.svg" alt="Meesho" className="h-10 w-auto object-contain dark:brightness-0 dark:invert" />
+                    <img src="/logos/flipkart.svg" alt="Flipkart" className="h-10 w-auto object-contain dark:brightness-0 dark:invert" />
+                    <img src="/logos/myntra.svg" alt="Myntra" className="h-10 w-auto object-contain dark:brightness-0 dark:invert" />
+                    <img src="/logos/woo.svg" alt="WooCommerce" className="h-14 w-auto object-contain dark:brightness-0 dark:invert" />
+
+                    {/* Duplicate Set for Seamless Loop */}
+                    <img src="/logos/amazon-in.svg" alt="Amazon India" className="h-10 w-auto object-contain dark:brightness-0 dark:invert" />
+                    <img src="/logos/shopify.svg" alt="Shopify" className="h-12 w-auto object-contain dark:brightness-0 dark:invert" />
+                    <img src="/logos/google.svg" alt="Google Ads" className="h-10 w-auto object-contain dark:brightness-0 dark:invert" />
+                    <img src="/logos/meta.svg" alt="Meta" className="h-10 w-auto object-contain dark:brightness-0 dark:invert" />
+                    <img src="/logos/meesho.svg" alt="Meesho" className="h-10 w-auto object-contain dark:brightness-0 dark:invert" />
+                    <img src="/logos/flipkart.svg" alt="Flipkart" className="h-10 w-auto object-contain dark:brightness-0 dark:invert" />
+                    <img src="/logos/myntra.svg" alt="Myntra" className="h-10 w-auto object-contain dark:brightness-0 dark:invert" />
+                    <img src="/logos/woo.svg" alt="WooCommerce" className="h-14 w-auto object-contain dark:brightness-0 dark:invert" />
                   </div>
                 </div>
               </div>
@@ -216,7 +229,7 @@ export function Home() {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
             {[
               { img: 'https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Chart%20Decreasing.png', title: t('features.deadStock'), desc: 'Identify products blocking your cash' },
-              { img: 'https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Body%20parts/Brain.png', title: t('features.aiForecasting'), desc: 'Predict future demand with 95% accuracy' },
+              { img: 'https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Brain/3D/brain_3d.png', title: t('features.aiForecasting'), desc: 'Predict future demand with 95% accuracy' },
               { img: 'https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Bell.png', title: t('features.reorder'), desc: 'Never run out of bestsellers' },
               { img: 'https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Package.png', title: t('features.blockedCapital'), desc: 'See exactly where your money is stuck' },
             ].map((feature, index) => (
