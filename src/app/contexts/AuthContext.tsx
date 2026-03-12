@@ -50,6 +50,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const login = async (email: string, password?: string) => {
         setIsLoading(true);
         try {
+            // --- DEMO BYPASS ---
+            if (email === 'demo@stocksense.ai' && password === 'demo123') {
+                const demoToken = 'demo-jwt-token-7x8y9z';
+                localStorage.setItem('access_token', demoToken);
+                localStorage.setItem('userEmail', email);
+                setUser({ email });
+                return;
+            }
+            // -------------------
+
             // Many FastAPI setups use OAuth2PasswordRequestForm.
             // But standard user implementations might just use JSON. Let's send a standard JSON payload.
             const response = await api.post('/auth/login', { email, password });
@@ -75,6 +85,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const register = async (email: string, password?: string) => {
         setIsLoading(true);
         try {
+            // --- DEMO BYPASS ---
+            if (email === 'demo@stocksense.ai') {
+                return; // Fake a successful registration
+            }
+            // -------------------
+
             await api.post('/auth/register', { email, password });
             // Don't auto-login unless required, redirect to login page instead
         } catch (error) {

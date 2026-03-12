@@ -38,11 +38,22 @@ export interface ForecastRecord {
     predictedDemand: number;
 }
 
+export interface DatasetRecord {
+    id: string;
+    userId: string;
+    name: string;
+    fileName: string;
+    columns: string[];
+    rows: any[];
+    createdAt: string;
+}
+
 export class StockSenseDatabase extends Dexie {
     users!: Table<User, string>;
     inventory!: Table<InventoryItem, string>;
     sales!: Table<SalesRecord, string>;
     forecasts!: Table<ForecastRecord, string>;
+    datasets!: Table<DatasetRecord, string>;
 
     constructor() {
         super('StockSenseDB');
@@ -51,6 +62,13 @@ export class StockSenseDatabase extends Dexie {
             inventory: 'id, userId, sku, [userId+sku], category', // Compound index for fast user-specific lookup
             sales: 'id, userId, sku, [userId+sku], date',
             forecasts: 'id, userId, sku, [userId+sku], date'
+        });
+        this.version(2).stores({
+            users: 'id, &email',
+            inventory: 'id, userId, sku, [userId+sku], category',
+            sales: 'id, userId, sku, [userId+sku], date',
+            forecasts: 'id, userId, sku, [userId+sku], date',
+            datasets: 'id, userId, name, createdAt'
         });
     }
 }

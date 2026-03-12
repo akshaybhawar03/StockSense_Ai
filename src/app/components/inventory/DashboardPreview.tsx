@@ -1,5 +1,5 @@
 import React from 'react';
-import { useStats, useMovements } from '../../lib/queries';
+import { useData } from '../../contexts/DataContext';
 import { PredictionChart } from './PredictionChart';
 import { Card } from '../ui/card';
 import { motion } from 'motion/react';
@@ -8,16 +8,15 @@ import { Button } from '../ui/button';
 import { Link } from 'react-router';
 
 export function DashboardPreview() {
-    const { data: stats, isLoading: statsLoading } = useStats();
-    const { data: movements, isLoading: movementsLoading } = useMovements();
+    const { kpis, sales, isLoadingData } = useData();
 
-    if (statsLoading || movementsLoading) return <div className="p-8 text-center animate-pulse">Loading dashboard...</div>;
+    if (isLoadingData) return <div className="p-8 text-center animate-pulse">Loading dashboard...</div>;
 
-    const kpis = [
-        { label: 'Total Products', value: stats?.totalProducts.toLocaleString(), icon: Package, color: 'blue' },
-        { label: 'Inventory Value', value: `₹${(stats?.totalValue || 0).toLocaleString()}`, icon: DollarSign, color: 'green' },
-        { label: 'Low Stock Alerts', value: stats?.lowStockCount, icon: AlertTriangle, color: 'orange' },
-        { label: 'Out of Stock', value: stats?.outOfStockCount, icon: Activity, color: 'red' },
+    const kpisData = [
+        { label: 'Total Products', value: kpis.totalProducts.toLocaleString(), icon: Package, color: 'blue' },
+        { label: 'Inventory Value', value: `₹${(kpis.inventoryValue || 0).toLocaleString()}`, icon: DollarSign, color: 'green' },
+        { label: 'Low Stock Alerts', value: kpis.lowStock, icon: AlertTriangle, color: 'orange' },
+        { label: 'Out of Stock', value: kpis.outOfStock, icon: Activity, color: 'red' },
     ];
 
     return (
@@ -35,7 +34,7 @@ export function DashboardPreview() {
 
             {/* KPI Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {kpis.map((kpi, idx) => {
+                {kpisData.map((kpi, idx) => {
                     const Icon = kpi.icon;
                     const bgColors = {
                         blue: 'bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-400',
@@ -74,24 +73,24 @@ export function DashboardPreview() {
                 <div className="lg:col-span-1">
                     <Card className="p-6 h-full bg-white/90 dark:bg-gray-900/90 border-gray-100 dark:border-gray-800 shadow-lg">
                         <h3 className="text-lg font-bold mb-4 flex items-center gap-2"><Activity className="w-5 h-5 text-gray-400" /> Recent Movements</h3>
-                        <div className="space-y-4">
-                            {movements?.map((mov: any) => (
+                        <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2">
+                            {sales.slice(0, 10).map((mov) => (
                                 <div key={mov.id} className="flex justify-between items-center p-3 hover:bg-gray-50 dark:hover:bg-gray-800/50 rounded-lg transition-colors border border-transparent hover:border-gray-100 dark:hover:border-gray-800">
                                     <div className="flex items-center gap-3">
-                                        <div className={`p-2 rounded-full ${mov.type === 'IN' ? 'bg-green-100 text-green-600 dark:bg-green-900/30' : 'bg-blue-100 text-blue-600 dark:bg-blue-900/30'}`}>
-                                            {mov.type === 'IN' ? <ArrowDownRight className="w-4 h-4" /> : <ArrowUpRight className="w-4 h-4" />}
+                                        <div className="p-2 rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30">
+                                            <ArrowUpRight className="w-4 h-4" />
                                         </div>
                                         <div>
-                                            <p className="text-sm font-medium">{mov.reason}</p>
+                                            <p className="text-sm font-medium">Sale: {mov.sku}</p>
                                             <p className="text-xs text-gray-500">{new Date(mov.date).toLocaleDateString()}</p>
                                         </div>
                                     </div>
-                                    <div className={`font-semibold ${mov.type === 'IN' ? 'text-green-600' : 'text-gray-900 dark:text-gray-100'}`}>
-                                        {mov.type === 'IN' ? '+' : '-'}{mov.quantity}
+                                    <div className="font-semibold text-gray-900 dark:text-gray-100">
+                                        -{mov.quantity}
                                     </div>
                                 </div>
                             ))}
-                            {movements?.length === 0 && <p className="text-sm text-gray-400 py-4 text-center">No recent activity</p>}
+                            {sales.length === 0 && <p className="text-sm text-gray-400 py-4 text-center">No recent activity</p>}
                         </div>
                     </Card>
                 </div>

@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL || 'https://stock-sense-ai-sooty.vercel.app/api/v1';
+const API_URL = import.meta.env.VITE_API_URL || 'https://stocksense-backend-wijr.onrender.com';
 
 export const api = axios.create({
     baseURL: API_URL,

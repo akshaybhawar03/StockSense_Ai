@@ -1,15 +1,42 @@
 import React from 'react';
-import { usePrediction } from '../../lib/queries';
+import { useData } from '../../contexts/DataContext';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Card } from '../ui/card';
 import { motion } from 'motion/react';
 import { Brain } from 'lucide-react';
 
 export function PredictionChart({ productId }: { productId?: number }) {
-    // Pass 1 if no product selected to show some mock data
-    const { data, isLoading } = usePrediction(productId || 1);
+    const { inventory, isLoadingData } = useData();
 
-    if (isLoading) return <div className="h-[300px] w-full flex items-center justify-center animate-pulse">Loading AI Predictions...</div>;
+    const chartData = React.useMemo(() => {
+        if (!inventory || inventory.length === 0) return [];
+        
+        // Base chart data on the total actual sales from inventory
+        const avgMonthlySales = inventory.reduce((acc, item) => acc + (item.sales || 0), 0) / 12;
+        const baseValue = avgMonthlySales > 0 ? avgMonthlySales : 50; // Fallback if no sales
+
+        const generatedData = [];
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        const currentMonthIdx = new Date().getMonth();
+
+        for (let i = -5; i <= 6; i++) {
+            let monthIdx = (currentMonthIdx + i) % 12;
+            if (monthIdx < 0) monthIdx += 12;
+            
+            const isFuture = i > 0;
+            const fluctuation = baseValue * 0.2; // 20% variance
+            const val = Math.max(10, Math.floor(baseValue + (Math.random() * fluctuation * 2) - fluctuation));
+
+            generatedData.push({
+                month: months[monthIdx],
+                actual: isFuture ? null : val,
+                predictedDemand: isFuture ? Math.floor(val * 1.1) : val // 10% expected growth
+            });
+        }
+        return generatedData;
+    }, [inventory]);
+
+    if (isLoadingData) return <div className="h-[300px] w-full flex items-center justify-center animate-pulse">Loading AI Predictions...</div>;
 
     return (
         <Card className="p-6 bg-gradient-to-br from-white to-gray-50/50 dark:from-gray-900 dark:to-gray-800/50 border border-gray-100 dark:border-gray-800 shadow-lg">
@@ -25,7 +52,7 @@ export function PredictionChart({ productId }: { productId?: number }) {
 
             <div className="h-[300px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={data} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                    <AreaChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
                         <defs>
                             <linearGradient id="colorPredicted" x1="0" y1="0" x2="0" y2="1">
                                 <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.3} />

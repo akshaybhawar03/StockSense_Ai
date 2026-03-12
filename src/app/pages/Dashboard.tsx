@@ -1,17 +1,19 @@
 import { useState } from 'react';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import { Card } from '../components/ui/card';
-import { CloudUpload, Package, DollarSign, AlertTriangle, TrendingUp, TrendingDown, Clock, Building2, Activity, RefreshCw } from 'lucide-react';
+import { CloudUpload, Package, DollarSign, AlertTriangle, TrendingUp, TrendingDown, Clock, Activity, RefreshCw, X, Maximize, BarChart3 } from 'lucide-react';
 import { useData } from '../contexts/DataContext';
 import { CsvUploadModal } from '../components/dashboard/CsvUploadModal';
 import { GlobalCharts } from '../components/dashboard/GlobalCharts';
 import { CashFlowOptimizer } from '../components/dashboard/CashFlowOptimizer';
 import { DeadStockAnalyzer } from '../components/dashboard/DeadStockAnalyzer';
 import { ReorderPredictor } from '../components/dashboard/ReorderPredictor';
+import { PowerBIDashboard } from '../components/dashboard/PowerBIDashboard';
 
 export function Dashboard() {
-  const { kpis, inventory, isLoadingData } = useData();
+  const { kpis, inventory, datasets, isLoadingData } = useData();
   const [isUploadOpen, setIsUploadOpen] = useState(false);
+  const [isFullscreenPowerBI, setIsFullscreenPowerBI] = useState(false);
 
   const stats = [
     { label: 'Total Products', value: kpis.totalProducts.toLocaleString(), icon: Package, color: 'text-blue-500', bg: 'bg-blue-50 dark:bg-blue-900/20' },
@@ -29,26 +31,70 @@ export function Dashboard() {
   }
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-6 relative">
+      <AnimatePresence>
+        {isFullscreenPowerBI && (
+            <motion.div 
+               initial={{ opacity: 0, y: 20 }}
+               animate={{ opacity: 1, y: 0 }}
+               exit={{ opacity: 0, y: 20 }}
+               className="fixed inset-0 z-[100] bg-gray-50 dark:bg-gray-900 overflow-y-auto w-full h-full"
+            >
+               <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 flex flex-col gap-6 min-h-full">
+                 <div className="flex justify-between items-center bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 mx-auto w-full">
+                    <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                        <Maximize className="w-5 h-5 text-teal-500" />
+                        Full Screen Data Visualization
+                    </h2>
+                    <button 
+                        onClick={() => setIsFullscreenPowerBI(false)}
+                        className="px-4 py-2 text-white bg-red-500 hover:bg-red-600 rounded-lg transition-colors flex items-center gap-2 shadow-sm font-medium"
+                    >
+                        <X className="w-5 h-5" />
+                        Exit Full Screen
+                    </button>
+                 </div>
+                 <PowerBIDashboard />
+               </div>
+            </motion.div>
+        )}
+      </AnimatePresence>
 
       {inventory.length === 0 ? (
-        <Card className="p-8 border border-dashed border-gray-300 dark:border-gray-700 shadow-sm bg-gray-50 dark:bg-gray-800/50 flex flex-col items-center justify-center text-center">
-          <div className="w-16 h-16 rounded-full bg-teal-100 dark:bg-teal-900/30 flex items-center justify-center text-teal-600 dark:text-teal-400 mb-4">
-            <CloudUpload className="w-8 h-8" />
-          </div>
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">No Data Found</h2>
-          <p className="text-gray-500 dark:text-gray-400 max-w-md mb-6">
-            Upload your inventory CSV file to instantly generate AI-driven insights, forecasts, and powerful analytics.
-          </p>
-          <button
-            onClick={() => setIsUploadOpen(true)}
-            className="px-6 py-3 bg-teal-600 hover:bg-teal-700 text-white font-medium rounded-lg transition-colors shadow-sm cursor-pointer"
-          >
-            Upload Inventory Data
-          </button>
-        </Card>
+        datasets && datasets.length > 0 ? (
+            <PowerBIDashboard />
+        ) : (
+            <Card className="p-8 border border-dashed border-gray-300 dark:border-gray-700 shadow-sm bg-gray-50 dark:bg-gray-800/50 flex flex-col items-center justify-center text-center">
+            <div className="w-16 h-16 rounded-full bg-teal-100 dark:bg-teal-900/30 flex items-center justify-center text-teal-600 dark:text-teal-400 mb-4">
+                <CloudUpload className="w-8 h-8" />
+            </div>
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">No Data Found</h2>
+            <p className="text-gray-500 dark:text-gray-400 max-w-md mb-6">
+                Upload your inventory Excel or CSV file to instantly generate AI-driven insights, forecasts, and powerful analytics.
+            </p>
+            <button
+                onClick={() => setIsUploadOpen(true)}
+                className="px-6 py-3 bg-teal-600 hover:bg-teal-700 text-white font-medium rounded-lg transition-colors shadow-sm cursor-pointer"
+            >
+                Upload Inventory Data
+            </button>
+            </Card>
+        )
       ) : (
         <>
+          <div className="flex justify-between items-center">
+             <h2 className="text-xl font-bold font-heading text-gray-900 dark:text-white">Overview</h2>
+             {datasets && datasets.length > 0 && (
+                <button 
+                  onClick={() => setIsFullscreenPowerBI(true)}
+                  className="px-4 py-2 bg-gradient-to-r from-teal-500 to-emerald-600 text-white font-medium rounded-lg text-sm flex items-center gap-2 shadow-sm hover:shadow-md transition-all active:scale-95"
+                >
+                  <BarChart3 className="w-4 h-4" />
+                  View Raw Data Dashboard
+                </button>
+             )}
+          </div>
+
           {/* Dynamic KPIs Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {stats.map((stat, idx) => (

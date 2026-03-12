@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { db, InventoryItem, SalesRecord, ForecastRecord } from '../lib/db';
+import { db, InventoryItem, SalesRecord, ForecastRecord, DatasetRecord } from '../lib/db';
 import { useAuth } from './AuthContext';
 
 interface GlobalKPIs {
@@ -17,6 +17,7 @@ interface DataContextType {
     inventory: InventoryItem[];
     sales: SalesRecord[];
     forecasts: ForecastRecord[];
+    datasets: DatasetRecord[];
     kpis: GlobalKPIs;
     refreshData: () => Promise<void>;
     isLoadingData: boolean;
@@ -29,6 +30,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     const [inventory, setInventory] = useState<InventoryItem[]>([]);
     const [sales, setSales] = useState<SalesRecord[]>([]);
     const [forecasts, setForecasts] = useState<ForecastRecord[]>([]);
+    const [datasets, setDatasets] = useState<DatasetRecord[]>([]);
     const [isLoadingData, setIsLoadingData] = useState(true);
 
     const [kpis, setKpis] = useState<GlobalKPIs>({
@@ -46,14 +48,16 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         if (!user) return;
         setIsLoadingData(true);
         try {
-            const userId = user.id;
+            const userId = user.id || user.email;
             const invData = await db.inventory.where('userId').equals(userId).toArray();
             const salesData = await db.sales.where('userId').equals(userId).toArray();
             const forecastData = await db.forecasts.where('userId').equals(userId).toArray();
+            const datasetsData = await db.datasets.where('userId').equals(userId).toArray();
 
             setInventory(invData);
             setSales(salesData);
             setForecasts(forecastData);
+            setDatasets(datasetsData);
 
             // Calculate KPIs
             const totalProducts = invData.length;
@@ -104,12 +108,13 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
             setInventory([]);
             setSales([]);
             setForecasts([]);
+            setDatasets([]);
             setIsLoadingData(false);
         }
     }, [user, refreshData]);
 
     return (
-        <DataContext.Provider value={{ inventory, sales, forecasts, kpis, refreshData, isLoadingData }}>
+        <DataContext.Provider value={{ inventory, sales, forecasts, datasets, kpis, refreshData, isLoadingData }}>
             {children}
         </DataContext.Provider>
     );

@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react';
-import Papa from 'papaparse';
+import * as XLSX from 'xlsx';
 import { v4 as uuidv4 } from 'uuid';
 import { UploadCloud, CheckCircle, AlertCircle, X, Loader2 } from 'lucide-react';
 import { db, InventoryItem, SalesRecord } from '../../lib/db';
@@ -47,8 +47,10 @@ export function CsvUploadModal({ isOpen, onClose }: Props) {
     };
 
     const handleFile = (selectedFile: File) => {
-        if (selectedFile.type !== 'text/csv' && !selectedFile.name.endsWith('.csv')) {
-            setError('Please upload a valid CSV file.');
+        const isExcel = selectedFile.name.endsWith('.xlsx') || selectedFile.name.endsWith('.xls') || selectedFile.type.includes('excel') || selectedFile.type.includes('spreadsheetml');
+        const isCsv = selectedFile.type === 'text/csv' || selectedFile.name.endsWith('.csv');
+        if (!isExcel && !isCsv) {
+            setError('Please upload a valid Excel (.xlsx, .xls) or CSV file.');
             return;
         }
         setError(null);
@@ -60,92 +62,104 @@ export function CsvUploadModal({ isOpen, onClose }: Props) {
         setIsUploading(true);
         setError(null);
 
-        Papa.parse(file, {
-            header: true,
-            skipEmptyLines: true,
-            dynamicTyping: true,
-            complete: async (results) => {
-                try {
-                    const data = results.data as any[];
-                    if (!data || data.length === 0) {
-                        throw new Error('CSV file is empty or invalid.');
-                    }
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+            try {
+                const data = e.target?.result;
+                const workbook = XLSX.read(data, { type: 'binary' });
+                const firstSheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[firstSheetName];
+                const jsonData = XLSX.utils.sheet_to_json(worksheet, { defval: null }) as any[];
 
-                    const newInventory: InventoryItem[] = [];
-                    const newSales: SalesRecord[] = [];
+                if (!jsonData || jsonData.length === 0) {
+                    throw new Error('File is empty or invalid.');
+                }
 
-                    const now = new Date().toISOString();
+                const columns = Object.keys(jsonData[0]);
 
-                    for (let row of data) {
-                        // Basic validation
-                        if (!row.sku || typeof row.sku !== 'string') continue;
+                const newInventory: InventoryItem[] = [];
+                const newSales: SalesRecord[] = [];
+                const now = new Date().toISOString();
+                const userId = user.id || user.email;
 
-                        const stock = Number(row.stock) || 0;
-                        const price = Number(row.price) || 0;
-                        const sales = Number(row.sales) || 0;
-                        const name = row.name || row.product_name || `Unknown Product ${row.sku}`;
-                        const category = row.category || 'General';
+                for (let row of jsonData) {
+                    // Best effort mapping logic for KPI features
+                    const sku = String(row.sku || row.SKU || row.item_id || row['Item ID'] || `AUTO-${uuidv4().substring(0, 8)}`);
+                    const name = String(row.name || row.Name || row.product_name || row['Product Name'] || row.title || row.Title || `Product ${sku}`);
+                    const category = String(row.category || row.Category || row.department || row.Department || 'General');
+                    const stock = Number(row.stock || row.Stock || row.quantity || row.qty || row.Qty || row['Quantity On Hand']) || 0;
+                    const price = Number(row.price || row.Price || row['price'] || row.cost || row.Cost || row.value || row['Unit Price']) || 0;
+                    const sales = Number(row.sales || row.Sales || row.sold || row.Sold || row['Sales Volume']) || 0;
 
-                        newInventory.push({
-                            id: uuidv4(),
-                            userId: user.id,
-                            sku: row.sku,
-                            name,
-                            category,
-                            stock,
-                            price,
-                            sales,
-                            createdAt: now,
-                            updatedAt: now
-                        });
-
-                        // Generate some pseudo sales records based on the total sales number 
-                        // so our charts have something to show right away.
-                        if (sales > 0) {
-                            // Spread it over the last 30 days randomly
-                            for (let i = 0; i < Math.min(sales, 10); i++) {
-                                const daysAgo = Math.floor(Math.random() * 30);
-                                const recordDate = new Date();
-                                recordDate.setDate(recordDate.getDate() - daysAgo);
-
-                                newSales.push({
-                                    id: uuidv4(),
-                                    userId: user.id,
-                                    sku: row.sku,
-                                    quantity: Math.ceil(sales / 10),
-                                    revenue: Math.ceil(sales / 10) * price,
-                                    date: recordDate.toISOString()
-                                });
-                            }
-                        }
-                    }
-
-                    // Batch insert
-                    await db.transaction('rw', db.inventory, db.sales, async () => {
-                        await db.inventory.bulkAdd(newInventory);
-                        await db.sales.bulkAdd(newSales);
+                    newInventory.push({
+                        id: uuidv4(),
+                        userId,
+                        sku,
+                        name,
+                        category,
+                        stock,
+                        price,
+                        sales,
+                        createdAt: now,
+                        updatedAt: now
                     });
 
-                    setSuccess(true);
-                    await refreshData();
+                    if (sales > 0) {
+                        for (let i = 0; i < Math.min(sales, 10); i++) {
+                            const daysAgo = Math.floor(Math.random() * 30);
+                            const recordDate = new Date();
+                            recordDate.setDate(recordDate.getDate() - daysAgo);
 
-                    setTimeout(() => {
-                        onClose();
-                        setSuccess(false);
-                        setFile(null);
-                    }, 2000);
-
-                } catch (err: any) {
-                    setError(err.message || 'Error processing CSV file.');
-                } finally {
-                    setIsUploading(false);
+                            newSales.push({
+                                id: uuidv4(),
+                                userId,
+                                sku,
+                                quantity: Math.ceil(sales / 10),
+                                revenue: Math.ceil(sales / 10) * price,
+                                date: recordDate.toISOString()
+                            });
+                        }
+                    }
                 }
-            },
-            error: (error) => {
-                setError(`Error parsing CSV: ${error.message}`);
+
+                const datasetId = uuidv4();
+                
+                await db.transaction('rw', db.inventory, db.sales, db.datasets, async () => {
+                    await db.inventory.bulkAdd(newInventory);
+                    await db.sales.bulkAdd(newSales);
+                    await db.datasets.put({
+                        id: datasetId,
+                        userId,
+                        name: file.name.split('.')[0],
+                        fileName: file.name,
+                        columns,
+                        rows: jsonData,
+                        createdAt: now
+                    });
+                });
+
+                setSuccess(true);
+                await refreshData();
+
+                setTimeout(() => {
+                    onClose();
+                    setSuccess(false);
+                    setFile(null);
+                }, 2000);
+
+            } catch (err: any) {
+                setError(err.message || 'Error processing Excel/CSV file.');
+            } finally {
                 setIsUploading(false);
             }
-        });
+        };
+
+        reader.onerror = () => {
+            setError('Error reading local file.');
+            setIsUploading(false);
+        };
+
+        reader.readAsBinaryString(file);
     };
 
     if (!isOpen) return null;
@@ -181,7 +195,7 @@ export function CsvUploadModal({ isOpen, onClose }: Props) {
                                     type="file"
                                     id="csv-upload"
                                     className="hidden"
-                                    accept=".csv"
+                                    accept=".csv,.xlsx,.xls"
                                     onChange={handleFileChange}
                                 />
 
@@ -205,11 +219,11 @@ export function CsvUploadModal({ isOpen, onClose }: Props) {
                                             Click to upload or drag and drop
                                         </p>
                                         <p className="text-xs text-gray-500 mb-4">
-                                            CSV files only (max 10MB)
+                                            Excel or CSV files (max 10MB)
                                         </p>
                                         <div className="text-xs text-left bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 p-3 rounded-lg flex items-start">
                                             <AlertCircle className="w-4 h-4 mr-2 shrink-0 mt-0.5" />
-                                            <span>Required columns: <br /><strong>sku, name, category, stock, price, sales</strong></span>
+                                            <span><strong>Any columns supported.</strong><br/> We will auto-extract all columns for the dynamic dashboard view and chart builder.</span>
                                         </div>
                                     </label>
                                 )}
