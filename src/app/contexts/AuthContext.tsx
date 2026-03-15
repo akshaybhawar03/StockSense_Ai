@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { api } from '../services/api';
+import React, { createContext, useContext, useState, useEffect } from "react";
+import { api } from "../services/api";
 
 export interface User {
     id?: string;
@@ -10,8 +10,8 @@ export interface User {
 interface AuthContextType {
     isLoggedIn: boolean;
     user: User | null;
-    login: (email: string, password?: string) => Promise<void>;
-    register: (email: string, password?: string) => Promise<void>;
+    login: (email: string, password: string) => Promise<void>;
+    register: (email: string, password: string) => Promise<void>;
     logout: () => void;
     isLoading: boolean;
 }
@@ -22,58 +22,42 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
+    // Restore login from localStorage
     useEffect(() => {
-        const initAuth = async () => {
-            const token = localStorage.getItem('access_token');
-            const userEmail = localStorage.getItem('userEmail');
+        const token = localStorage.getItem("access_token");
+        const userEmail = localStorage.getItem("userEmail");
 
-            if (token && userEmail) {
-                // If there was a /me endpoint we could verify it here,
-                // but since we just have the token, we'll restore state locally
-                setUser({ email: userEmail });
+        if (token && userEmail) {
+            setUser({ email: userEmail });
+        }
 
-                // Optional: Verify token with backend
-                // try {
-                //     const response = await api.get('/me');
-                //     setUser(response.data);
-                // } catch (err) {
-                //     logout();
-                // }
-            } else {
-                logout();
-            }
-            setIsLoading(false);
-        };
-        initAuth();
+        setIsLoading(false);
     }, []);
 
-    const login = async (email: string, password?: string) => {
+    // ---------------- LOGIN ----------------
+    const login = async (email: string, password: string) => {
         setIsLoading(true);
+
         try {
-            // --- DEMO BYPASS ---
-            if (email === 'demo@stocksense.ai' && password === 'demo123') {
-                const demoToken = 'demo-jwt-token-7x8y9z';
-                localStorage.setItem('access_token', demoToken);
-                localStorage.setItem('userEmail', email);
-                setUser({ email });
-                return;
-            }
-            // -------------------
+            // OAuth2PasswordRequestForm requires form-data
+            const params = new URLSearchParams();
+            params.append("username", email);
+            params.append("password", password);
 
-            // Many FastAPI setups use OAuth2PasswordRequestForm.
-            // But standard user implementations might just use JSON. Let's send a standard JSON payload.
-            const response = await api.post('/auth/login', { email, password });
+            const response = await api.post("/auth/login", params, {
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                },
+            });
 
+            const token = response.data.access_token;
 
-            const accessToken = response.data.access_token || response.data.token;
+            if (!token) throw new Error("No token received");
 
-            if (accessToken) {
-                localStorage.setItem('access_token', accessToken);
-                localStorage.setItem('userEmail', email);
-                setUser({ email });
-            } else {
-                throw new Error("No access token provided.");
-            }
+            localStorage.setItem("access_token", token);
+            localStorage.setItem("userEmail", email);
+
+            setUser({ email });
         } catch (error) {
             console.error("Login failed:", error);
             throw error;
@@ -82,17 +66,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
     };
 
-    const register = async (email: string, password?: string) => {
+    // ---------------- REGISTER ----------------
+    const register = async (email: string, password: string) => {
         setIsLoading(true);
-        try {
-            // --- DEMO BYPASS ---
-            if (email === 'demo@stocksense.ai') {
-                return; // Fake a successful registration
-            }
-            // -------------------
 
-            await api.post('/auth/register', { email, password });
-            // Don't auto-login unless required, redirect to login page instead
+        try {
+            await api.post("/auth/register", {
+                email,
+                password,
+            });
+
+            // After register redirect to login
+            console.log("Registration successful");
         } catch (error) {
             console.error("Registration failed:", error);
             throw error;
@@ -101,23 +86,36 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
     };
 
+    // ---------------- LOGOUT ----------------
     const logout = () => {
+        localStorage.removeItem("access_token");
+        localStorage.removeItem("userEmail");
         setUser(null);
-        localStorage.removeItem('access_token');
-        localStorage.removeItem('userEmail');
     };
 
     return (
-        <AuthContext.Provider value={{ isLoggedIn: !!user, user, login, register, logout, isLoading }}>
+        <AuthContext.Provider
+            value={{
+                isLoggedIn: !!user,
+                user,
+                login,
+                register,
+                logout,
+                isLoading,
+            }}
+        >
             {children}
         </AuthContext.Provider>
     );
 }
 
+// ---------------- HOOK ----------------
 export function useAuth() {
     const context = useContext(AuthContext);
-    if (context === undefined) {
-        throw new Error('useAuth must be used within an AuthProvider');
+
+    if (!context) {
+        throw new Error("useAuth must be used within AuthProvider");
     }
+
     return context;
 }
