@@ -12,11 +12,14 @@ import {
     LogOut,
     Menu,
     X,
-    UploadCloud
+    UploadCloud,
+    Sparkles,
+    BarChart3
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { Button } from '../ui/button';
 import { CsvUploadModal } from './CsvUploadModal';
+import { ChatPanel } from '../ai/ChatPanel';
 
 export function DashboardLayout() {
     const { user, logout } = useAuth();
@@ -32,6 +35,8 @@ export function DashboardLayout() {
         { name: 'Alerts', icon: Bell, path: '/dashboard/alerts' },
         { name: 'Integrations', icon: Plug, path: '/dashboard/integrations' },
         { name: 'Settings', icon: Settings, path: '/dashboard/settings' },
+        { name: 'AI Report', icon: Sparkles, path: '/dashboard/ai-report', badge: 'New' },
+        { name: 'Analytics', icon: BarChart3, path: '/dashboard/analytics' },
     ];
 
     const userName = user?.name || 'User';
@@ -172,6 +177,9 @@ export function DashboardLayout() {
             )}
 
             <CsvUploadModal isOpen={isUploadOpen} onClose={() => setIsUploadOpen(false)} />
+            
+            {/* Global AI Chat Widget */}
+            <ChatPanel />
         </div>
     );
 }

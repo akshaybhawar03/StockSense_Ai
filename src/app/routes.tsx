@@ -19,6 +19,8 @@ import { AlertsPage } from './components/dashboard/AlertsPage';
 import { DataProvider } from './contexts/DataContext';
 import { SmartInventory } from './pages/SmartInventory';
 import { SmartDashboard } from './pages/SmartDashboard';
+import { AiReportPage } from './components/dashboard/AiReportPage';
+import { AnalyticsPage } from './components/dashboard/AnalyticsPage';
 
 export const router = createBrowserRouter([
   {
@@ -54,6 +56,8 @@ export const router = createBrowserRouter([
       { path: 'settings', Component: DashboardSettings },
       { path: 'smart-inventory', Component: SmartInventory },
       { path: 'smart-dashboard', Component: SmartDashboard },
+      { path: 'ai-report', Component: AiReportPage },
+      { path: 'analytics', Component: AnalyticsPage },
     ],
   },
 ]);
