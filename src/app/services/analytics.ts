@@ -1,2 +1,2 @@
 import { api } from './api';
-export const getAnalytics = () => api.get('/api/analytics');
+export const getAnalytics = () => api.get('/analytics');

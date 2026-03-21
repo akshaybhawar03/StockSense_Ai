@@ -1,2 +1,2 @@
 import { api } from './api';
-export const getForecast = () => api.get('/api/forecast');
+export const getForecast = () => api.get('/forecast');
