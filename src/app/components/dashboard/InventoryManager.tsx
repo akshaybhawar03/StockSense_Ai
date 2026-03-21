@@ -10,6 +10,7 @@ import { getInventory, deleteItem, getCategories } from '../../services/inventor
 import { useDebounce } from 'use-debounce';
 import toast from 'react-hot-toast';
 import { EditItemModal } from '../inventory/EditItemModal';
+import StatusBadge from '../ui/StatusBadge';
 
 export function InventoryManager() {
     // State variables based on PRD
@@ -87,21 +88,6 @@ export function InventoryManager() {
             fetchInventory(); // refresh list
         } catch {
             toast.error('Failed to delete item');
-        }
-    };
-
-    const getStockBadge = (alert_type: string) => {
-        switch (alert_type) {
-            case 'out_of_stock':
-                return <Badge variant="destructive" className="bg-red-100 text-red-700 hover:bg-red-200 border-0">Out of Stock</Badge>;
-            case 'low':
-                return <Badge variant="default" className="bg-orange-100 text-orange-700 hover:bg-orange-200 border-0">Low Stock</Badge>;
-            case 'healthy':
-                return <Badge variant="secondary" className="bg-green-100 text-green-700 hover:bg-green-200 border-0">Healthy</Badge>;
-            case 'dead':
-                return <Badge variant="outline" className="bg-gray-100 text-gray-500 hover:bg-gray-200 border-0">Dead Stock</Badge>;
-            default:
-                return <Badge variant="secondary" className="bg-green-100 text-green-700 hover:bg-green-200 border-0">Available</Badge>;
         }
     };
 
@@ -206,7 +192,7 @@ export function InventoryManager() {
                                         ₹{item.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                     </TableCell>
                                     <TableCell className="text-center">
-                                        {getStockBadge(item.alert_type)}
+                                        <StatusBadge type={item.alert_type} />
                                     </TableCell>
                                     <TableCell className="text-right">
                                         <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">

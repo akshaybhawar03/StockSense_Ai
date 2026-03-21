@@ -9,24 +9,50 @@ import { CashFlowOptimizer } from '../components/dashboard/CashFlowOptimizer';
 import { DeadStockAnalyzer } from '../components/dashboard/DeadStockAnalyzer';
 import { ReorderPredictor } from '../components/dashboard/ReorderPredictor';
 import { PowerBIDashboard } from '../components/dashboard/PowerBIDashboard';
+import { useEffect } from 'react';
+import { getDashboardStats } from '../services/dashboard';
+import toast from 'react-hot-toast';
 
 export function Dashboard() {
-  const { kpis, inventory, datasets, isLoadingData } = useData();
+  const { inventory, datasets, isLoadingData } = useData();
   const [isUploadOpen, setIsUploadOpen] = useState(false);
   const [isFullscreenPowerBI, setIsFullscreenPowerBI] = useState(false);
+  const [statsData, setStatsData] = useState<any>(null);
+  const [loadingStats, setLoadingStats] = useState(true);
+
+  const formatINR = (value: any) => {
+     if (!value && value !== 0) return '₹0.00';
+     return '₹' + Number(value).toLocaleString('en-IN', {
+       minimumFractionDigits: 2,
+       maximumFractionDigits: 2,
+     });
+  };
+
+  const fetchStats = () => {
+      getDashboardStats()
+        .then(res => setStatsData(res.data))
+        .catch(() => toast.error('Failed to load dashboard'))
+        .finally(() => setLoadingStats(false));
+  };
+
+  useEffect(() => {
+      fetchStats();
+      window.addEventListener('csv-uploaded', fetchStats);
+      return () => window.removeEventListener('csv-uploaded', fetchStats);
+  }, []);
 
   const stats = [
-    { label: 'Total Products', value: kpis.totalProducts.toLocaleString(), icon: Package, color: 'text-blue-500', bg: 'bg-blue-50 dark:bg-blue-900/20' },
-    { label: 'Inventory Value', value: `$${kpis.inventoryValue.toLocaleString(undefined, { minimumFractionDigits: 2 })}`, icon: DollarSign, color: 'text-emerald-500', bg: 'bg-emerald-50 dark:bg-emerald-900/20' },
-    { label: 'Low Stock Items', value: kpis.lowStock.toLocaleString(), icon: AlertTriangle, color: 'text-amber-500', bg: 'bg-amber-50 dark:bg-amber-900/20' },
-    { label: 'Out of Stock', value: kpis.outOfStock.toLocaleString(), icon: TrendingDown, color: 'text-red-500', bg: 'bg-red-50 dark:bg-red-900/20' },
-    { label: 'Dead Stock Items', value: kpis.deadStock.toLocaleString(), icon: Clock, color: 'text-purple-500', bg: 'bg-purple-50 dark:bg-purple-900/20' },
-    { label: 'Total Sales', value: kpis.totalSales.toLocaleString(), icon: Activity, color: 'text-indigo-500', bg: 'bg-indigo-50 dark:bg-indigo-900/20' },
-    { label: 'Monthly Revenue', value: `$${kpis.monthlyRevenue.toLocaleString(undefined, { minimumFractionDigits: 2 })}`, icon: TrendingUp, color: 'text-teal-500', bg: 'bg-teal-50 dark:bg-teal-900/20' },
-    { label: 'Turnover Rate', value: `${kpis.turnoverRate}%`, icon: RefreshCw, color: 'text-cyan-500', bg: 'bg-cyan-50 dark:bg-cyan-900/20' },
+    { label: 'Total Products', value: (statsData?.total_products || 0).toLocaleString(), icon: Package, color: 'text-blue-500', bg: 'bg-blue-50 dark:bg-blue-900/20' },
+    { label: 'Inventory Value', value: formatINR(statsData?.total_stock_value), icon: DollarSign, color: 'text-emerald-500', bg: 'bg-emerald-50 dark:bg-emerald-900/20' },
+    { label: 'Low Stock Items', value: (statsData?.low_stock || 0).toLocaleString(), icon: AlertTriangle, color: 'text-amber-500', bg: 'bg-amber-50 dark:bg-amber-900/20' },
+    { label: 'Out of Stock', value: (statsData?.out_of_stock || 0).toLocaleString(), icon: TrendingDown, color: 'text-red-500', bg: 'bg-red-50 dark:bg-red-900/20' },
+    { label: 'Dead Stock Items', value: (statsData?.dead_stock || 0).toLocaleString(), icon: Clock, color: 'text-purple-500', bg: 'bg-purple-50 dark:bg-purple-900/20' },
+    { label: 'Total Sales', value: (statsData?.total_sales || 0).toLocaleString(), icon: Activity, color: 'text-indigo-500', bg: 'bg-indigo-50 dark:bg-indigo-900/20' },
+    { label: 'Monthly Revenue', value: formatINR(statsData?.monthly_revenue), icon: TrendingUp, color: 'text-teal-500', bg: 'bg-teal-50 dark:bg-teal-900/20' },
+    { label: 'Turnover Rate', value: `${statsData?.turnover_rate || 0}%`, icon: RefreshCw, color: 'text-cyan-500', bg: 'bg-cyan-50 dark:bg-cyan-900/20' },
   ];
 
-  if (isLoadingData) {
+  if (isLoadingData || loadingStats) {
     return <div className="flex h-64 items-center justify-center text-gray-500 dark:text-gray-400">Loading your data...</div>;
   }
 
@@ -83,7 +109,7 @@ export function Dashboard() {
       ) : (
         <>
           <div className="flex justify-between items-center">
-             <h2 className="text-xl font-bold font-heading text-gray-900 dark:text-white">Overview</h2>
+             <h2 className="text-xl font-bold font-heading text-gray-900 dark:text-white">{statsData?.warehouse_name || 'Overview'}</h2>
              {datasets && datasets.length > 0 && (
                 <button 
                   onClick={() => setIsFullscreenPowerBI(true)}

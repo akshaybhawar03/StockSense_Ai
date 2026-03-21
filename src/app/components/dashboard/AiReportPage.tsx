@@ -1,30 +1,22 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { streamAnalysis, getLowStockInsight, getDeadStockInsight } from '../../services/ai';
 import toast from 'react-hot-toast';
-import { motion } from 'motion/react';
-import { Bot, Sparkles, TrendingDown, AlertTriangle } from 'lucide-react';
 
 export function AiReportPage() {
     const [report, setReport] = useState('');
     const [streaming, setStreaming] = useState(false);
     const [insight, setInsight] = useState('');
+    const [insightTitle, setInsightTitle] = useState('');
     const [insightLoading, setInsightLoading] = useState(false);
+    const [error, setError] = useState('');
 
-    React.useEffect(() => {
-        const handleCsvUpload = () => {
-            setReport('');
-            setInsight('');
-            toast.success('New data detected. Please generate a fresh report.', { icon: '🔄' });
-        };
-        window.addEventListener('csv-uploaded', handleCsvUpload);
-        return () => window.removeEventListener('csv-uploaded', handleCsvUpload);
-    }, []);
-
-    const handleStream = () => {
+    const handleGenerate = () => {
         setReport('');
+        setError('');
         setStreaming(true);
+
         const es = streamAnalysis();
-        
+
         es.onmessage = (e) => {
             if (e.data === '[DONE]') {
                 es.close();
@@ -36,90 +28,95 @@ export function AiReportPage() {
                 setReport(prev => prev + text);
             } catch {}
         };
-        
-        es.onerror = () => {
+
+        es.onerror = (err) => {
+            console.error('Stream error:', err);
             es.close();
             setStreaming(false);
-            if (report.length === 0) {
-               toast.error('Analysis failed. Please try again.');
-            }
+            setError('AI analysis failed. Make sure the backend is running and you have uploaded a CSV first.');
+            toast.error('AI analysis failed');
         };
     };
 
     const handleInsight = async (type: 'low' | 'dead') => {
         setInsight('');
         setInsightLoading(true);
+        setInsightTitle(type === 'low' ? 'Low Stock Details' : 'Dead Stock Details');
         try {
             const fn = type === 'low' ? getLowStockInsight : getDeadStockInsight;
             const res = await fn();
             setInsight(res.data.insight);
-        } catch {
-            toast.error('Failed to load insight');
+        } catch (err) {
+            console.error(err);
+            toast.error('Failed to load insight. Check backend connection.');
         } finally {
             setInsightLoading(false);
         }
     };
 
     return (
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-4xl mx-auto p-6 space-y-6">
-            <div className="flex items-center gap-3">
-                <div className="p-3 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl shadow-lg ring-1 ring-white/20">
-                    <Bot className="w-8 h-8 text-white" />
+        <div className='max-w-3xl mx-auto p-6'>
+            <div className='flex items-center gap-3 mb-2'>
+                <div className='w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center'>
+                    <span className='text-white text-lg'> ✦ </span>
                 </div>
                 <div>
-                    <h1 className="text-3xl font-bold font-heading text-gray-900 dark:text-white">AI Warehouse Analysis</h1>
-                    <p className="text-gray-500 text-sm mt-1">
-                        Personalised report using your actual stock data
-                    </p>
+                    <h1 className='text-2xl font-semibold text-white'>AI Warehouse Analysis</h1>
+                    <p className='text-sm text-gray-400'>Personalised report using your actual stock data</p>
                 </div>
             </div>
 
-            <button 
-                onClick={handleStream} 
+            <span className='block h-6' />
+
+            {/* Generate button */}
+            <button
+                onClick={handleGenerate}
                 disabled={streaming}
-                className="w-full flex justify-center items-center gap-2 bg-[rgb(var(--accent-primary))] text-white rounded-xl py-4 font-medium text-lg shadow-md hover:bg-[rgb(var(--accent-primary))]/90 disabled:opacity-50 transition-colors"
+                className='w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white rounded-xl py-3.5 font-medium text-sm mb-4 flex items-center justify-center gap-2 transition-colors'
             >
-                <Sparkles className="w-5 h-5" />
-                {streaming ? 'Generating...' : 'Generate Full Data Report'}
+                <span> ✦ </span>
+                {streaming ? 'Generating analysis...' : 'Generate Full Data Report'}
             </button>
 
-            {report && (
-                <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-6 whitespace-pre-wrap text-sm leading-relaxed text-gray-800 dark:text-gray-200 shadow-sm relative">
-                    {report}
-                    {streaming && <span className="animate-pulse ml-1 inline-block w-2 h-4 bg-[rgb(var(--accent-primary))]"></span>}
+            {/* Error message */}
+            {error && (
+                <div className='bg-red-900/20 border border-red-700/50 rounded-xl p-4 mb-4'>
+                    <p className='text-red-400 text-sm'>{error}</p>
                 </div>
             )}
 
-            <div className="flex flex-col sm:flex-row gap-4 mt-6">
-                <button 
-                    onClick={() => handleInsight('low')} 
-                    disabled={insightLoading}
-                    className="flex-1 flex justify-center items-center gap-2 border border-orange-200 text-orange-700 bg-orange-50 dark:bg-orange-900/10 dark:text-orange-400 dark:border-orange-800/30 rounded-xl py-3 text-sm font-medium hover:bg-orange-100 disabled:opacity-50 transition-colors"
-                >
-                    <AlertTriangle className="w-4 h-4" />
-                    Low Stock Details
+            {/* Streamed report */}
+            {(report || streaming) && (
+                <div className='bg-gray-800/50 border border-gray-700/50 rounded-xl p-6 mb-4 text-sm leading-relaxed text-gray-200 whitespace-pre-wrap'>
+                    {report}
+                    {streaming && <span className='animate-pulse text-blue-400 font-bold'>|</span>}
+                </div>
+            )}
+
+            {/* Insight buttons */}
+            <div className='flex gap-3 mb-4'>
+                <button onClick={() => handleInsight('low')} disabled={insightLoading} className='flex-1 border border-amber-700/50 text-amber-400 bg-amber-900/20 rounded-xl py-2.5 text-sm font-medium hover:bg-amber-900/40 disabled:opacity-50 flex items-center justify-center gap-2'>
+                    <span> ⚠ </span> Low Stock Details
                 </button>
-                <button 
-                    onClick={() => handleInsight('dead')} 
-                    disabled={insightLoading}
-                    className="flex-1 flex justify-center items-center gap-2 border border-gray-200 text-gray-600 bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700 rounded-xl py-3 text-sm font-medium hover:bg-gray-100 disabled:opacity-50 transition-colors"
-                >
-                    <TrendingDown className="w-4 h-4" />
-                    Dead Stock Details
+                <button onClick={() => handleInsight('dead')} disabled={insightLoading} className='flex-1 border border-gray-700/50 text-gray-400 bg-gray-800/30 rounded-xl py-2.5 text-sm font-medium hover:bg-gray-800/60 disabled:opacity-50 flex items-center justify-center gap-2'>
+                    <span> ↘ </span> Dead Stock Details
                 </button>
             </div>
 
-            {insightLoading && <p className="text-sm text-[rgb(var(--accent-primary))] text-center animate-pulse py-4 font-medium">Analyzing stock patterns...</p>}
+            {insightLoading && (
+                <p className='text-sm text-gray-400 text-center py-4 animate-pulse'>
+                    Loading insight...
+                </p>
+            )}
             
             {insight && (
-                <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-gradient-to-br from-indigo-50 to-blue-50 dark:from-indigo-900/10 dark:to-blue-900/10 border border-indigo-100 dark:border-indigo-800/30 rounded-xl p-6 text-sm leading-relaxed text-indigo-900 dark:text-indigo-200 whitespace-pre-wrap shadow-inner">
-                    <div className="flex items-center gap-2 mb-3">
-                        <Sparkles className="w-5 h-5 text-indigo-500" />
-                        <h3 className="font-semibold text-lg text-indigo-900 dark:text-indigo-300">AI Deep Dive</h3>
-                    </div>
-                    {insight}
-                </motion.div>
+                <div className='bg-gray-800/50 border border-gray-700/50 rounded-xl p-5'>
+                    <h3 className='text-sm font-medium text-gray-300 mb-3'>{insightTitle}</h3>
+                    <p className='text-sm leading-relaxed text-gray-200 whitespace-pre-wrap'>
+                        {insight}
+                    </p>
+                </div>
             )}
-        </motion.div>
+        </div>
     );
 }
