@@ -60,9 +60,16 @@ export function InventoryManager() {
         }
     };
 
-    // Load table data
+    // Load table data and handle CSV upload refresh
     useEffect(() => {
         fetchInventory();
+
+        const handleCsvUpload = () => {
+            fetchInventory();
+        };
+
+        window.addEventListener('csv-uploaded', handleCsvUpload);
+        return () => window.removeEventListener('csv-uploaded', handleCsvUpload);
     }, [debouncedSearch, category, status, page, sortField, sortOrder]);
 
     // Load categories

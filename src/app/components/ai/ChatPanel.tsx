@@ -16,6 +16,12 @@ export function ChatPanel() {
         bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages, loading]);
 
+    useEffect(() => {
+        const handleCsvUpload = () => setMessages([]);
+        window.addEventListener('csv-uploaded', handleCsvUpload);
+        return () => window.removeEventListener('csv-uploaded', handleCsvUpload);
+    }, []);
+
     const handleSend = async () => {
         const text = input.trim();
         if (!text || loading) return;

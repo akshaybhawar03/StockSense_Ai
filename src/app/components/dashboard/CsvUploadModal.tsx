@@ -6,6 +6,7 @@ import { db, InventoryItem, SalesRecord } from '../../lib/db';
 import { useAuth } from '../../contexts/AuthContext';
 import { useData } from '../../contexts/DataContext';
 import { Button } from '../ui/button';
+import { uploadInventoryBatch } from '../../services/inventory';
 
 interface Props {
     isOpen: boolean;
@@ -138,8 +139,15 @@ export function CsvUploadModal({ isOpen, onClose }: Props) {
                     });
                 });
 
+                try {
+                    await uploadInventoryBatch(newInventory);
+                } catch (e) {
+                    console.warn("Backend sync failed or unavailable, relying on local DB for fallback.", e);
+                }
+
                 setSuccess(true);
                 await refreshData();
+                window.dispatchEvent(new CustomEvent('csv-uploaded'));
 
                 setTimeout(() => {
                     onClose();

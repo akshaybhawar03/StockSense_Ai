@@ -22,10 +22,17 @@ export function AlertsPage() {
     });
 
     useEffect(() => {
-        getAlerts()
-            .then(r => setData(r.data))
-            .catch(() => toast.error('Failed to load alerts'))
-            .finally(() => setLoading(false));
+        const fetchAlertsData = () => {
+            setLoading(true);
+            getAlerts()
+                .then(r => setData(r.data))
+                .catch(() => toast.error('Failed to load alerts'))
+                .finally(() => setLoading(false));
+        };
+
+        fetchAlertsData();
+        window.addEventListener('csv-uploaded', fetchAlertsData);
+        return () => window.removeEventListener('csv-uploaded', fetchAlertsData);
     }, []);
 
     const toggleOpen = (key: string) => setOpenStates(prev => ({ ...prev, [key]: !prev[key] }));

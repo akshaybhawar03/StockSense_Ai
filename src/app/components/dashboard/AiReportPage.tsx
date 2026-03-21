@@ -10,6 +10,16 @@ export function AiReportPage() {
     const [insight, setInsight] = useState('');
     const [insightLoading, setInsightLoading] = useState(false);
 
+    React.useEffect(() => {
+        const handleCsvUpload = () => {
+            setReport('');
+            setInsight('');
+            toast.success('New data detected. Please generate a fresh report.', { icon: '🔄' });
+        };
+        window.addEventListener('csv-uploaded', handleCsvUpload);
+        return () => window.removeEventListener('csv-uploaded', handleCsvUpload);
+    }, []);
+
     const handleStream = () => {
         setReport('');
         setStreaming(true);

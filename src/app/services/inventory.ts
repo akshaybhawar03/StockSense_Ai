@@ -21,3 +21,6 @@ export const deleteItem = (id: string) =>
 
 export const getCategories = () => 
   api.get('/inventory/categories');
+
+export const uploadInventoryBatch = (data: any[]) =>
+  api.post('/inventory/batch', data);

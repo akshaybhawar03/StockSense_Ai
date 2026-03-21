@@ -13,10 +13,17 @@ export function AnalyticsPage() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        getAnalytics()
-            .then(r => setData(r.data))
-            .catch(() => toast.error('Failed to load analytics'))
-            .finally(() => setLoading(false));
+        const fetchAnalytics = () => {
+            setLoading(true);
+            getAnalytics()
+                .then(r => setData(r.data))
+                .catch(() => toast.error('Failed to load analytics'))
+                .finally(() => setLoading(false));
+        };
+        
+        fetchAnalytics();
+        window.addEventListener('csv-uploaded', fetchAnalytics);
+        return () => window.removeEventListener('csv-uploaded', fetchAnalytics);
     }, []);
 
     if (loading) {
