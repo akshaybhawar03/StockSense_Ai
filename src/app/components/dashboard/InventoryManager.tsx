@@ -52,10 +52,20 @@ export function InventoryManager() {
                 sort_by: sortField,
                 sort_dir: sortOrder
             });
-            setItems(res.data.items);
-            setTotal(res.data.total);
-        } catch (err) {
+            console.log('[INVENTORY] Response:', res.data);
+
+            // Handle both possible response shapes
+            const data = res.data;
+            const itemsList = data.items || data.data || data.products || [];
+            const totalCount = data.total || data.count || itemsList.length;
+
+            setItems(itemsList);
+            setTotal(totalCount);
+        } catch (err: any) {
+            console.error('[INVENTORY] Error:', err.response?.data || err.message);
             toast.error('Failed to load inventory');
+            setItems([]);
+            setTotal(0);
         } finally {
             setLoading(false);
         }
@@ -170,29 +180,43 @@ export function InventoryManager() {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {loading && items.length === 0 ? (
+                            {loading ? (
                                 <TableRow>
-                                    <TableCell colSpan={6} className="h-32 text-center text-gray-500">
-                                        Loading inventory...
+                                    <TableCell colSpan={6}>
+                                        <div className="flex items-center justify-center h-64">
+                                            <p className="text-gray-400 text-sm animate-pulse">Loading inventory...</p>
+                                        </div>
                                     </TableCell>
                                 </TableRow>
-                            ) : items.length > 0 ? items.map((item) => (
+                            ) : !loading && items.length === 0 ? (
+                                <TableRow>
+                                    <TableCell colSpan={6}>
+                                        <div className="flex flex-col items-center justify-center h-64 gap-3">
+                                            <p className="text-gray-400 text-sm">No inventory items found.</p>
+                                            <p className="text-gray-500 text-xs">Upload a CSV to get started.</p>
+                                        </div>
+                                    </TableCell>
+                                </TableRow>
+                            ) : items.map((item) => (
                                 <TableRow key={item.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-800/30 group">
                                     <TableCell>
-                                        <div className="font-medium text-gray-900 dark:text-gray-100">{item.name || 'Unnamed Product'}</div>
-                                        <div className="text-xs text-gray-500">SKU: {item.sku}</div>
+                                        <div className="font-medium text-gray-900 dark:text-gray-100">{item.name || 'Unknown'}</div>
+                                        <div className="text-xs text-gray-500">SKU: {item.sku || '-'}</div>
                                     </TableCell>
                                     <TableCell className="text-gray-600 dark:text-gray-400">
                                         {item.category || 'Uncategorized'}
                                     </TableCell>
                                     <TableCell className="text-right font-medium">
-                                        {(item.quantity ?? item.stock).toLocaleString()}
+                                        {Number(item.quantity ?? 0).toLocaleString('en-IN')}
                                     </TableCell>
                                     <TableCell className="text-right font-medium text-[rgb(var(--accent-primary))]">
-                                        ₹{item.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                        {'₹' + Number(item.unit_price ?? item.price ?? 0).toLocaleString('en-IN', {
+                                            minimumFractionDigits: 2,
+                                            maximumFractionDigits: 2
+                                        })}
                                     </TableCell>
                                     <TableCell className="text-center">
-                                        <StatusBadge type={item.alert_type} />
+                                        <StatusBadge item={item} />
                                     </TableCell>
                                     <TableCell className="text-right">
                                         <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -215,16 +239,7 @@ export function InventoryManager() {
                                         </div>
                                     </TableCell>
                                 </TableRow>
-                            )) : (
-                                <TableRow>
-                                    <TableCell colSpan={6} className="h-32 text-center text-gray-500">
-                                        <div className="flex flex-col items-center justify-center">
-                                            <Package className="w-8 h-8 text-gray-300 mb-2" />
-                                            <p>No inventory items found matching your filters.</p>
-                                        </div>
-                                    </TableCell>
-                                </TableRow>
-                            )}
+                            ))}
                         </TableBody>
                     </Table>
                 </div>
