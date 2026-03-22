@@ -17,22 +17,27 @@ export function Dashboard() {
   const { inventory, datasets, isLoadingData } = useData();
   const [isUploadOpen, setIsUploadOpen] = useState(false);
   const [isFullscreenPowerBI, setIsFullscreenPowerBI] = useState(false);
-  const [statsData, setStatsData] = useState<any>(null);
-  const [loadingStats, setLoadingStats] = useState(true);
+  const [stats, setStats] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
-  const formatINR = (value: any) => {
-     if (!value && value !== 0) return '₹0.00';
-     return '₹' + Number(value).toLocaleString('en-IN', {
-       minimumFractionDigits: 2,
-       maximumFractionDigits: 2,
-     });
+  const formatINR = (val: any) => {
+    if (!val && val !== 0) return '₹0.00';
+    return '₹' + Number(val).toLocaleString('en-IN', {
+      minimumFractionDigits: 2, maximumFractionDigits: 2
+    });
   };
 
   const fetchStats = () => {
-      getDashboardStats()
-        .then(res => setStatsData(res.data))
-        .catch(() => toast.error('Failed to load dashboard'))
-        .finally(() => setLoadingStats(false));
+    getDashboardStats()
+      .then(res => {
+        console.log('[DASHBOARD] API response:', res.data);
+        setStats(res.data);
+      })
+      .catch(err => {
+        console.error('[DASHBOARD] Error:', err);
+        toast.error('Failed to load dashboard');
+      })
+      .finally(() => setLoading(false));
   };
 
   useEffect(() => {
@@ -41,18 +46,27 @@ export function Dashboard() {
       return () => window.removeEventListener('csv-uploaded', fetchStats);
   }, []);
 
-  const stats = [
-    { label: 'Total Products', value: (statsData?.total_products || 0).toLocaleString(), icon: Package, color: 'text-blue-500', bg: 'bg-blue-50 dark:bg-blue-900/20' },
-    { label: 'Inventory Value', value: formatINR(statsData?.total_stock_value), icon: DollarSign, color: 'text-emerald-500', bg: 'bg-emerald-50 dark:bg-emerald-900/20' },
-    { label: 'Low Stock Items', value: (statsData?.low_stock || 0).toLocaleString(), icon: AlertTriangle, color: 'text-amber-500', bg: 'bg-amber-50 dark:bg-amber-900/20' },
-    { label: 'Out of Stock', value: (statsData?.out_of_stock || 0).toLocaleString(), icon: TrendingDown, color: 'text-red-500', bg: 'bg-red-50 dark:bg-red-900/20' },
-    { label: 'Dead Stock Items', value: (statsData?.dead_stock || 0).toLocaleString(), icon: Clock, color: 'text-purple-500', bg: 'bg-purple-50 dark:bg-purple-900/20' },
-    { label: 'Total Sales', value: (statsData?.total_sales || 0).toLocaleString(), icon: Activity, color: 'text-indigo-500', bg: 'bg-indigo-50 dark:bg-indigo-900/20' },
-    { label: 'Monthly Revenue', value: formatINR(statsData?.monthly_revenue), icon: TrendingUp, color: 'text-teal-500', bg: 'bg-teal-50 dark:bg-teal-900/20' },
-    { label: 'Turnover Rate', value: `${statsData?.turnover_rate || 0}%`, icon: RefreshCw, color: 'text-cyan-500', bg: 'bg-cyan-50 dark:bg-cyan-900/20' },
+  const statCards = [
+    { label: 'Total Products', value: (stats?.total_products || 0).toLocaleString(), icon: Package, accent: 'text-blue-500', bg: 'bg-blue-50 dark:bg-blue-900/20' },
+    { label: 'Inventory Value', value: formatINR(stats?.inventory_value), icon: DollarSign, accent: 'text-blue-500', bg: 'bg-blue-50 dark:bg-blue-900/20' },
+    { label: 'Low Stock Items', value: (stats?.low_stock_items || 0).toLocaleString(), icon: AlertTriangle, accent: 'text-amber-500', bg: 'bg-amber-50 dark:bg-amber-900/20', warning: (stats?.low_stock_items || 0) > 0 },
+    { label: 'Out of Stock', value: (stats?.out_of_stock || 0).toLocaleString(), icon: TrendingDown, accent: 'text-red-500', bg: 'bg-red-50 dark:bg-red-900/20', danger: (stats?.out_of_stock || 0) > 0 },
+    { label: 'Dead Stock Items', value: (stats?.dead_stock_items || 0).toLocaleString(), icon: Clock, accent: 'text-purple-500', bg: 'bg-purple-50 dark:bg-purple-900/20' },
+    { label: 'Total Sales', value: (stats?.total_sales || 0).toLocaleString(), icon: Activity, accent: 'text-emerald-500', bg: 'bg-emerald-50 dark:bg-emerald-900/20' },
+    { label: 'Monthly Revenue', value: formatINR(stats?.monthly_revenue), icon: TrendingUp, accent: 'text-emerald-500', bg: 'bg-emerald-50 dark:bg-emerald-900/20' },
+    { label: 'Turnover Rate', value: `${stats?.turnover_rate || 0}%`, icon: RefreshCw, accent: 'text-cyan-500', bg: 'bg-cyan-50 dark:bg-cyan-900/20' },
   ];
 
-  if (isLoadingData || loadingStats) {
+  const total = stats?.total_products || 1;
+  const healthy = total - (stats?.out_of_stock || 0) - (stats?.low_stock_items || 0);
+  const segments = [
+    { label: 'Healthy',      value: healthy,                  color: '#10b981' },
+    { label: 'Low Stock',    value: stats?.low_stock_items,   color: '#f59e0b' },
+    { label: 'Out of Stock', value: stats?.out_of_stock,      color: '#ef4444' },
+    { label: 'Dead Stock',   value: stats?.dead_stock_items,  color: '#6b7280' },
+  ];
+
+  if (isLoadingData || loading) {
     return <div className="flex h-64 items-center justify-center text-gray-500 dark:text-gray-400">Loading your data...</div>;
   }
 
@@ -109,7 +123,7 @@ export function Dashboard() {
       ) : (
         <>
           <div className="flex justify-between items-center">
-             <h2 className="text-xl font-bold font-heading text-gray-900 dark:text-white">{statsData?.warehouse_name || 'Overview'}</h2>
+             <h2 className="text-xl font-bold font-heading text-gray-900 dark:text-white">{stats?.warehouse_name || 'Overview'}</h2>
              {datasets && datasets.length > 0 && (
                 <button 
                   onClick={() => setIsFullscreenPowerBI(true)}
@@ -123,20 +137,23 @@ export function Dashboard() {
 
           {/* Dynamic KPIs Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {stats.map((stat, idx) => (
+            {statCards.map((stat: any, idx) => (
               <motion.div
                 key={stat.label}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: idx * 0.05 }}
               >
-                <Card className="p-5 border-0 shadow-sm bg-white dark:bg-gray-800 hover:shadow-md transition-shadow relative overflow-hidden group">
+                <Card 
+                  className={`p-5 border-0 shadow-sm bg-white dark:bg-gray-800 hover:shadow-md transition-shadow relative overflow-hidden group`}
+                  style={{ borderLeft: stat.danger ? '3px solid #ef4444' : stat.warning ? '3px solid #f59e0b' : undefined }}
+                >
                   <div className="flex items-start justify-between">
                     <div>
                       <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{stat.label}</p>
                       <h3 className="text-2xl font-bold text-gray-900 dark:text-white mt-1">{stat.value}</h3>
                     </div>
-                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${stat.bg} ${stat.color} transition-transform group-hover:scale-110`}>
+                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${stat.bg} ${stat.accent} transition-transform group-hover:scale-110`}>
                       <stat.icon className="w-5 h-5" />
                     </div>
                   </div>
@@ -145,8 +162,39 @@ export function Dashboard() {
             ))}
           </div>
 
+          <div style={{
+            background:'#0f172a', borderRadius:12, padding:'16px 20px',
+            border:'1px solid #1e293b', marginBottom:24
+          }}>
+            <p style={{color:'#64748b',fontSize:12,marginBottom:10}}>
+              Stock health overview
+            </p>
+            <div style={{display:'flex',height:8,borderRadius:99,overflow:'hidden',gap:2}}>
+              {segments.map((s,i) => (
+                <div key={i} style={{
+                  flex: s.value / total,
+                  background: s.color,
+                  minWidth: s.value > 0 ? 4 : 0,
+                  transition: 'flex 0.6s ease'
+                }} />
+              ))}
+            </div>
+            <div style={{display:'flex',gap:16,marginTop:10,flexWrap:'wrap'}}>
+              {segments.map((s,i) => (
+                <div key={i} style={{display:'flex',alignItems:'center',gap:5}}>
+                  <div style={{
+                    width:8, height:8, borderRadius:'50%', background:s.color
+                  }} />
+                  <span style={{color:'#94a3b8',fontSize:11}}>
+                    {s.label}: <strong style={{color:'white'}}>{s.value || 0}</strong>
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+
           {/* Global Overview Charts */}
-          <GlobalCharts />
+          <GlobalCharts stats={stats} />
 
           {/* Smart Modules */}
           <CashFlowOptimizer />
