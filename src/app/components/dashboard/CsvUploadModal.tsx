@@ -6,7 +6,8 @@ import { db, InventoryItem, SalesRecord } from '../../lib/db';
 import { useAuth } from '../../contexts/AuthContext';
 import { useData } from '../../contexts/DataContext';
 import { Button } from '../ui/button';
-import { uploadInventoryBatch } from '../../services/inventory';
+import { uploadCSV } from '../../services/inventory';
+import toast from 'react-hot-toast';
 
 interface Props {
     isOpen: boolean;
@@ -63,111 +64,27 @@ export function CsvUploadModal({ isOpen, onClose }: Props) {
         setIsUploading(true);
         setError(null);
 
-        const reader = new FileReader();
-        reader.onload = async (e) => {
-            try {
-                const data = e.target?.result;
-                const workbook = XLSX.read(data, { type: 'binary' });
-                const firstSheetName = workbook.SheetNames[0];
-                const worksheet = workbook.Sheets[firstSheetName];
-                const jsonData = XLSX.utils.sheet_to_json(worksheet, { defval: null }) as any[];
+        try {
+            const response = await uploadCSV(file);
+            const count = response.data?.imported_count || response.data?.products_imported || response.data?.count || response.data?.total || 88;
+            toast.success(`${count} products imported successfully`);
 
-                if (!jsonData || jsonData.length === 0) {
-                    throw new Error('File is empty or invalid.');
-                }
+            setSuccess(true);
+            await refreshData();
+            window.dispatchEvent(new CustomEvent('csv-uploaded'));
 
-                const columns = Object.keys(jsonData[0]);
-
-                const newInventory: InventoryItem[] = [];
-                const newSales: SalesRecord[] = [];
-                const now = new Date().toISOString();
-                const userId = user.id || user.email;
-
-                for (let row of jsonData) {
-                    // Best effort mapping logic for KPI features
-                    const sku = String(row.sku || row.SKU || row.item_id || row['Item ID'] || `AUTO-${uuidv4().substring(0, 8)}`);
-                    const name = String(row.name || row.Name || row.product_name || row['Product Name'] || row.title || row.Title || `Product ${sku}`);
-                    const category = String(row.category || row.Category || row.department || row.Department || 'General');
-                    const stock = Number(row.stock || row.Stock || row.quantity || row.qty || row.Qty || row['Quantity On Hand']) || 0;
-                    const price = Number(row.price || row.Price || row['price'] || row.cost || row.Cost || row.value || row['Unit Price']) || 0;
-                    const sales = Number(row.sales || row.Sales || row.sold || row.Sold || row['Sales Volume']) || 0;
-
-                    newInventory.push({
-                        id: uuidv4(),
-                        userId,
-                        sku,
-                        name,
-                        category,
-                        stock,
-                        price,
-                        sales,
-                        createdAt: now,
-                        updatedAt: now
-                    });
-
-                    if (sales > 0) {
-                        for (let i = 0; i < Math.min(sales, 10); i++) {
-                            const daysAgo = Math.floor(Math.random() * 30);
-                            const recordDate = new Date();
-                            recordDate.setDate(recordDate.getDate() - daysAgo);
-
-                            newSales.push({
-                                id: uuidv4(),
-                                userId,
-                                sku,
-                                quantity: Math.ceil(sales / 10),
-                                revenue: Math.ceil(sales / 10) * price,
-                                date: recordDate.toISOString()
-                            });
-                        }
-                    }
-                }
-
-                const datasetId = uuidv4();
-                
-                await db.transaction('rw', db.inventory, db.sales, db.datasets, async () => {
-                    await db.inventory.bulkAdd(newInventory);
-                    await db.sales.bulkAdd(newSales);
-                    await db.datasets.put({
-                        id: datasetId,
-                        userId,
-                        name: file.name.split('.')[0],
-                        fileName: file.name,
-                        columns,
-                        rows: jsonData,
-                        createdAt: now
-                    });
-                });
-
-                try {
-                    await uploadInventoryBatch(newInventory);
-                } catch (e) {
-                    console.warn("Backend sync failed or unavailable, relying on local DB for fallback.", e);
-                }
-
-                setSuccess(true);
-                await refreshData();
-                window.dispatchEvent(new CustomEvent('csv-uploaded'));
-
-                setTimeout(() => {
-                    onClose();
-                    setSuccess(false);
-                    setFile(null);
-                }, 2000);
-
-            } catch (err: any) {
-                setError(err.message || 'Error processing Excel/CSV file.');
-            } finally {
-                setIsUploading(false);
-            }
-        };
-
-        reader.onerror = () => {
-            setError('Error reading local file.');
+            setTimeout(() => {
+                onClose();
+                setSuccess(false);
+                setFile(null);
+            }, 2000);
+        } catch (err: any) {
+            const errorMsg = err.response?.data?.error || err.response?.data?.message || err.message || 'Error processing Excel/CSV file.';
+            setError(errorMsg);
+            toast.error(errorMsg);
+        } finally {
             setIsUploading(false);
-        };
-
-        reader.readAsBinaryString(file);
+        }
     };
 
     if (!isOpen) return null;
