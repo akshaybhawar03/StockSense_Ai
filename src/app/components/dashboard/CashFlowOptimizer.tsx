@@ -1,55 +1,37 @@
-import React, { useMemo } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
 import { Card } from '../ui/card';
 import {
-    PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
+    BarChart, Bar, XAxis, YAxis, Tooltip, Cell, ResponsiveContainer
 } from 'recharts';
 import { DollarSign, ShieldAlert, RefreshCw, TrendingUp, BarChart3, Presentation } from 'lucide-react';
-import { useData } from '../../contexts/DataContext';
+import { getHealthScore } from '../../services/dashboard';
 
 export function CashFlowOptimizer() {
-    const { inventory, kpis } = useData();
+    const [healthData, setHealthData] = useState<any>(null);
 
-    // Calculate dynamic values
-    const { blocked, active, recoverable, next30DSales } = useMemo(() => {
-        let blockedVal = 0;
-        let activeVal = 0;
-        let next30 = 0;
-
-        inventory.forEach(item => {
-            const val = item.stock * item.price;
-            if (item.sales === 0 && item.stock > 10) {
-                blockedVal += val;
-            } else {
-                activeVal += val;
-            }
-            // Naive projection: if they sold 'sales' in the past period, they might sell the same in next 30D
-            next30 += (item.sales * item.price);
-        });
-
-        // Assume we can recover 50% of blocked capital by liquidation
-        const rec = blockedVal * 0.5;
-
-        return { blocked: blockedVal, active: activeVal, recoverable: rec, next30DSales: next30 };
-    }, [inventory]);
-
-    const totalVal = blocked + active;
-    const healthScore = totalVal > 0 ? Math.round((active / totalVal) * 100) : 0;
-
-    const healthData = [
-        { name: 'Score', value: healthScore },
-        { name: 'Remaining', value: 100 - healthScore }
-    ];
-
-    const capitalData = [
-        { name: 'Categories', blocked: blocked, active: active }
-    ];
+    useEffect(() => {
+        getHealthScore()
+            .then(res => {
+                console.log('[HEALTH] API response:', res.data);
+                setHealthData(res.data);
+            })
+            .catch(err => {
+                console.error('[HEALTH] Error:', err);
+            });
+    }, []);
 
     const formatCurrency = (val: number) => {
+        if (!val && val !== 0) return '₹0';
         if (val >= 100000) return `₹${(val / 100000).toFixed(1)}L`;
         if (val >= 1000) return `₹${(val / 1000).toFixed(1)}K`;
-        return `₹${val.toFixed(0)}`;
+        return `₹${Number(val).toFixed(0)}`;
     };
+
+    const score = healthData?.overall_score || 0;
+    const circumference = 2 * Math.PI * 45;
+    const strokeDashoffset = circumference - (score / 100) * circumference;
+    const scoreColor = score >= 70 ? '#10b981' : score >= 40 ? '#f59e0b' : '#ef4444';
 
     return (
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
@@ -70,23 +52,28 @@ export function CashFlowOptimizer() {
                         </div>
 
                         <div className="flex items-center gap-6 bg-white/50 dark:bg-gray-800/50 p-4 rounded-2xl border border-white/20 dark:border-gray-700/50 shadow-sm backdrop-blur-md">
-                            <div className="relative w-24 h-24">
-                                <ResponsiveContainer width="100%" height="100%">
-                                    <PieChart>
-                                        <Pie data={healthData} cx="50%" cy="50%" innerRadius={30} outerRadius={40} startAngle={90} endAngle={-270} dataKey="value" stroke="none">
-                                            <Cell fill="rgb(var(--accent-primary))" />
-                                            <Cell fill="rgba(156, 163, 175, 0.2)" />
-                                        </Pie>
-                                    </PieChart>
-                                </ResponsiveContainer>
-                                <div className="absolute inset-0 flex items-center justify-center flex-col">
-                                    <span className="text-2xl font-bold text-gray-900 dark:text-white">{healthScore}</span>
-                                </div>
+                            <div className="relative flex items-center justify-center">
+                                <svg width="120" height="120" viewBox="0 0 120 120">
+                                    <circle cx="60" cy="60" r="45" fill="none"
+                                        stroke="#1e293b" strokeWidth="10" />
+                                    <circle cx="60" cy="60" r="45" fill="none"
+                                        stroke={scoreColor} strokeWidth="10"
+                                        strokeDasharray={circumference}
+                                        strokeDashoffset={strokeDashoffset}
+                                        strokeLinecap="round"
+                                        transform="rotate(-90 60 60)" />
+                                    <text x="60" y="55" textAnchor="middle"
+                                        fill="white" fontSize="20" fontWeight="700">{score}</text>
+                                    <text x="60" y="72" textAnchor="middle"
+                                        fill="#64748b" fontSize="10">
+                                        {healthData?.score_label || 'No Data'}
+                                    </text>
+                                </svg>
                             </div>
                             <div>
                                 <div className="text-sm text-gray-500 dark:text-gray-400 font-medium">Overall Score</div>
-                                <div className={`font-semibold text-sm ${healthScore > 70 ? 'text-green-600 dark:text-green-400' : healthScore > 40 ? 'text-orange-500' : 'text-red-500'}`}>
-                                    {healthScore > 70 ? 'Good Health' : healthScore > 40 ? 'Fair Health' : 'Poor Health'}
+                                <div className={`font-semibold text-sm`} style={{ color: scoreColor }}>
+                                    {healthData?.score_label || 'Calculating...'}
                                 </div>
                             </div>
                         </div>
@@ -94,11 +81,11 @@ export function CashFlowOptimizer() {
 
                     <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
                         {[
-                            { label: 'Total Value', value: formatCurrency(totalVal), icon: DollarSign, color: 'text-blue-600', bg: 'bg-blue-100 dark:bg-blue-900/20' },
-                            { label: 'Dead Stock', value: formatCurrency(blocked), icon: ShieldAlert, color: 'text-red-600', bg: 'bg-red-100 dark:bg-red-900/20' },
-                            { label: 'Recoverable', value: formatCurrency(recoverable), icon: RefreshCw, color: 'text-green-600', bg: 'bg-green-100 dark:bg-green-900/20' },
-                            { label: 'Turnover Ratio', value: `${kpis.turnoverRate}x`, icon: TrendingUp, color: 'text-purple-600', bg: 'bg-purple-100 dark:bg-purple-900/20' },
-                            { label: 'Next 30D Sales', value: formatCurrency(next30DSales), icon: BarChart3, color: 'text-orange-600', bg: 'bg-orange-100 dark:bg-orange-900/20' }
+                            { label: 'Total Value', value: formatCurrency(healthData?.total_value), icon: DollarSign, color: 'text-blue-600', bg: 'bg-blue-100 dark:bg-blue-900/20' },
+                            { label: 'Dead Stock', value: formatCurrency(healthData?.dead_stock_value), icon: ShieldAlert, color: 'text-red-600', bg: 'bg-red-100 dark:bg-red-900/20' },
+                            { label: 'Recoverable', value: formatCurrency(healthData?.recoverable_value), icon: RefreshCw, color: 'text-green-600', bg: 'bg-green-100 dark:bg-green-900/20' },
+                            { label: 'Turnover Ratio', value: `${healthData?.turnover_ratio || 0}x`, icon: TrendingUp, color: 'text-purple-600', bg: 'bg-purple-100 dark:bg-purple-900/20' },
+                            { label: 'Next 30D Sales', value: formatCurrency(healthData?.next_30d_sales), icon: BarChart3, color: 'text-orange-600', bg: 'bg-orange-100 dark:bg-orange-900/20' }
                         ].map((stat, idx) => (
                             <motion.div key={idx} whileHover={{ y: -5 }} className="bg-white/60 dark:bg-gray-800/60 p-4 rounded-xl border border-white/20 dark:border-gray-700/50 shadow-sm backdrop-blur-md">
                                 <div className={`w-10 h-10 rounded-lg ${stat.bg} flex items-center justify-center mb-3`}>
@@ -113,18 +100,26 @@ export function CashFlowOptimizer() {
                     <div className="grid md:grid-cols-3 gap-6">
                         <div className="md:col-span-2 bg-white/50 dark:bg-gray-800/50 p-5 rounded-2xl border border-white/20 dark:border-gray-700/50">
                             <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4">Capital Distribution (Blocked vs Active)</h3>
-                            <div className="h-48">
-                                <ResponsiveContainer width="100%" height="100%">
-                                    <BarChart data={capitalData} layout="vertical" margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
-                                        <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#374151" opacity={0.1} />
-                                        <XAxis type="number" hide />
-                                        <YAxis dataKey="name" type="category" hide />
-                                        <Tooltip cursor={{ fill: 'transparent' }} contentStyle={{ borderRadius: '8px' }} />
-                                        <Bar dataKey="active" name="Active Capital (₹)" fill="rgb(var(--accent-primary))" radius={[0, 4, 4, 0]} barSize={30} />
-                                        <Bar dataKey="blocked" name="Blocked Capital (₹)" fill="#ef4444" radius={[0, 4, 4, 0]} barSize={30} />
-                                    </BarChart>
-                                </ResponsiveContainer>
-                            </div>
+                            <ResponsiveContainer width="100%" height={120}>
+                                <BarChart data={healthData?.capital_distribution || []}
+                                    margin={{ top:5, right:10, left:10, bottom:5 }} layout="vertical">
+                                    <XAxis type="number"
+                                        tickFormatter={v => '₹'+(v/100000).toFixed(1)+'L'}
+                                        tick={{ fill:'#64748b', fontSize:11 }} axisLine={false} />
+                                    <YAxis type="category" dataKey="name"
+                                        tick={{ fill:'#94a3b8', fontSize:11 }} width={90} axisLine={false} />
+                                    <Tooltip
+                                        formatter={(v: any) => ['₹'+Number(v).toLocaleString('en-IN'), 'Value']}
+                                        contentStyle={{
+                                            background:'#1e293b', border:'1px solid #334155', borderRadius:8
+                                        }} />
+                                    <Bar dataKey="value" radius={[0,6,6,0]}>
+                                        {(healthData?.capital_distribution || []).map((entry: any, i: number) => (
+                                            <Cell key={i} fill={entry.color} />
+                                        ))}
+                                    </Bar>
+                                </BarChart>
+                            </ResponsiveContainer>
                         </div>
 
                         <div className="relative overflow-hidden rounded-2xl p-6 border border-[rgb(var(--accent-primary))]/30 bg-gradient-to-br from-[rgb(var(--accent-primary))]/10 to-transparent">
@@ -136,9 +131,7 @@ export function CashFlowOptimizer() {
                                     ✨ AI Insight of the Day
                                 </div>
                                 <p className="text-lg md:text-xl font-semibold text-gray-900 dark:text-white leading-tight">
-                                    "You can unlock{" "}
-                                    <span className="text-[rgb(var(--accent-primary))]">{formatCurrency(recoverable)}</span>{" "}
-                                    by liquidating your lowest performing SKUs."
+                                    {healthData?.ai_insight || 'Analyzing your inventory data...'}
                                 </p>
                             </div>
                         </div>

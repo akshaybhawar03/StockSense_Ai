@@ -1,14 +1,13 @@
-import React, { useMemo } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
 import { Card } from '../ui/card';
 import { Badge } from '../ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip, Legend } from 'recharts';
 import { PackageX, Archive, AlertOctagon, AlertTriangle, Package } from 'lucide-react';
-import { useData } from '../../contexts/DataContext';
+import { getDeadStockAnalysis } from '../../services/dashboard';
 
 export function DeadStockAnalyzer() {
-    const { inventory, kpis } = useData();
 
     const formatCurrency = (val: number) => {
         if (val >= 100000) return `₹${(val / 100000).toFixed(1)}L`;
@@ -16,57 +15,29 @@ export function DeadStockAnalyzer() {
         return `₹${val.toFixed(0)}`;
     };
 
-    const { metrics, distributionData, deadStockItems } = useMemo(() => {
-        let healthy = 0, slowMoving = 0, risk = 0, dead = 0;
-        const deadItems: any[] = [];
+    const [deadStockData, setDeadStockData] = useState<any>(null);
 
-        inventory.forEach(item => {
-            const val = item.stock * item.price;
-            if (item.stock === 0) return; // Skip out of stock
+    useEffect(() => {
+        getDeadStockAnalysis()
+            .then(res => {
+                console.log('[DEAD STOCK] API response:', res.data);
+                setDeadStockData(res.data);
+            })
+            .catch(err => {
+                console.error('[DEAD STOCK] Error:', err);
+            });
+    }, []);
 
-            // Generate some mock intelligence since CSV doesn't have real "days without sale"
-            // For a real app, this would query the `sales` table for the last sale date.
-            const daysWithoutSale = item.sales === 0 ? Math.floor(Math.random() * 60) + 90 : Math.floor(Math.random() * 30);
+    const metrics = [
+        { label: 'Total Units', value: (deadStockData?.stats?.total_units || 0).toLocaleString(), icon: Package, color: 'blue' },
+        { label: 'Total Value', value: formatCurrency(deadStockData?.stats?.total_value || 0), icon: Archive, color: 'purple' },
+        { label: 'Low Stock', value: (deadStockData?.stats?.low_stock || 0).toString(), icon: AlertTriangle, color: 'yellow' },
+        { label: 'Overstocked', value: (deadStockData?.stats?.overstocked || 0).toString(), icon: AlertOctagon, color: 'orange' },
+        { label: 'Dead Stock', value: (deadStockData?.stats?.dead_stock || 0).toString(), icon: PackageX, color: 'red' },
+    ];
 
-            if (daysWithoutSale > 90 || (item.sales === 0 && item.stock > 10)) {
-                dead++;
-                deadItems.push({
-                    id: item.id,
-                    sku: item.sku,
-                    days: daysWithoutSale,
-                    qty: item.stock,
-                    value: val,
-                    action: val > 1000 ? 'Liquidate' : 'Discount 40%'
-                });
-            } else if (daysWithoutSale > 60) {
-                risk++;
-            } else if (daysWithoutSale > 30) {
-                slowMoving++;
-            } else {
-                healthy++;
-            }
-        });
-
-        // Sort dead items by highest value
-        deadItems.sort((a, b) => b.value - a.value);
-
-        const dist = [
-            { name: 'Healthy', value: healthy || 1, color: '#10b981' },
-            { name: 'Slow Moving', value: slowMoving || 0, color: '#eab308' },
-            { name: 'Risk', value: risk || 0, color: '#f97316' },
-            { name: 'Dead Stock', value: dead || 0, color: '#ef4444' },
-        ].filter(d => d.value > 0);
-
-        const m = [
-            { label: 'Total Units', value: inventory.reduce((sum, item) => sum + item.stock, 0).toLocaleString(), icon: Package, color: 'blue' },
-            { label: 'Total Value', value: formatCurrency(kpis.inventoryValue), icon: Archive, color: 'purple' },
-            { label: 'Low Stock', value: kpis.lowStock.toString(), icon: AlertTriangle, color: 'yellow' },
-            { label: 'Overstocked', value: risk.toString(), icon: AlertOctagon, color: 'orange' },
-            { label: 'Dead Stock', value: dead.toString(), icon: PackageX, color: 'red' },
-        ];
-
-        return { metrics: m, distributionData: dist, deadStockItems: deadItems.slice(0, 5) };
-    }, [inventory, kpis]);
+    const deadStockItems = deadStockData?.dead_stock_items || [];
+    const distributionData = deadStockData?.health_distribution || [];
 
     const getAgingColor = (days: number) => {
         if (days >= 90) return 'text-red-600 bg-red-100 dark:bg-red-900/20 dark:text-red-400';
@@ -133,21 +104,21 @@ export function DeadStockAnalyzer() {
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
-                                        {deadStockItems.length > 0 ? deadStockItems.map((item) => (
-                                            <TableRow key={item.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-800/30">
-                                                <TableCell className="font-semibold">{item.sku}</TableCell>
+                                        {deadStockItems.length > 0 ? deadStockItems.map((item: any, i: number) => (
+                                            <TableRow key={i} className="hover:bg-gray-50/50 dark:hover:bg-gray-800/30">
+                                                <TableCell className="font-semibold">{item.name}</TableCell>
                                                 <TableCell>
-                                                    <span className={`px-2 py-1 rounded-md text-xs font-bold ${getAgingColor(item.days)}`}>
-                                                        {item.days} days
+                                                    <span className={`px-2 py-1 rounded-md text-xs font-bold ${getAgingColor(item.days_without_sale)}`}>
+                                                        {item.days_without_sale} days
                                                     </span>
                                                 </TableCell>
-                                                <TableCell>{item.qty}</TableCell>
+                                                <TableCell>{item.quantity}</TableCell>
                                                 <TableCell className="text-gray-900 dark:text-gray-100 font-medium">
-                                                    {formatCurrency(item.value)}
+                                                    ₹{Number(item.blocked_capital || 0).toLocaleString('en-IN')}
                                                 </TableCell>
                                                 <TableCell>
                                                     <div className="flex items-center gap-1.5 text-xs font-semibold text-[rgb(var(--accent-primary))]">
-                                                        <span>⚡</span> {item.action}
+                                                        <span>⚡</span> {item.ai_suggestion}
                                                     </div>
                                                 </TableCell>
                                             </TableRow>
@@ -167,15 +138,27 @@ export function DeadStockAnalyzer() {
                             Inventory Health Distribution
                         </h3>
                         <div className="h-64">
-                            <ResponsiveContainer width="100%" height="100%">
+                            <ResponsiveContainer width="100%" height={220}>
                                 <PieChart>
-                                    <Pie data={distributionData} cx="50%" cy="50%" innerRadius={60} outerRadius={80} paddingAngle={2} dataKey="value">
-                                        {distributionData.map((entry, index) => (
-                                            <Cell key={`cell-${index}`} fill={entry.color} />
+                                    <Pie
+                                        data={distributionData}
+                                        cx="50%" cy="50%"
+                                        innerRadius={60} outerRadius={90}
+                                        paddingAngle={2} dataKey="value"
+                                    >
+                                        {(distributionData || []).map((entry: any, i: number) => (
+                                            <Cell key={i} fill={entry.color} />
                                         ))}
                                     </Pie>
-                                    <RechartsTooltip contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} itemStyle={{ color: '#111827', fontWeight: 600 }} />
-                                    <Legend verticalAlign="bottom" height={36} iconType="circle" wrapperStyle={{ fontSize: '12px' }} />
+                                    <RechartsTooltip
+                                        formatter={(v: any, n: any) => [v + ' items', n]}
+                                        contentStyle={{
+                                            background:'#1e293b', border:'1px solid #334155', borderRadius:8
+                                        }} />
+                                    <Legend
+                                        formatter={(v: any) => <span style={{color:'#94a3b8',fontSize:11}}>{v}</span>}
+                                        iconType="circle" iconSize={8}
+                                    />
                                 </PieChart>
                             </ResponsiveContainer>
                         </div>
