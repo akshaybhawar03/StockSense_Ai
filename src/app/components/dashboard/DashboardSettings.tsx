@@ -1,5 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import toast from 'react-hot-toast';
+// @ts-ignore - Ignore TS error due to VS Code caching a deleted .js file
+import { getProfile, updateProfile } from '../../../api/profile';
 import { Card } from '../ui/card';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
@@ -18,6 +21,59 @@ export function DashboardSettings() {
     const { mode, toggleMode, accentColor, setAccentColor } = useTheme();
     const { language, setLanguage } = useLanguage();
     const [activeSection, setActiveSection] = useState('profile');
+    const [profile, setProfile] = useState<any>(null);
+    const [loading, setLoading] = useState(true);
+    const [saving, setSaving] = useState(false);
+
+    // Editable fields state
+    const [fullName, setFullName] = useState('');
+    const [phoneNumber, setPhoneNumber] = useState('');
+    const [warehouseName, setWarehouseName] = useState('');
+
+    useEffect(() => {
+        getProfile()
+            .then((res: any) => {
+                console.log('[PROFILE] Loaded:', res.data);
+                const data = res.data;
+                setProfile(data);
+
+                // Populate editable fields with real data
+                setFullName(data.full_name || '');
+                setPhoneNumber(data.phone_number || '');
+                setWarehouseName(data.warehouse_name || '');
+            })
+            .catch((err: any) => {
+                console.error('[PROFILE] Error loading:', err);
+                toast.error('Failed to load profile');
+            })
+            .finally(() => setLoading(false));
+    }, []);
+
+    const handleSaveChanges = async () => {
+        setSaving(true);
+        try {
+            const res = await updateProfile({
+                full_name: fullName.trim(),
+                phone_number: phoneNumber.trim(),
+                warehouse_name: warehouseName.trim(),
+            });
+            console.log('[PROFILE] Saved:', res.data);
+            toast.success('Profile updated successfully');
+
+            // Update local profile state with saved data
+            setProfile((prev: any) => ({
+                ...prev,
+                full_name: fullName,
+                phone_number: phoneNumber,
+                warehouse_name: warehouseName,
+            }));
+        } catch (err) {
+            console.error('[PROFILE] Save error:', err);
+            toast.error('Failed to save profile changes');
+        } finally {
+            setSaving(false);
+        }
+    };
 
     const sections = [
         { id: 'profile', label: 'Profile Settings', icon: User, desc: 'Manage your personal details and role' },
@@ -39,13 +95,24 @@ export function DashboardSettings() {
         </div>
     );
 
-    const SaveButton = ({ label = "Save Changes" }: { label?: string }) => (
+    const SaveButton = ({ label = "Save Changes", onClick, disabled }: { label?: string, onClick?: () => void, disabled?: boolean }) => (
         <div className="mt-8 flex justify-end">
-            <Button className="bg-[rgb(var(--accent-primary))] text-white hover:bg-[rgb(var(--accent-primary))]/90 px-8">
+            <Button 
+                onClick={onClick}
+                disabled={disabled}
+                className="bg-[rgb(var(--accent-primary))] text-white hover:bg-[rgb(var(--accent-primary))]/90 px-8 disabled:opacity-50"
+            >
                 {label}
             </Button>
         </div>
     );
+
+    const initials = (profile?.full_name || profile?.email || 'U')
+        .split(' ')
+        .map((w: string) => w[0])
+        .join('')
+        .toUpperCase()
+        .slice(0, 2);
 
     // Render components for each section
     const renderProfileSettings = () => (
@@ -55,7 +122,7 @@ export function DashboardSettings() {
             <div className="flex items-center gap-6 mb-8 bg-gray-50 dark:bg-gray-800/50 p-6 rounded-2xl border border-gray-100 dark:border-gray-800">
                 <div className="relative">
                     <div className="w-24 h-24 rounded-full bg-gradient-to-br from-[rgb(var(--accent-primary))] to-purple-500 flex items-center justify-center text-3xl font-bold text-white shadow-lg">
-                        JD
+                        <span>{initials}</span>
                     </div>
                     <button className="absolute bottom-0 right-0 w-8 h-8 bg-white dark:bg-gray-700 rounded-full shadow-md border border-gray-200 dark:border-gray-600 flex items-center justify-center hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
                         <Upload className="w-4 h-4 text-gray-600 dark:text-gray-300" />
@@ -74,23 +141,23 @@ export function DashboardSettings() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                     <Label htmlFor="fullName">Full Name</Label>
-                    <Input id="fullName" defaultValue="John Doe" className="bg-white dark:bg-gray-900" />
+                    <Input id="fullName" value={fullName} onChange={e => setFullName(e.target.value)} placeholder="Your full name" className="bg-white dark:bg-gray-900" />
                 </div>
                 <div className="space-y-2">
                     <Label htmlFor="email">Email Address</Label>
-                    <Input id="email" type="email" defaultValue="admin@stocksense.ai" className="bg-white dark:bg-gray-900" />
+                    <Input id="email" type="email" value={profile?.email || ''} readOnly disabled className="bg-white dark:bg-gray-900 opacity-60 cursor-not-allowed" />
                 </div>
                 <div className="space-y-2">
                     <Label htmlFor="phone">Phone Number</Label>
-                    <Input id="phone" type="tel" defaultValue="+1 (555) 000-0000" className="bg-white dark:bg-gray-900" />
+                    <Input id="phone" type="tel" value={phoneNumber} onChange={e => setPhoneNumber(e.target.value)} placeholder="Your phone number" className="bg-white dark:bg-gray-900" />
                 </div>
                 <div className="space-y-2">
                     <Label htmlFor="role">Role</Label>
-                    <Input id="role" defaultValue="Admin" disabled className="bg-gray-50 dark:bg-gray-800/50 opacity-70" />
+                    <Input id="role" value={profile?.role || 'Admin'} readOnly disabled className="bg-gray-50 dark:bg-gray-800/50 opacity-60 cursor-not-allowed" />
                 </div>
             </div>
 
-            <SaveButton />
+            <SaveButton onClick={handleSaveChanges} disabled={saving} label={saving ? 'Saving...' : 'Save Changes'} />
         </motion.div>
     );
 
@@ -101,7 +168,7 @@ export function DashboardSettings() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                     <Label htmlFor="businessName">Business Name</Label>
-                    <Input id="businessName" defaultValue="Acme Retail Corp" className="bg-white dark:bg-gray-900" />
+                    <Input id="businessName" value={warehouseName} onChange={e => setWarehouseName(e.target.value)} className="bg-white dark:bg-gray-900" />
                 </div>
                 <div className="space-y-2">
                     <Label htmlFor="gst">GST / Tax Number</Label>
@@ -138,7 +205,7 @@ export function DashboardSettings() {
                 </div>
             </div>
 
-            <SaveButton label="Save Business Settings" />
+            <SaveButton onClick={handleSaveChanges} disabled={saving} label={saving ? 'Saving...' : 'Save Business Settings'} />
         </motion.div>
     );
 
@@ -667,6 +734,14 @@ export function DashboardSettings() {
             </motion.div>
         );
     };
+
+    if (loading) return (
+        <div className="flex items-center justify-center h-64">
+            <p className="text-gray-400 text-sm animate-pulse">
+                Loading profile...
+            </p>
+        </div>
+    );
 
     return (
         <div className="max-w-6xl mx-auto py-6">
