@@ -9,6 +9,7 @@ import { getHealthScore } from '../../services/dashboard';
 
 export function CashFlowOptimizer() {
     const [healthData, setHealthData] = useState<any>(null);
+    const [isLoading, setIsLoading] = useState(true); // Issue 2: loading state for visual feedback
 
     useEffect(() => {
         getHealthScore()
@@ -18,7 +19,8 @@ export function CashFlowOptimizer() {
             })
             .catch(err => {
                 console.error('[HEALTH] Error:', err);
-            });
+            })
+            .finally(() => setIsLoading(false)); // Issue 2: hide skeleton once data arrives or errors
     }, []);
 
     const formatCurrency = (val: number) => {
@@ -38,6 +40,14 @@ export function CashFlowOptimizer() {
             <Card className="p-6 md:p-8 bg-gradient-to-br from-white/80 to-white/40 dark:from-gray-900/80 dark:to-gray-900/40 backdrop-blur-xl border border-white/20 dark:border-gray-800/50 shadow-2xl relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-green-500/10 rounded-full blur-3xl" />
                 <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl" />
+
+                {/* Issue 2: show skeleton while data is loading */}
+                {isLoading && (
+                    <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-4 bg-white/60 dark:bg-gray-900/60 backdrop-blur-sm rounded-xl">
+                        <div className="w-10 h-10 border-4 border-teal-500 border-t-transparent rounded-full animate-spin" />
+                        <p className="text-sm text-gray-500 dark:text-gray-400">Loading health score…</p>
+                    </div>
+                )}
 
                 <div className="relative z-10">
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">

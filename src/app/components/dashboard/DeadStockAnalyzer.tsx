@@ -8,6 +8,7 @@ import { PackageX, Archive, AlertOctagon, AlertTriangle, Package } from 'lucide-
 import { getDeadStockAnalysis } from '../../services/dashboard';
 
 export function DeadStockAnalyzer() {
+    const [isLoading, setIsLoading] = useState(true); // Issue 2: loading state for visual feedback
 
     const formatCurrency = (val: number) => {
         if (val >= 100000) return `₹${(val / 100000).toFixed(1)}L`;
@@ -25,7 +26,8 @@ export function DeadStockAnalyzer() {
             })
             .catch(err => {
                 console.error('[DEAD STOCK] Error:', err);
-            });
+            })
+            .finally(() => setIsLoading(false)); // Issue 2: hide skeleton once data arrives or errors
     }, []);
 
     const metrics = [
@@ -49,6 +51,14 @@ export function DeadStockAnalyzer() {
     return (
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="mb-8">
             <Card className="p-6 md:p-8 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border border-gray-200 dark:border-gray-800 shadow-xl overflow-hidden">
+                {/* Issue 2: show spinner overlay while data is loading */}
+                {isLoading && (
+                    <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-4 bg-white/60 dark:bg-gray-900/60 backdrop-blur-sm rounded-xl">
+                        <div className="w-10 h-10 border-4 border-red-500 border-t-transparent rounded-full animate-spin" />
+                        <p className="text-sm text-gray-500 dark:text-gray-400">Analyzing dead stock…</p>
+                    </div>
+                )}
+
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
                     <div>
                         <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">

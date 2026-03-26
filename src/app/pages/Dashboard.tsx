@@ -20,6 +20,8 @@ export function Dashboard() {
   const [isFullscreenPowerBI, setIsFullscreenPowerBI] = useState(false);
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [showCharts, setShowCharts] = useState(false);   // Issue 1: stagger chart mount to avoid simultaneous API calls
+  const [showModules, setShowModules] = useState(false); // Issue 1: stagger module mount to avoid simultaneous API calls
 
   const formatINR = (val: any) => {
     if (!val && val !== 0) return '₹0.00';
@@ -44,7 +46,16 @@ export function Dashboard() {
   useEffect(() => {
     fetchStats();
     window.addEventListener('csv-uploaded', fetchStats);
-    return () => window.removeEventListener('csv-uploaded', fetchStats);
+
+    // Issue 1: stagger heavy components so API calls don't fire simultaneously
+    const chartsTimer = setTimeout(() => setShowCharts(true), 800);
+    const modulesTimer = setTimeout(() => setShowModules(true), 1600);
+
+    return () => {
+      window.removeEventListener('csv-uploaded', fetchStats);
+      clearTimeout(chartsTimer);   // cleanup to prevent state updates on unmounted component
+      clearTimeout(modulesTimer);  // cleanup to prevent state updates on unmounted component
+    };
   }, []);
 
   const statCards = [
@@ -194,19 +205,34 @@ export function Dashboard() {
             </div>
           </div>
 
-          {/* Global Overview Charts */}
-          <GlobalCharts stats={stats} />
+          {/* Global Overview Charts — staggered mount (Issue 1) */}
+          {showCharts ? (
+            <GlobalCharts stats={stats} />
+          ) : (
+            /* Skeleton placeholder while charts load */
+            <div className="h-64 rounded-xl bg-gray-100 dark:bg-gray-800 animate-pulse" />
+          )}
 
-          {/* Smart Modules */}
-          <CashFlowOptimizer />
-          <DeadStockAnalyzer />
-          <ReorderPredictor />
+          {/* Smart Modules — staggered mount (Issue 1) */}
+          {showModules ? (
+            <>
+              <CashFlowOptimizer />
+              <DeadStockAnalyzer />
+              <ReorderPredictor />
 
-          {/* AI Stock Assistant */}
-          <div className="mt-6">
-            <h2 className="text-xl font-bold font-heading text-gray-900 dark:text-white mb-4">AI Stock Assistant</h2>
-            <StockAIChat />
-          </div>
+              {/* AI Stock Assistant */}
+              <div className="mt-6">
+                <h2 className="text-xl font-bold font-heading text-gray-900 dark:text-white mb-4">AI Stock Assistant</h2>
+                <StockAIChat />
+              </div>
+            </>
+          ) : (
+            /* Skeleton placeholder while modules load */
+            <div className="space-y-6">
+              <div className="h-48 rounded-xl bg-gray-100 dark:bg-gray-800 animate-pulse" />
+              <div className="h-48 rounded-xl bg-gray-100 dark:bg-gray-800 animate-pulse" />
+            </div>
+          )}
         </>
       )}
 

@@ -83,7 +83,17 @@ export function StockAIChat() {
     try {
       // Use user.id if available, otherwise fall back to user.email
       const ownerId = user.id || user.email;
-      const answer = await askStockQuestion(question.trim(), ownerId);
+
+      // Issue 3: 20s timeout so users aren't left hanging on cold starts
+      const TIMEOUT_MS = 20_000;
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error('__TIMEOUT__')), TIMEOUT_MS)
+      );
+
+      const answer = await Promise.race([
+        askStockQuestion(question.trim(), ownerId),
+        timeoutPromise,
+      ]);
 
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
@@ -95,7 +105,13 @@ export function StockAIChat() {
       setMessages(prev => [...prev, assistantMessage]);
     } catch (err: any) {
       console.error('Failed to get answer:', err);
-      const errorMessage = err.response?.data?.detail || 'Failed to get response. Please try again.';
+
+      // Issue 3: friendly message when the request times out
+      const errorMessage =
+        err.message === '__TIMEOUT__'
+          ? 'The assistant is taking longer than usual. The server may be waking up — please try again in a moment.'
+          : err.response?.data?.detail || 'Failed to get response. Please try again.';
+
       setError(errorMessage);
       toast.error(errorMessage);
     } finally {
