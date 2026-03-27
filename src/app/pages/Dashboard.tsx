@@ -11,17 +11,52 @@ import { ReorderPredictor } from '../components/dashboard/ReorderPredictor';
 import { PowerBIDashboard } from '../components/dashboard/PowerBIDashboard';
 import { StockAIChat } from '../components/StockAIChat';
 import { useEffect } from 'react';
-import { getDashboardStats } from '../services/dashboard';
+import { getDashboardStats, getHealthScore, getDeadStockAnalysis } from '../services/dashboard';
 import toast from 'react-hot-toast';
+
+// 2a: Skeleton UI component for dashboard cards
+function DashboardSkeleton() {
+  return (
+    <div className="flex flex-col gap-6 animate-pulse">
+      {/* Stat cards skeleton */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {Array.from({ length: 8 }).map((_, i) => (
+          <div key={i} className="p-5 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700">
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <div className="h-3 w-24 bg-gray-200 dark:bg-gray-700 rounded mb-3" />
+                <div className="h-7 w-20 bg-gray-200 dark:bg-gray-700 rounded" />
+              </div>
+              <div className="w-10 h-10 bg-gray-200 dark:bg-gray-700 rounded-lg" />
+            </div>
+          </div>
+        ))}
+      </div>
+      {/* Health bar skeleton */}
+      <div className="h-20 bg-gray-200 dark:bg-gray-800 rounded-xl" />
+      {/* Charts skeleton */}
+      <div className="grid md:grid-cols-2 gap-6">
+        <div className="h-72 bg-gray-200 dark:bg-gray-800 rounded-xl" />
+        <div className="h-72 bg-gray-200 dark:bg-gray-800 rounded-xl" />
+      </div>
+      {/* Modules skeleton */}
+      <div className="space-y-6">
+        <div className="h-64 bg-gray-200 dark:bg-gray-800 rounded-xl" />
+        <div className="h-64 bg-gray-200 dark:bg-gray-800 rounded-xl" />
+        <div className="h-48 bg-gray-200 dark:bg-gray-800 rounded-xl" />
+      </div>
+    </div>
+  );
+}
 
 export function Dashboard() {
   const { inventory, datasets, isLoadingData } = useData();
   const [isUploadOpen, setIsUploadOpen] = useState(false);
   const [isFullscreenPowerBI, setIsFullscreenPowerBI] = useState(false);
   const [stats, setStats] = useState<any>(null);
+  const [healthData, setHealthData] = useState<any>(null);
+  const [deadStockData, setDeadStockData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [showCharts, setShowCharts] = useState(false);   // Issue 1: stagger chart mount to avoid simultaneous API calls
-  const [showModules, setShowModules] = useState(false); // Issue 1: stagger module mount to avoid simultaneous API calls
 
   const formatINR = (val: any) => {
     if (!val && val !== 0) return '₹0.00';
@@ -30,31 +65,38 @@ export function Dashboard() {
     });
   };
 
-  const fetchStats = () => {
-    getDashboardStats()
-      .then(res => {
-        console.log('[DASHBOARD] API response:', res.data);
-        setStats(res.data);
-      })
-      .catch(err => {
-        console.error('[DASHBOARD] Error:', err);
-        toast.error('Failed to load dashboard');
+  // 2b: Fetch all dashboard data in parallel with Promise.all()
+  const fetchAllData = () => {
+    setLoading(true);
+    Promise.all([
+      getDashboardStats().catch(err => { console.error('[DASHBOARD] Error:', err); return null; }),
+      getHealthScore().catch(err => { console.error('[HEALTH] Error:', err); return null; }),
+      getDeadStockAnalysis().catch(err => { console.error('[DEAD STOCK] Error:', err); return null; }),
+    ])
+      .then(([statsRes, healthRes, deadStockRes]) => {
+        if (statsRes) {
+          console.log('[DASHBOARD] API response:', statsRes.data);
+          setStats(statsRes.data);
+        } else {
+          toast.error('Failed to load dashboard');
+        }
+        if (healthRes) {
+          console.log('[HEALTH] API response:', healthRes.data);
+          setHealthData(healthRes.data);
+        }
+        if (deadStockRes) {
+          console.log('[DEAD STOCK] API response:', deadStockRes.data);
+          setDeadStockData(deadStockRes.data);
+        }
       })
       .finally(() => setLoading(false));
   };
 
   useEffect(() => {
-    fetchStats();
-    window.addEventListener('csv-uploaded', fetchStats);
-
-    // Issue 1: stagger heavy components so API calls don't fire simultaneously
-    const chartsTimer = setTimeout(() => setShowCharts(true), 800);
-    const modulesTimer = setTimeout(() => setShowModules(true), 1600);
-
+    fetchAllData();
+    window.addEventListener('csv-uploaded', fetchAllData);
     return () => {
-      window.removeEventListener('csv-uploaded', fetchStats);
-      clearTimeout(chartsTimer);   // cleanup to prevent state updates on unmounted component
-      clearTimeout(modulesTimer);  // cleanup to prevent state updates on unmounted component
+      window.removeEventListener('csv-uploaded', fetchAllData);
     };
   }, []);
 
@@ -78,8 +120,9 @@ export function Dashboard() {
     { label: 'Dead Stock', value: stats?.dead_stock_items, color: '#6b7280' },
   ];
 
+  // 2a: Show skeleton UI while loading instead of blank screen
   if (isLoadingData || loading) {
-    return <div className="flex h-64 items-center justify-center text-gray-500 dark:text-gray-400">Loading your data...</div>;
+    return <DashboardSkeleton />;
   }
 
   return (
@@ -205,34 +248,19 @@ export function Dashboard() {
             </div>
           </div>
 
-          {/* Global Overview Charts — staggered mount (Issue 1) */}
-          {showCharts ? (
-            <GlobalCharts stats={stats} />
-          ) : (
-            /* Skeleton placeholder while charts load */
-            <div className="h-64 rounded-xl bg-gray-100 dark:bg-gray-800 animate-pulse" />
-          )}
+          {/* Global Overview Charts */}
+          <GlobalCharts stats={stats} />
 
-          {/* Smart Modules — staggered mount (Issue 1) */}
-          {showModules ? (
-            <>
-              <CashFlowOptimizer />
-              <DeadStockAnalyzer />
-              <ReorderPredictor />
+          {/* Smart Modules — data passed as props (fetched in parallel) */}
+          <CashFlowOptimizer healthData={healthData} />
+          <DeadStockAnalyzer deadStockData={deadStockData} />
+          <ReorderPredictor />
 
-              {/* AI Stock Assistant */}
-              <div className="mt-6">
-                <h2 className="text-xl font-bold font-heading text-gray-900 dark:text-white mb-4">AI Stock Assistant</h2>
-                <StockAIChat />
-              </div>
-            </>
-          ) : (
-            /* Skeleton placeholder while modules load */
-            <div className="space-y-6">
-              <div className="h-48 rounded-xl bg-gray-100 dark:bg-gray-800 animate-pulse" />
-              <div className="h-48 rounded-xl bg-gray-100 dark:bg-gray-800 animate-pulse" />
-            </div>
-          )}
+          {/* AI Stock Assistant */}
+          <div className="mt-6">
+            <h2 className="text-xl font-bold font-heading text-gray-900 dark:text-white mb-4">AI Stock Assistant</h2>
+            <StockAIChat />
+          </div>
         </>
       )}
 
@@ -240,5 +268,3 @@ export function Dashboard() {
     </div>
   );
 }
-
-

@@ -1,34 +1,23 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { motion } from 'motion/react';
 import { Card } from '../ui/card';
 import { Badge } from '../ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip, Legend } from 'recharts';
 import { PackageX, Archive, AlertOctagon, AlertTriangle, Package } from 'lucide-react';
-import { getDeadStockAnalysis } from '../../services/dashboard';
 
-export function DeadStockAnalyzer() {
-    const [isLoading, setIsLoading] = useState(true); // Issue 2: loading state for visual feedback
+interface DeadStockAnalyzerProps {
+    deadStockData: any;
+}
+
+export function DeadStockAnalyzer({ deadStockData }: DeadStockAnalyzerProps) {
+    const isLoading = !deadStockData;
 
     const formatCurrency = (val: number) => {
         if (val >= 100000) return `₹${(val / 100000).toFixed(1)}L`;
         if (val >= 1000) return `₹${(val / 1000).toFixed(1)}K`;
         return `₹${val.toFixed(0)}`;
     };
-
-    const [deadStockData, setDeadStockData] = useState<any>(null);
-
-    useEffect(() => {
-        getDeadStockAnalysis()
-            .then(res => {
-                console.log('[DEAD STOCK] API response:', res.data);
-                setDeadStockData(res.data);
-            })
-            .catch(err => {
-                console.error('[DEAD STOCK] Error:', err);
-            })
-            .finally(() => setIsLoading(false)); // Issue 2: hide skeleton once data arrives or errors
-    }, []);
 
     const metrics = [
         { label: 'Total Units', value: (deadStockData?.stats?.total_units || 0).toLocaleString(), icon: Package, color: 'blue' },

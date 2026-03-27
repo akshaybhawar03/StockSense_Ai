@@ -48,11 +48,18 @@ export function CsvUploadModal({ isOpen, onClose }: Props) {
         }
     };
 
+    const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
+
     const handleFile = (selectedFile: File) => {
         const isExcel = selectedFile.name.endsWith('.xlsx') || selectedFile.name.endsWith('.xls') || selectedFile.type.includes('excel') || selectedFile.type.includes('spreadsheetml');
         const isCsv = selectedFile.type === 'text/csv' || selectedFile.name.endsWith('.csv');
         if (!isExcel && !isCsv) {
             setError('Please upload a valid Excel (.xlsx, .xls) or CSV file.');
+            return;
+        }
+        // 3c: Reject files over 5 MB
+        if (selectedFile.size > MAX_FILE_SIZE) {
+            setError('File too large. Maximum size is 5 MB.');
             return;
         }
         setError(null);
@@ -61,6 +68,15 @@ export function CsvUploadModal({ isOpen, onClose }: Props) {
 
     const processData = async () => {
         if (!file || !user) return;
+
+        // 3a: Check auth token before upload
+        const token = localStorage.getItem('access_token');
+        if (!token) {
+            setError('Authentication required. Please log in again.');
+            toast.error('Please log in again to upload files.');
+            return;
+        }
+
         setIsUploading(true);
         setError(null);
 
@@ -79,7 +95,25 @@ export function CsvUploadModal({ isOpen, onClose }: Props) {
                 setFile(null);
             }, 2000);
         } catch (err: any) {
-            const errorMsg = err.response?.data?.error || err.response?.data?.message || err.message || 'Error processing Excel/CSV file.';
+            // 3b: Specific error messages by HTTP status
+            let errorMsg: string;
+            const status = err.response?.status;
+
+            if (!err.response && err.message) {
+                // Network error (no response at all)
+                errorMsg = 'Network error. Please check your internet connection and try again.';
+            } else if (status === 401 || status === 403) {
+                errorMsg = 'Authentication failed. Please log in again and retry.';
+            } else if (status === 413) {
+                errorMsg = 'File is too large for the server. Please reduce the file size.';
+            } else if (status === 422 || status === 400) {
+                errorMsg = err.response?.data?.detail || err.response?.data?.error || 'Invalid file format. Please upload a valid CSV or Excel file with the correct columns.';
+            } else if (status && status >= 500) {
+                errorMsg = 'Server error. The backend may be restarting — please try again in a minute.';
+            } else {
+                errorMsg = err.response?.data?.error || err.response?.data?.message || err.message || 'Error processing file.';
+            }
+
             setError(errorMsg);
             toast.error(errorMsg);
         } finally {
@@ -144,7 +178,7 @@ export function CsvUploadModal({ isOpen, onClose }: Props) {
                                             Click to upload or drag and drop
                                         </p>
                                         <p className="text-xs text-gray-500 mb-4">
-                                            Excel or CSV files (max 10MB)
+                                            Excel or CSV files (max 5MB)
                                         </p>
                                         <div className="text-xs text-left bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 p-3 rounded-lg flex items-start">
                                             <AlertCircle className="w-4 h-4 mr-2 shrink-0 mt-0.5" />

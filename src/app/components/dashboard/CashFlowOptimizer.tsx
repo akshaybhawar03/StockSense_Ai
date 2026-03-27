@@ -1,27 +1,17 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { motion } from 'motion/react';
 import { Card } from '../ui/card';
 import {
     BarChart, Bar, XAxis, YAxis, Tooltip, Cell, ResponsiveContainer
 } from 'recharts';
 import { DollarSign, ShieldAlert, RefreshCw, TrendingUp, BarChart3, Presentation } from 'lucide-react';
-import { getHealthScore } from '../../services/dashboard';
 
-export function CashFlowOptimizer() {
-    const [healthData, setHealthData] = useState<any>(null);
-    const [isLoading, setIsLoading] = useState(true); // Issue 2: loading state for visual feedback
+interface CashFlowOptimizerProps {
+    healthData: any;
+}
 
-    useEffect(() => {
-        getHealthScore()
-            .then(res => {
-                console.log('[HEALTH] API response:', res.data);
-                setHealthData(res.data);
-            })
-            .catch(err => {
-                console.error('[HEALTH] Error:', err);
-            })
-            .finally(() => setIsLoading(false)); // Issue 2: hide skeleton once data arrives or errors
-    }, []);
+export function CashFlowOptimizer({ healthData }: CashFlowOptimizerProps) {
+    const isLoading = !healthData;
 
     const formatCurrency = (val: number) => {
         if (!val && val !== 0) return '₹0';

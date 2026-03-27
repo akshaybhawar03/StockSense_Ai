@@ -11,7 +11,8 @@ import {
   AlertCircle,
   Sparkles,
   User,
-  MessageSquare
+  MessageSquare,
+  RotateCcw
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -39,6 +40,9 @@ export function StockAIChat() {
   const [isReindexing, setIsReindexing] = useState(false);
   const [healthStatus, setHealthStatus] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isTimeout, setIsTimeout] = useState(false);
+  const [lastQuestion, setLastQuestion] = useState<string | null>(null);
+  const [isSyncing, setIsSyncing] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -49,15 +53,40 @@ export function StockAIChat() {
     scrollToBottom();
   }, [messages]);
 
-  // Check health on mount
+  // Check health on mount — auto-reindex if collection is empty
   useEffect(() => {
     const fetchHealth = async () => {
       try {
         const count = await checkRAGHealth();
         setHealthStatus(count);
+
+        // 1a: Auto-reindex when collection_count is 0
+        if (count === 0) {
+          setIsSyncing(true);
+          try {
+            await reindexStock();
+            const newCount = await checkRAGHealth();
+            setHealthStatus(newCount);
+          } catch (reindexErr) {
+            console.error('Auto-reindex failed:', reindexErr);
+          } finally {
+            setIsSyncing(false);
+          }
+        }
       } catch (err) {
         console.error('Failed to check RAG health:', err);
         setHealthStatus(0);
+        // Even on health-check failure, try reindex
+        setIsSyncing(true);
+        try {
+          await reindexStock();
+          const newCount = await checkRAGHealth();
+          setHealthStatus(newCount);
+        } catch (reindexErr) {
+          console.error('Auto-reindex failed:', reindexErr);
+        } finally {
+          setIsSyncing(false);
+        }
       }
     };
     if (isLoggedIn) {
@@ -79,13 +108,14 @@ export function StockAIChat() {
     setInput('');
     setIsLoading(true);
     setError(null);
+    setIsTimeout(false);
+    setLastQuestion(question.trim());
 
     try {
-      // Use user.id if available, otherwise fall back to user.email
       const ownerId = user.id || user.email;
 
-      // Issue 3: 20s timeout so users aren't left hanging on cold starts
-      const TIMEOUT_MS = 20_000;
+      // 1b: 60-second timeout
+      const TIMEOUT_MS = 60_000;
       const timeoutPromise = new Promise<never>((_, reject) =>
         setTimeout(() => reject(new Error('__TIMEOUT__')), TIMEOUT_MS)
       );
@@ -106,16 +136,25 @@ export function StockAIChat() {
     } catch (err: any) {
       console.error('Failed to get answer:', err);
 
-      // Issue 3: friendly message when the request times out
-      const errorMessage =
-        err.message === '__TIMEOUT__'
-          ? 'The assistant is taking longer than usual. The server may be waking up — please try again in a moment.'
-          : err.response?.data?.detail || 'Failed to get response. Please try again.';
-
-      setError(errorMessage);
-      toast.error(errorMessage);
+      if (err.message === '__TIMEOUT__') {
+        // 1b: Specific timeout message with retry button
+        setIsTimeout(true);
+        setError('Server is waking up. Please try again in 30 seconds.');
+      } else {
+        const errorMessage =
+          err.response?.data?.detail || 'Failed to get response. Please try again.';
+        setError(errorMessage);
+        toast.error(errorMessage);
+      }
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  // Retry handler for timeout
+  const handleRetry = () => {
+    if (lastQuestion) {
+      handleSendMessage(lastQuestion);
     }
   };
 
@@ -126,7 +165,6 @@ export function StockAIChat() {
     try {
       const message = await reindexStock();
       toast.success(message);
-      // Refresh health after reindex
       const count = await checkRAGHealth();
       setHealthStatus(count);
     } catch (err: any) {
@@ -164,18 +202,23 @@ export function StockAIChat() {
             </h3>
             <div className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400">
               <span
-                className={`w-2 h-2 rounded-full ${healthStatus === null
-                    ? 'bg-gray-400'
-                    : healthStatus > 0
-                      ? 'bg-green-500'
-                      : 'bg-red-500'
-                  }`}
+                className={`w-2 h-2 rounded-full ${
+                  isSyncing
+                    ? 'bg-amber-500 animate-pulse'
+                    : healthStatus === null
+                      ? 'bg-gray-400'
+                      : healthStatus > 0
+                        ? 'bg-green-500'
+                        : 'bg-amber-500'
+                }`}
               />
-              {healthStatus === null
-                ? 'Checking...'
-                : healthStatus > 0
-                  ? `${healthStatus} items indexed`
-                  : 'No data indexed'}
+              {isSyncing
+                ? 'Syncing your inventory data, please wait...'
+                : healthStatus === null
+                  ? 'Checking...'
+                  : healthStatus > 0
+                    ? `${healthStatus} items indexed`
+                    : 'Syncing your inventory data, please wait...'}
             </div>
           </div>
         </div>
@@ -267,7 +310,7 @@ export function StockAIChat() {
           ))}
         </AnimatePresence>
 
-        {/* Loading indicator */}
+        {/* 1c: Loading indicator — "Analyzing your inventory..." */}
         {isLoading && (
           <motion.div
             initial={{ opacity: 0 }}
@@ -277,21 +320,33 @@ export function StockAIChat() {
             <div className="flex items-center gap-2 px-4 py-2.5 bg-gray-100 dark:bg-gray-700 rounded-2xl rounded-tl-sm">
               <Loader2 className="w-4 h-4 animate-spin text-teal-500" />
               <span className="text-sm text-gray-500 dark:text-gray-400">
-                Thinking...
+                Analyzing your inventory...
               </span>
             </div>
           </motion.div>
         )}
 
-        {/* Error message */}
+        {/* Error message with retry button for timeout */}
         {error && !isLoading && (
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="flex items-center gap-2 px-4 py-2 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg text-sm"
+            className="flex flex-col gap-2"
           >
-            <AlertCircle className="w-4 h-4" />
-            {error}
+            <div className="flex items-center gap-2 px-4 py-2 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg text-sm">
+              <AlertCircle className="w-4 h-4 flex-shrink-0" />
+              {error}
+            </div>
+            {/* 1b: Retry button on timeout */}
+            {isTimeout && (
+              <button
+                onClick={handleRetry}
+                className="flex items-center gap-2 self-start ml-2 px-4 py-2 text-sm font-medium text-white bg-teal-500 hover:bg-teal-600 rounded-lg transition-colors shadow-sm"
+              >
+                <RotateCcw className="w-4 h-4" />
+                Retry
+              </button>
+            )}
           </motion.div>
         )}
 
