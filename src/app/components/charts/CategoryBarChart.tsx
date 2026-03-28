@@ -1,9 +1,12 @@
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import { ChartSkeleton } from '../skeletons/ChartSkeleton';
 
 export default function CategoryBarChart({ data }: { data: any[] }) {
     const sorted = [...(data || [])].sort((a,b) => b.value - a.value).slice(0,8);
-    if (!sorted.length)
-        return <p className='text-gray-500 text-sm text-center py-8'>No data yet</p>;
+    
+    if (!sorted || sorted.length === 0) {
+        return <ChartSkeleton height={220} />;
+    }
 
     return (
         <ResponsiveContainer width='100%' height={220}>

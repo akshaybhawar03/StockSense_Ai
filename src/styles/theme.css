@@ -270,3 +270,12 @@
   50% { transform: translateX(150%); }
   100% { transform: translateX(300%); }
 }
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 0.3; }
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
