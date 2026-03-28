@@ -1,30 +1,70 @@
 import React, { useState } from 'react';
 import { updateItem } from '../../services/inventory';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 
 export function EditItemModal({ item, onClose, onSaved }: { item: any; onClose: () => void; onSaved: () => void; }) {
+  const queryClient = useQueryClient();
   const [qty, setQty] = useState(item.quantity !== undefined ? item.quantity : item.stock);
   const [price, setPrice] = useState(item.price);
   const [cat, setCat] = useState(item.category);
-  const [saving, setSaving] = useState(false);
 
-  const handleSave = async () => {
-    setSaving(true);
-    try {
-      await updateItem(item.id, {
-        quantity: Number(qty),
-        price: Number(price),
-        category: cat
-      });
+  const updateMutation = useMutation({
+    mutationFn: (updatedFields: { quantity: number; price: number; category: string }) =>
+      updateItem(item.id, updatedFields),
+    onMutate: async (updatedFields) => {
+      // Cancel in-flight inventory queries
+      await queryClient.cancelQueries({ queryKey: ['inventory', 'list'] });
+
+      // Snapshot previous data for rollback
+      const previousQueries = queryClient.getQueriesData({ queryKey: ['inventory', 'list'] });
+
+      // Optimistically update cache
+      queryClient.setQueriesData(
+        { queryKey: ['inventory', 'list'] },
+        (old: any) => {
+          if (!old?.items) return old;
+          return {
+            ...old,
+            items: old.items.map((i: any) =>
+              i.id === item.id
+                ? { ...i, ...updatedFields, unit_price: updatedFields.price }
+                : i
+            ),
+          };
+        }
+      );
+
+      return { previousQueries };
+    },
+    onError: (_err, _vars, context) => {
+      // Rollback on error
+      if (context?.previousQueries) {
+        context.previousQueries.forEach(([queryKey, data]: [any, any]) => {
+          queryClient.setQueryData(queryKey, data);
+        });
+      }
+      toast.error('Failed to update item');
+    },
+    onSuccess: () => {
       toast.success('Item updated');
       onSaved();
       onClose();
-    } catch {
-      toast.error('Failed to update item');
-    } finally {
-      setSaving(false);
-    }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['inventory', 'list'] });
+    },
+  });
+
+  const handleSave = () => {
+    updateMutation.mutate({
+      quantity: Number(qty),
+      price: Number(price),
+      category: cat,
+    });
   };
+
+  const saving = updateMutation.isPending;
 
   return (
     <div className='fixed inset-0 bg-black/40 flex items-center justify-center z-50'>

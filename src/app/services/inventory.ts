@@ -1,9 +1,9 @@
 import { api } from './api';
 
-export const getInventory = (params?: any) => api.get('/inventory', { params });
+export const getInventory = (params?: any, signal?: AbortSignal) => api.get('/inventory', { params, signal });
 export const updateItem = (id: string, data: any) => api.put(`/inventory/${id}`, data);
 export const deleteItem = (id: string) => api.delete(`/inventory/${id}`);
-export const getCategories = () => api.get('/inventory/categories');
+export const getCategories = (signal?: AbortSignal) => api.get('/inventory/categories', { signal });
 export const uploadInventoryBatch = (data: any[]) => api.post('/inventory/batch', data);
 export const uploadCSV = (file: File) => {
   const formData = new FormData();

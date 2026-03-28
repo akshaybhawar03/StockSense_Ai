@@ -1,6 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { getAlerts } from '../../services/ai';
 import toast from 'react-hot-toast';
+import { AlertsSkeleton } from '../skeletons/AlertsSkeleton';
 
 // These are the 5 groups the backend returns
 const GROUPS = [
@@ -12,32 +14,20 @@ const GROUPS = [
 ];
 
 export function AlertsPage() {
-    const [data, setData] = useState<any>(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState('');
     const [open, setOpen] = useState<Record<string, boolean>>({ out_of_stock: true });
 
-    useEffect(() => {
-        getAlerts()
-            .then(r => setData(r.data))
-            .catch(err => {
-                console.error('Alerts error:', err);
-                setError('Failed to load alerts. Check backend connection.');
-                toast.error('Failed to load alerts');
-            })
-            .finally(() => setLoading(false));
-    }, []);
+    const { data, isLoading, error } = useQuery({
+        queryKey: ['alerts', 'active'],
+        queryFn: ({ signal }) => getAlerts(signal).then(r => r.data),
+        staleTime: 60_000,
+    });
 
-    if (loading) return (
-        <div className='flex items-center justify-center h-64'>
-            <p className='text-gray-400 text-sm'>Loading alerts...</p>
-        </div>
-    );
+    if (isLoading) return <AlertsSkeleton />;
 
     if (error) return (
         <div className='p-6'>
             <div className='bg-red-900/20 border border-red-700/50 rounded-xl p-4'>
-                <p className='text-red-400 text-sm'>{error}</p>
+                <p className='text-red-400 text-sm'>Failed to load alerts. Check backend connection.</p>
             </div>
         </div>
     );

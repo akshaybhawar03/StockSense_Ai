@@ -249,3 +249,24 @@
 .animate-reverse-orbit-inner {
   animation: reverse-spin-orbit 35s linear infinite;
 }
+
+/* Skeleton loading pulse */
+@keyframes skeleton-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+:root {
+  --skeleton-bg: #e5e7eb;
+}
+
+.dark {
+  --skeleton-bg: #374151;
+}
+
+/* Global loading bar slide animation */
+@keyframes loading-bar-slide {
+  0% { transform: translateX(-100%); }
+  50% { transform: translateX(150%); }
+  100% { transform: translateX(300%); }
+}

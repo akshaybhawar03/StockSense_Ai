@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { getAnalytics } from '../../services/analytics';
 import toast from 'react-hot-toast';
 
@@ -6,31 +6,26 @@ import StockHealthDonut from '../charts/StockHealthDonut';
 import CategoryBarChart from '../charts/CategoryBarChart';
 import TopProductsBar from '../charts/TopProductsBar';
 import LowStockBar from '../charts/LowStockBar';
+import { AnalyticsSkeleton } from '../skeletons/AnalyticsSkeleton';
 
 export function AnalyticsPage() {
-    const [data, setData] = useState<any>(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState('');
+    const { data, isLoading, error } = useQuery({
+        queryKey: ['analytics', 'overview'],
+        queryFn: ({ signal }) => getAnalytics(signal).then(r => r.data),
+        staleTime: 60_000,
+    });
 
-    useEffect(() => {
-        getAnalytics()
-            .then(r => setData(r.data))
-            .catch(err => {
-                console.error('Analytics error:', err);
-                setError('Failed to load analytics. Check backend connection.');
-                toast.error('Failed to load analytics');
-            })
-            .finally(() => setLoading(false));
-    }, []);
+    if (isLoading) return <AnalyticsSkeleton />;
 
-    if (loading) return <div className='p-6 text-gray-400 text-sm'>Loading analytics...</div>;
     if (error) return (
         <div className='p-6'>
             <div className='bg-red-900/20 border border-red-700/50 rounded-xl p-4'>
-                <p className='text-red-400 text-sm'>{error}</p>
+                <p className='text-red-400 text-sm'>Failed to load analytics. Check backend connection.</p>
             </div>
         </div>
     );
+
+    if (!data) return <AnalyticsSkeleton />;
 
     return (
         <div className='p-6 max-w-7xl mx-auto'>

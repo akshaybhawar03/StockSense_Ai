@@ -1,31 +1,24 @@
-import { useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { getForecast } from '../../services/forecast';
 import {
     LineChart, Line, XAxis, YAxis, CartesianGrid,
     Tooltip, ResponsiveContainer, Legend
 } from 'recharts';
 import toast from 'react-hot-toast';
+import { ForecastSkeleton } from '../skeletons/ForecastSkeleton';
 
 export function AIForecastEngine() {
-    const [data, setData] = useState<any>(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState('');
+    const { data, isLoading, error } = useQuery({
+        queryKey: ['forecast', 'weekly'],
+        queryFn: ({ signal }) => getForecast(signal).then(r => r.data),
+        staleTime: 60_000,
+    });
 
-    useEffect(() => {
-        getForecast()
-            .then(r => setData(r.data))
-            .catch(err => {
-                console.error('Forecast error:', err);
-                setError('Forecast not available. Upload a CSV with last_sale_date column to enable forecasting.');
-            })
-            .finally(() => setLoading(false));
-    }, []);
+    const errorMsg = error
+        ? 'Forecast not available. Upload a CSV with last_sale_date column to enable forecasting.'
+        : '';
 
-    if (loading) return (
-        <div className='flex items-center justify-center h-64'>
-            <p className='text-gray-400 text-sm'>Loading forecast...</p>
-        </div>
-    );
+    if (isLoading) return <ForecastSkeleton />;
 
     return (
         <div className='p-6 max-w-5xl mx-auto'>
@@ -41,9 +34,9 @@ export function AIForecastEngine() {
                 </div>
             </div>
 
-            {error && (
+            {errorMsg && (
                 <div className='bg-amber-900/20 border border-amber-700/50 rounded-xl p-4 mb-6'>
-                    <p className='text-amber-400 text-sm'>{error}</p>
+                    <p className='text-amber-400 text-sm'>{errorMsg}</p>
                 </div>
             )}
 

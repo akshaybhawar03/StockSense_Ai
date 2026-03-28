@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion } from 'motion/react';
 import { Card } from '../ui/card';
 import { Input } from '../ui/input';
@@ -11,19 +11,18 @@ import { useDebounce } from 'use-debounce';
 import toast from 'react-hot-toast';
 import { EditItemModal } from '../inventory/EditItemModal';
 import StatusBadge from '../ui/StatusBadge';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { InventorySkeleton } from '../skeletons/InventorySkeleton';
 
 export function InventoryManager() {
-    // State variables based on PRD
-    const [items, setItems] = useState<any[]>([]);
-    const [total, setTotal] = useState(0);
-    const [page, setPage] = useState(1);
+    const queryClient = useQueryClient();
+
+    // Filter/pagination state (still local)
     const [search, setSearch] = useState('');
     const [category, setCategory] = useState('');
     const [status, setStatus] = useState('');
-    const [categories, setCategories] = useState<string[]>([]);
-    const [loading, setLoading] = useState(false);
-    const [editItem, setEditItem] = useState<any>(null); // item being edited
-
+    const [page, setPage] = useState(1);
+    const [editItem, setEditItem] = useState<any>(null);
     const PAGE_SIZE = 50;
     const [debouncedSearch] = useDebounce(search, 300);
 
@@ -40,68 +39,95 @@ export function InventoryManager() {
         setPage(1);
     };
 
-    const fetchInventory = async () => {
-        setLoading(true);
-        try {
-            const res = await getInventory({
-                search: debouncedSearch || undefined,
-                category: category || undefined,
-                status: status || undefined,
-                page,
-                page_size: PAGE_SIZE,
-                sort_by: sortField,
-                sort_dir: sortOrder
-            });
-            console.log('[INVENTORY] Response:', res.data);
+    const filters = { search: debouncedSearch, category, status, page, sortField, sortOrder };
 
-            // Handle both possible response shapes
+    // React Query: Inventory list
+    const { data: inventoryData, isLoading: loading } = useQuery({
+        queryKey: ['inventory', 'list', filters],
+        queryFn: ({ signal }) => getInventory({
+            search: debouncedSearch || undefined,
+            category: category || undefined,
+            status: status || undefined,
+            page,
+            page_size: PAGE_SIZE,
+            sort_by: sortField,
+            sort_dir: sortOrder
+        }, signal).then(res => {
             const data = res.data;
             const itemsList = data.items || data.data || data.products || [];
             const totalCount = data.total || data.count || itemsList.length;
+            return { items: itemsList, total: totalCount };
+        }),
+        staleTime: 60_000,
+    });
 
-            setItems(itemsList);
-            setTotal(totalCount);
-        } catch (err: any) {
-            console.error('[INVENTORY] Error:', err.response?.data || err.message);
-            toast.error('Failed to load inventory');
-            setItems([]);
-            setTotal(0);
-        } finally {
-            setLoading(false);
-        }
-    };
+    const items = inventoryData?.items ?? [];
+    const total = inventoryData?.total ?? 0;
 
-    // Load table data and handle CSV upload refresh
+    // React Query: Categories
+    const { data: categoriesData } = useQuery({
+        queryKey: ['inventory', 'categories'],
+        queryFn: ({ signal }) => getCategories(signal).then(r => r.data.categories || []),
+        staleTime: 60_000,
+    });
+
+    const categories = categoriesData ?? [];
+
+    // Invalidate on CSV upload
+    const handleCsvUploaded = useCallback(() => {
+        queryClient.invalidateQueries({ queryKey: ['inventory'] });
+    }, [queryClient]);
+
     useEffect(() => {
-        fetchInventory();
+        window.addEventListener('csv-uploaded', handleCsvUploaded);
+        return () => window.removeEventListener('csv-uploaded', handleCsvUploaded);
+    }, [handleCsvUploaded]);
 
-        const handleCsvUpload = () => {
-            fetchInventory();
-        };
-
-        window.addEventListener('csv-uploaded', handleCsvUpload);
-        return () => window.removeEventListener('csv-uploaded', handleCsvUpload);
-    }, [debouncedSearch, category, status, page, sortField, sortOrder]);
-
-    // Load categories
-    useEffect(() => {
-        getCategories()
-            .then(r => setCategories(r.data.categories || []))
-            .catch(() => {});
-    }, []);
-
-    const handleDelete = async (id: string, name: string) => {
-        if (!window.confirm(`Delete '${name}'? This cannot be undone.`)) return;
-        try {
-            await deleteItem(id);
-            toast.success(`'${name}' deleted`);
-            fetchInventory(); // refresh list
-        } catch {
+    // Optimistic delete mutation
+    const deleteMutation = useMutation({
+        mutationFn: (id: string) => deleteItem(id),
+        onMutate: async (id: string) => {
+            await queryClient.cancelQueries({ queryKey: ['inventory', 'list'] });
+            const previousQueries = queryClient.getQueriesData({ queryKey: ['inventory', 'list'] });
+            queryClient.setQueriesData(
+                { queryKey: ['inventory', 'list'] },
+                (old: any) => {
+                    if (!old) return old;
+                    return {
+                        ...old,
+                        items: old.items.filter((item: any) => item.id !== id),
+                        total: old.total - 1,
+                    };
+                }
+            );
+            return { previousQueries };
+        },
+        onError: (_err, _id, context) => {
+            if (context?.previousQueries) {
+                context.previousQueries.forEach(([queryKey, data]: [any, any]) => {
+                    queryClient.setQueryData(queryKey, data);
+                });
+            }
             toast.error('Failed to delete item');
-        }
+        },
+        onSuccess: () => {
+            toast.success('Item deleted');
+        },
+        onSettled: () => {
+            queryClient.invalidateQueries({ queryKey: ['inventory', 'list'] });
+        },
+    });
+
+    const handleDelete = (id: string, name: string) => {
+        if (!window.confirm(`Delete '${name}'? This cannot be undone.`)) return;
+        deleteMutation.mutate(id);
     };
 
     const totalPages = Math.ceil(total / PAGE_SIZE);
+
+    if (loading) {
+        return <InventorySkeleton />;
+    }
 
     return (
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
@@ -135,7 +161,7 @@ export function InventoryManager() {
                             className="h-10 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 rounded-lg px-3 py-2 text-sm"
                         >
                             <option value="">All Categories</option>
-                            {categories.map(c => <option key={c} value={c}>{c}</option>)}
+                            {categories.map((c: string) => <option key={c} value={c}>{c}</option>)}
                         </select>
                         <select
                             value={status}
@@ -180,15 +206,7 @@ export function InventoryManager() {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {loading ? (
-                                <TableRow>
-                                    <TableCell colSpan={6}>
-                                        <div className="flex items-center justify-center h-64">
-                                            <p className="text-gray-400 text-sm animate-pulse">Loading inventory...</p>
-                                        </div>
-                                    </TableCell>
-                                </TableRow>
-                            ) : !loading && items.length === 0 ? (
+                            {!loading && items.length === 0 ? (
                                 <TableRow>
                                     <TableCell colSpan={6}>
                                         <div className="flex flex-col items-center justify-center h-64 gap-3">
@@ -197,7 +215,7 @@ export function InventoryManager() {
                                         </div>
                                     </TableCell>
                                 </TableRow>
-                            ) : items.map((item) => (
+                            ) : items.map((item: any) => (
                                 <TableRow key={item.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-800/30 group">
                                     <TableCell>
                                         <div className="font-medium text-gray-900 dark:text-gray-100">{item.name || 'Unknown'}</div>
@@ -276,7 +294,7 @@ export function InventoryManager() {
                 <EditItemModal
                     item={editItem}
                     onClose={() => setEditItem(null)}
-                    onSaved={() => fetchInventory()}
+                    onSaved={() => queryClient.invalidateQueries({ queryKey: ['inventory', 'list'] })}
                 />
             )}
         </motion.div>

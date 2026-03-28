@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { Outlet, NavLink, useLocation } from 'react-router';
 import {
     LayoutDashboard,
@@ -20,12 +20,49 @@ import { useAuth } from '../../contexts/AuthContext';
 import { Button } from '../ui/button';
 import { CsvUploadModal } from './CsvUploadModal';
 import { ChatPanel } from '../ai/ChatPanel';
+import { GlobalLoadingBar } from '../GlobalLoadingBar';
+import { useQueryClient } from '@tanstack/react-query';
+import { getDashboardStats, getHealthScore, getDeadStockAnalysis } from '../../services/dashboard';
+import { getInventory } from '../../services/inventory';
+import { getForecast } from '../../services/forecast';
+import { getAnalytics } from '../../services/analytics';
+import { getAlerts } from '../../services/ai';
+
+// Map nav paths to their prefetch configs
+const prefetchMap: Record<string, { queryKey: any[]; queryFn: () => Promise<any> }[]> = {
+    '/dashboard': [
+        { queryKey: ['dashboard', 'stats'], queryFn: () => getDashboardStats().then(r => r.data) },
+        { queryKey: ['dashboard', 'health'], queryFn: () => getHealthScore().then(r => r.data) },
+        { queryKey: ['dashboard', 'deadStock'], queryFn: () => getDeadStockAnalysis().then(r => r.data) },
+    ],
+    '/dashboard/inventory': [
+        {
+            queryKey: ['inventory', 'list', { search: '', category: '', status: '', page: 1, sortField: 'name', sortOrder: 'asc' }],
+            queryFn: () => getInventory({ page: 1, page_size: 50, sort_by: 'name', sort_dir: 'asc' }).then(res => {
+                const data = res.data;
+                const itemsList = data.items || data.data || data.products || [];
+                const totalCount = data.total || data.count || itemsList.length;
+                return { items: itemsList, total: totalCount };
+            }),
+        },
+    ],
+    '/dashboard/forecast': [
+        { queryKey: ['forecast', 'weekly'], queryFn: () => getForecast().then(r => r.data) },
+    ],
+    '/dashboard/analytics': [
+        { queryKey: ['analytics', 'overview'], queryFn: () => getAnalytics().then(r => r.data) },
+    ],
+    '/dashboard/alerts': [
+        { queryKey: ['alerts', 'active'], queryFn: () => getAlerts().then(r => r.data) },
+    ],
+};
 
 export function DashboardLayout() {
     const { user, logout } = useAuth();
     const location = useLocation();
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [isUploadOpen, setIsUploadOpen] = useState(false);
+    const queryClient = useQueryClient();
 
     const navItems = [
         { name: 'Dashboard', icon: LayoutDashboard, path: '/dashboard' },
@@ -39,11 +76,23 @@ export function DashboardLayout() {
         { name: 'Analytics', icon: BarChart3, path: '/dashboard/analytics' },
     ];
 
+    // Prefetch data on nav hover
+    const handleNavHover = useCallback((path: string) => {
+        const configs = prefetchMap[path];
+        if (!configs) return;
+        configs.forEach(({ queryKey, queryFn }) => {
+            queryClient.prefetchQuery({ queryKey, queryFn, staleTime: 60_000 });
+        });
+    }, [queryClient]);
+
     const userName = user?.name || 'User';
     const userInitials = userName.substring(0, 2).toUpperCase();
 
     return (
         <div className="flex h-screen bg-gray-50/50 dark:bg-gray-900">
+            {/* Global Loading Bar */}
+            <GlobalLoadingBar />
+
             {/* Sidebar */}
             <aside
                 className={`fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-gray-800 border-r border-gray-100 dark:border-gray-700 transform transition-transform duration-200 ease-in-out lg:translate-x-0 lg:static lg:flex lg:flex-col ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
@@ -80,6 +129,7 @@ export function DashboardLayout() {
                             <NavLink
                                 key={item.name}
                                 to={item.path}
+                                onMouseEnter={() => handleNavHover(item.path)}
                                 className={`flex items-center justify-between px-3 py-2.5 rounded-lg transition-colors group ${isActive
                                     ? 'bg-blue-50/50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400'
                                     : 'text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-800/50'

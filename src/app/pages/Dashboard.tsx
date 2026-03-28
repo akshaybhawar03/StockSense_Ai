@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Card } from '../components/ui/card';
 import { CloudUpload, Package, DollarSign, AlertTriangle, TrendingUp, TrendingDown, Clock, Activity, RefreshCw, X, Maximize, BarChart3 } from 'lucide-react';
@@ -10,53 +10,16 @@ import { DeadStockAnalyzer } from '../components/dashboard/DeadStockAnalyzer';
 import { ReorderPredictor } from '../components/dashboard/ReorderPredictor';
 import { PowerBIDashboard } from '../components/dashboard/PowerBIDashboard';
 import { StockAIChat } from '../components/StockAIChat';
-import { useEffect } from 'react';
 import { getDashboardStats, getHealthScore, getDeadStockAnalysis } from '../services/dashboard';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { DashboardSkeleton } from '../components/skeletons/DashboardSkeleton';
 import toast from 'react-hot-toast';
-
-// 2a: Skeleton UI component for dashboard cards
-function DashboardSkeleton() {
-  return (
-    <div className="flex flex-col gap-6 animate-pulse">
-      {/* Stat cards skeleton */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {Array.from({ length: 8 }).map((_, i) => (
-          <div key={i} className="p-5 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700">
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
-                <div className="h-3 w-24 bg-gray-200 dark:bg-gray-700 rounded mb-3" />
-                <div className="h-7 w-20 bg-gray-200 dark:bg-gray-700 rounded" />
-              </div>
-              <div className="w-10 h-10 bg-gray-200 dark:bg-gray-700 rounded-lg" />
-            </div>
-          </div>
-        ))}
-      </div>
-      {/* Health bar skeleton */}
-      <div className="h-20 bg-gray-200 dark:bg-gray-800 rounded-xl" />
-      {/* Charts skeleton */}
-      <div className="grid md:grid-cols-2 gap-6">
-        <div className="h-72 bg-gray-200 dark:bg-gray-800 rounded-xl" />
-        <div className="h-72 bg-gray-200 dark:bg-gray-800 rounded-xl" />
-      </div>
-      {/* Modules skeleton */}
-      <div className="space-y-6">
-        <div className="h-64 bg-gray-200 dark:bg-gray-800 rounded-xl" />
-        <div className="h-64 bg-gray-200 dark:bg-gray-800 rounded-xl" />
-        <div className="h-48 bg-gray-200 dark:bg-gray-800 rounded-xl" />
-      </div>
-    </div>
-  );
-}
 
 export function Dashboard() {
   const { datasets } = useData();
   const [isUploadOpen, setIsUploadOpen] = useState(false);
   const [isFullscreenPowerBI, setIsFullscreenPowerBI] = useState(false);
-  const [stats, setStats] = useState<any>(null);
-  const [healthData, setHealthData] = useState<any>(null);
-  const [deadStockData, setDeadStockData] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
 
   const formatINR = (val: any) => {
     if (!val && val !== 0) return '₹0.00';
@@ -65,40 +28,39 @@ export function Dashboard() {
     });
   };
 
-  // 2b: Fetch all dashboard data in parallel with Promise.all()
-  const fetchAllData = () => {
-    setLoading(true);
-    Promise.all([
-      getDashboardStats().catch(err => { console.error('[DASHBOARD] Error:', err); return null; }),
-      getHealthScore().catch(err => { console.error('[HEALTH] Error:', err); return null; }),
-      getDeadStockAnalysis().catch(err => { console.error('[DEAD STOCK] Error:', err); return null; }),
-    ])
-      .then(([statsRes, healthRes, deadStockRes]) => {
-        if (statsRes) {
-          console.log('[DASHBOARD] API response:', statsRes.data);
-          setStats(statsRes.data);
-        } else {
-          toast.error('Failed to load dashboard');
-        }
-        if (healthRes) {
-          console.log('[HEALTH] API response:', healthRes.data);
-          setHealthData(healthRes.data);
-        }
-        if (deadStockRes) {
-          console.log('[DEAD STOCK] API response:', deadStockRes.data);
-          setDeadStockData(deadStockRes.data);
-        }
-      })
-      .finally(() => setLoading(false));
-  };
+  // React Query: Fetch all 3 dashboard endpoints
+  const { data: statsRes, isLoading: statsLoading } = useQuery({
+    queryKey: ['dashboard', 'stats'],
+    queryFn: ({ signal }) => getDashboardStats(signal).then(r => r.data),
+    staleTime: 60_000,
+  });
+
+  const { data: healthData } = useQuery({
+    queryKey: ['dashboard', 'health'],
+    queryFn: ({ signal }) => getHealthScore(signal).then(r => r.data),
+    staleTime: 60_000,
+  });
+
+  const { data: deadStockData } = useQuery({
+    queryKey: ['dashboard', 'deadStock'],
+    queryFn: ({ signal }) => getDeadStockAnalysis(signal).then(r => r.data),
+    staleTime: 60_000,
+  });
+
+  const stats = statsRes ?? null;
+  const loading = statsLoading;
+
+  // Invalidate dashboard queries when CSV is uploaded
+  const handleCsvUploaded = useCallback(() => {
+    queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+  }, [queryClient]);
 
   useEffect(() => {
-    fetchAllData();
-    window.addEventListener('csv-uploaded', fetchAllData);
+    window.addEventListener('csv-uploaded', handleCsvUploaded);
     return () => {
-      window.removeEventListener('csv-uploaded', fetchAllData);
+      window.removeEventListener('csv-uploaded', handleCsvUploaded);
     };
-  }, []);
+  }, [handleCsvUploaded]);
 
   const statCards = [
     { label: 'Total Products', value: (stats?.total_products || 0).toLocaleString(), icon: Package, accent: 'text-blue-500', bg: 'bg-blue-50 dark:bg-blue-900/20' },
@@ -120,7 +82,7 @@ export function Dashboard() {
     { label: 'Dead Stock', value: stats?.dead_stock_items, color: '#6b7280' },
   ];
 
-  // 2a: Show skeleton UI while loading instead of blank screen
+  // Show skeleton UI while loading
   if (loading) {
     return <DashboardSkeleton />;
   }

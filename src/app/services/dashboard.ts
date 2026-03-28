@@ -1,5 +1,5 @@
 import { api } from './api';
 
-export const getDashboardStats = () => api.get('/dashboard');
-export const getHealthScore = () => api.get('/dashboard/health');
-export const getDeadStockAnalysis = () => api.get('/dashboard/dead-stock-analysis');
+export const getDashboardStats = (signal?: AbortSignal) => api.get('/dashboard', { signal });
+export const getHealthScore = (signal?: AbortSignal) => api.get('/dashboard/health', { signal });
+export const getDeadStockAnalysis = (signal?: AbortSignal) => api.get('/dashboard/dead-stock-analysis', { signal });
