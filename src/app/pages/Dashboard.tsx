@@ -50,7 +50,7 @@ function DashboardSkeleton() {
 }
 
 export function Dashboard() {
-  const { inventory, datasets, isLoadingData } = useData();
+  const { datasets } = useData();
   const [isUploadOpen, setIsUploadOpen] = useState(false);
   const [isFullscreenPowerBI, setIsFullscreenPowerBI] = useState(false);
   const [stats, setStats] = useState<any>(null);
@@ -121,7 +121,7 @@ export function Dashboard() {
   ];
 
   // 2a: Show skeleton UI while loading instead of blank screen
-  if (isLoadingData || loading) {
+  if (loading) {
     return <DashboardSkeleton />;
   }
 
@@ -155,7 +155,7 @@ export function Dashboard() {
         )}
       </AnimatePresence>
 
-      {inventory.length === 0 ? (
+      {!stats || stats.total_products === 0 ? (
         datasets && datasets.length > 0 ? (
           <PowerBIDashboard />
         ) : (

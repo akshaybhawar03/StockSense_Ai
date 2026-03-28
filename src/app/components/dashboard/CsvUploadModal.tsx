@@ -86,8 +86,8 @@ export function CsvUploadModal({ isOpen, onClose }: Props) {
             toast.success(`${count} products imported successfully`);
 
             setSuccess(true);
-            await refreshData();
             window.dispatchEvent(new CustomEvent('csv-uploaded'));
+            refreshData().catch(() => {});
 
             setTimeout(() => {
                 onClose();
