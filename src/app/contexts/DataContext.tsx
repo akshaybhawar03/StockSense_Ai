@@ -65,8 +65,10 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
             const lowStock = invData.filter(item => item.stock > 0 && item.stock <= 10).length;
             const outOfStock = invData.filter(item => item.stock === 0).length;
 
-            // Assuming dead stock = high stock but 0 sales
-            const deadStock = invData.filter(item => item.stock > 20 && item.sales === 0).length;
+            // Dead stock = has stock AND never sold (sales === 0 as proxy for stagnant inventory)
+            const deadStock = invData.filter(item =>
+                item.stock > 0 && item.sales === 0
+            ).length;
 
             const totalSales = invData.reduce((sum, item) => sum + item.sales, 0);
 

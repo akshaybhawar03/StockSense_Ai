@@ -5,9 +5,36 @@ import { Badge } from '../ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip, Legend } from 'recharts';
 import { PackageX, Archive, AlertOctagon, AlertTriangle, Package } from 'lucide-react';
+import type { DeadStockAnalysis, DeadStockItem } from '../../services/dashboard';
+
+// ── Helper functions for days_without_sale rendering ──────────────
+function formatDaysWithoutSale(days: number | null): string {
+    if (days === null || days === undefined) return 'No sales recorded';
+    return `${days} days`;
+}
+
+function getDaysBadgeStyle(days: number | null): string {
+    if (days === null || days === undefined)
+        return 'bg-gray-800 text-gray-400 border border-gray-600';
+    if (days > 180)
+        return 'bg-red-900/30 text-red-400 border border-red-700';
+    if (days > 90)
+        return 'bg-orange-900/30 text-orange-400 border border-orange-700';
+    if (days > 30)
+        return 'bg-yellow-900/30 text-yellow-400 border border-yellow-700';
+    return 'bg-green-900/30 text-green-400 border border-green-700';
+}
+
+// ── AI suggestion color ──────────────────────────────────────────
+function getSuggestionColor(suggestion: string): string {
+    if (suggestion.includes('Liquidate')) return 'text-red-400';
+    if (suggestion.includes('High priority')) return 'text-orange-400';
+    if (suggestion.includes('Never sold')) return 'text-gray-400';
+    return 'text-yellow-400';
+}
 
 interface DeadStockAnalyzerProps {
-    deadStockData: any;
+    deadStockData: DeadStockAnalysis | null | undefined;
 }
 
 export function DeadStockAnalyzer({ deadStockData }: DeadStockAnalyzerProps) {
@@ -19,32 +46,32 @@ export function DeadStockAnalyzer({ deadStockData }: DeadStockAnalyzerProps) {
         return `₹${val.toFixed(0)}`;
     };
 
+    // Map from new backend shape (summary) to metric cards
+    const summary = deadStockData?.summary;
     const metrics = [
-        { label: 'Total Units', value: (deadStockData?.stats?.total_units || 0).toLocaleString(), icon: Package, color: 'blue' },
-        { label: 'Total Value', value: formatCurrency(deadStockData?.stats?.total_value || 0), icon: Archive, color: 'purple' },
-        { label: 'Low Stock', value: (deadStockData?.stats?.low_stock || 0).toString(), icon: AlertTriangle, color: 'yellow' },
-        { label: 'Overstocked', value: (deadStockData?.stats?.overstocked || 0).toString(), icon: AlertOctagon, color: 'orange' },
-        { label: 'Dead Stock', value: (deadStockData?.stats?.dead_stock || 0).toString(), icon: PackageX, color: 'red' },
+        { label: 'Total Dead Stock', value: (summary?.total_dead_stock || 0).toLocaleString(), icon: PackageX, color: 'red' },
+        { label: 'Blocked Value', value: formatCurrency(summary?.total_blocked_value || 0), icon: Archive, color: 'purple' },
+        { label: 'Low Stock', value: (summary?.low_stock || 0).toString(), icon: AlertTriangle, color: 'yellow' },
+        { label: 'Overstocked', value: (summary?.overstocked || 0).toString(), icon: AlertOctagon, color: 'orange' },
     ];
 
-    const deadStockItems = deadStockData?.dead_stock_items || [];
-    const distributionData = deadStockData?.health_distribution || [];
+    const deadStockItems: DeadStockItem[] = deadStockData?.items || [];
 
-    const getAgingColor = (days: number) => {
-        if (days >= 90) return 'text-red-600 bg-red-100 dark:bg-red-900/20 dark:text-red-400';
-        if (days >= 45) return 'text-orange-600 bg-orange-100 dark:bg-orange-900/20 dark:text-orange-400';
-        if (days >= 15) return 'text-yellow-600 bg-yellow-100 dark:bg-yellow-900/20 dark:text-yellow-400';
-        return 'text-green-600 bg-green-100 dark:bg-green-900/20 dark:text-green-400';
-    };
+    // Build health distribution from summary for the pie chart
+    const distributionData = summary ? [
+        { name: 'Dead Stock', value: summary.total_dead_stock, color: '#ef4444' },
+        { name: 'Overstocked', value: summary.overstocked, color: '#f97316' },
+        { name: 'Low Stock', value: summary.low_stock, color: '#eab308' },
+    ].filter(d => d.value > 0) : [];
 
     return (
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="mb-8">
-            <Card className="p-6 md:p-8 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border border-gray-200 dark:border-gray-800 shadow-xl overflow-hidden">
-                {/* Issue 2: show spinner overlay while data is loading */}
+            <Card className="p-6 md:p-8 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border border-gray-200 dark:border-gray-800 shadow-xl overflow-hidden relative">
+                {/* Loading overlay */}
                 {isLoading && (
                     <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-4 bg-white/60 dark:bg-gray-900/60 backdrop-blur-sm rounded-xl">
                         <div className="w-10 h-10 border-4 border-red-500 border-t-transparent rounded-full animate-spin" />
-                        <p className="text-sm text-gray-500 dark:text-gray-400">Analyzing dead stock…</p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">Analyzing inventory data...</p>
                     </div>
                 )}
 
@@ -60,7 +87,7 @@ export function DeadStockAnalyzer({ deadStockData }: DeadStockAnalyzerProps) {
                     </div>
                 </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
                     {metrics.map((metric, idx) => (
                         <motion.div key={idx} whileHover={{ scale: 1.02 }} className="p-4 rounded-xl bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-700/50">
                             <div className="flex items-center gap-3 mb-2">
@@ -103,27 +130,39 @@ export function DeadStockAnalyzer({ deadStockData }: DeadStockAnalyzerProps) {
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
-                                        {deadStockItems.length > 0 ? deadStockItems.map((item: any, i: number) => (
-                                            <TableRow key={i} className="hover:bg-gray-50/50 dark:hover:bg-gray-800/30">
-                                                <TableCell className="font-semibold">{item.name}</TableCell>
+                                        {deadStockItems.length > 0 ? deadStockItems.map((item: DeadStockItem, i: number) => (
+                                            <TableRow key={item.product_id || i} className="hover:bg-gray-50/50 dark:hover:bg-gray-800/30">
+                                                <TableCell className="font-semibold">
+                                                    <div>
+                                                        <div>{item.name}</div>
+                                                        <div className="text-xs text-gray-400">{item.sku}</div>
+                                                    </div>
+                                                </TableCell>
                                                 <TableCell>
-                                                    <span className={`px-2 py-1 rounded-md text-xs font-bold ${getAgingColor(item.days_without_sale)}`}>
-                                                        {item.days_without_sale} days
+                                                    <span className={`px-2 py-1 rounded-md text-xs font-bold ${getDaysBadgeStyle(item.days_without_sale)}`}>
+                                                        {formatDaysWithoutSale(item.days_without_sale)}
                                                     </span>
                                                 </TableCell>
-                                                <TableCell>{item.quantity}</TableCell>
+                                                <TableCell>{item.current_stock}</TableCell>
                                                 <TableCell className="text-gray-900 dark:text-gray-100 font-medium">
-                                                    ₹{Number(item.blocked_capital || 0).toLocaleString('en-IN')}
+                                                    ₹{Number(item.blocked_value || 0).toLocaleString('en-IN')}
                                                 </TableCell>
-                                                <TableCell>
-                                                    <div className="flex items-center gap-1.5 text-xs font-semibold text-[rgb(var(--accent-primary))]">
-                                                        <span>⚡</span> {item.ai_suggestion}
-                                                    </div>
+                                                <TableCell className="text-sm">
+                                                    {item.ai_suggestion ? (
+                                                        <span className="flex items-center gap-1">
+                                                            <span>⚡</span>
+                                                            <span className={getSuggestionColor(item.ai_suggestion)}>
+                                                                {item.ai_suggestion}
+                                                            </span>
+                                                        </span>
+                                                    ) : '—'}
                                                 </TableCell>
                                             </TableRow>
                                         )) : (
                                             <TableRow>
-                                                <TableCell colSpan={5} className="text-center text-gray-500 py-6">No dead stock detected. Great job!</TableCell>
+                                                <TableCell colSpan={5} className="text-center py-8">
+                                                    <span className="text-green-400">✓ No dead stock detected. Your inventory is healthy!</span>
+                                                </TableCell>
                                             </TableRow>
                                         )}
                                     </TableBody>
