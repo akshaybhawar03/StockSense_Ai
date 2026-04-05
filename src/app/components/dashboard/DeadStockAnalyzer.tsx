@@ -4,7 +4,7 @@ import { Card } from '../ui/card';
 import { Badge } from '../ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip, Legend } from 'recharts';
-import { PackageX, Archive, AlertOctagon, AlertTriangle, Package } from 'lucide-react';
+import { PackageX, Archive, AlertOctagon, AlertTriangle } from 'lucide-react';
 import type { DeadStockAnalysis, DeadStockItem } from '../../services/dashboard';
 
 // ── Helper functions for days_without_sale rendering ──────────────
@@ -35,27 +35,53 @@ function getSuggestionColor(suggestion: string): string {
 
 interface DeadStockAnalyzerProps {
     deadStockData: DeadStockAnalysis | null | undefined;
+    isLoading: boolean;
+    isError: boolean;
 }
 
-export function DeadStockAnalyzer({ deadStockData }: DeadStockAnalyzerProps) {
-    const isLoading = !deadStockData;
-
+export function DeadStockAnalyzer({ deadStockData, isLoading, isError }: DeadStockAnalyzerProps) {
     const formatCurrency = (val: number) => {
         if (val >= 100000) return `₹${(val / 100000).toFixed(1)}L`;
         if (val >= 1000) return `₹${(val / 1000).toFixed(1)}K`;
         return `₹${val.toFixed(0)}`;
     };
 
-    // Map from new backend shape (summary) to metric cards
-    const summary = deadStockData?.summary;
-    const metrics = [
-        { label: 'Total Dead Stock', value: (summary?.total_dead_stock || 0).toLocaleString(), icon: PackageX, color: 'red' },
-        { label: 'Blocked Value', value: formatCurrency(summary?.total_blocked_value || 0), icon: Archive, color: 'purple' },
-        { label: 'Low Stock', value: (summary?.low_stock || 0).toString(), icon: AlertTriangle, color: 'yellow' },
-        { label: 'Overstocked', value: (summary?.overstocked || 0).toString(), icon: AlertOctagon, color: 'orange' },
-    ];
+    // ── Early returns for loading / error / empty ────────────────
+    if (isLoading) {
+        return (
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="mb-8">
+                <Card className="p-6 md:p-8 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border border-gray-200 dark:border-gray-800 shadow-xl">
+                    <div className="flex flex-col items-center justify-center gap-4 py-12">
+                        <div className="w-10 h-10 border-4 border-red-500 border-t-transparent rounded-full animate-spin" />
+                        <p className="text-sm text-gray-500 dark:text-gray-400">Analyzing dead stock…</p>
+                    </div>
+                </Card>
+            </motion.div>
+        );
+    }
 
+    if (isError) {
+        return (
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="mb-8">
+                <Card className="p-6 md:p-8 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border border-gray-200 dark:border-gray-800 shadow-xl">
+                    <div className="text-center py-8 text-red-400">
+                        Failed to load dead stock data. Please refresh.
+                    </div>
+                </Card>
+            </motion.div>
+        );
+    }
+
+    // ── Data is loaded — extract values from API response ────────
+    const summary = deadStockData?.summary;
     const deadStockItems: DeadStockItem[] = deadStockData?.items || [];
+
+    const metrics = [
+        { label: 'Total Dead Stock', value: (summary?.total_dead_stock ?? 0).toLocaleString(), icon: PackageX, color: 'red' },
+        { label: 'Blocked Value', value: formatCurrency(summary?.total_blocked_value ?? 0), icon: Archive, color: 'purple' },
+        { label: 'Low Stock', value: (summary?.low_stock ?? 0).toString(), icon: AlertTriangle, color: 'yellow' },
+        { label: 'Overstocked', value: (summary?.overstocked ?? 0).toString(), icon: AlertOctagon, color: 'orange' },
+    ];
 
     // Build health distribution from summary for the pie chart
     const distributionData = summary ? [
@@ -67,14 +93,6 @@ export function DeadStockAnalyzer({ deadStockData }: DeadStockAnalyzerProps) {
     return (
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="mb-8">
             <Card className="p-6 md:p-8 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border border-gray-200 dark:border-gray-800 shadow-xl overflow-hidden relative">
-                {/* Loading overlay */}
-                {isLoading && (
-                    <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-4 bg-white/60 dark:bg-gray-900/60 backdrop-blur-sm rounded-xl">
-                        <div className="w-10 h-10 border-4 border-red-500 border-t-transparent rounded-full animate-spin" />
-                        <p className="text-sm text-gray-500 dark:text-gray-400">Analyzing inventory data...</p>
-                    </div>
-                )}
-
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
                     <div>
                         <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">

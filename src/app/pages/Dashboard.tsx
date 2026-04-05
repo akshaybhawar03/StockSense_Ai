@@ -41,7 +41,7 @@ export function Dashboard() {
     staleTime: 60_000,
   });
 
-  const { data: deadStockData } = useQuery({
+  const { data: deadStockData, isLoading: deadStockLoading, isError: deadStockError } = useQuery({
     queryKey: ['dashboard', 'deadStock'],
     queryFn: ({ signal }) => getDeadStockAnalysis(signal).then(r => r.data),
     staleTime: 60_000,
@@ -67,7 +67,7 @@ export function Dashboard() {
     { label: 'Inventory Value', value: formatINR(stats?.inventory_value), icon: DollarSign, accent: 'text-blue-500', bg: 'bg-blue-50 dark:bg-blue-900/20' },
     { label: 'Low Stock Items', value: (stats?.low_stock_items || 0).toLocaleString(), icon: AlertTriangle, accent: 'text-amber-500', bg: 'bg-amber-50 dark:bg-amber-900/20', warning: (stats?.low_stock_items || 0) > 0 },
     { label: 'Out of Stock', value: (stats?.out_of_stock || 0).toLocaleString(), icon: TrendingDown, accent: 'text-red-500', bg: 'bg-red-50 dark:bg-red-900/20', danger: (stats?.out_of_stock || 0) > 0 },
-    { label: 'Dead Stock Items', value: (stats?.dead_stock_items || 0).toLocaleString(), icon: Clock, accent: 'text-purple-500', bg: 'bg-purple-50 dark:bg-purple-900/20' },
+    { label: 'Dead Stock Items', value: (deadStockData?.summary?.total_dead_stock ?? 0).toLocaleString(), icon: Clock, accent: 'text-purple-500', bg: 'bg-purple-50 dark:bg-purple-900/20' },
     { label: 'Total Sales', value: (stats?.total_sales || 0).toLocaleString(), icon: Activity, accent: 'text-emerald-500', bg: 'bg-emerald-50 dark:bg-emerald-900/20' },
     { label: 'Monthly Revenue', value: formatINR(stats?.monthly_revenue), icon: TrendingUp, accent: 'text-emerald-500', bg: 'bg-emerald-50 dark:bg-emerald-900/20' },
     { label: 'Turnover Rate', value: `${stats?.turnover_rate || 0}%`, icon: RefreshCw, accent: 'text-cyan-500', bg: 'bg-cyan-50 dark:bg-cyan-900/20' },
@@ -79,7 +79,7 @@ export function Dashboard() {
     { label: 'Healthy', value: healthy, color: '#10b981' },
     { label: 'Low Stock', value: stats?.low_stock_items, color: '#f59e0b' },
     { label: 'Out of Stock', value: stats?.out_of_stock, color: '#ef4444' },
-    { label: 'Dead Stock', value: stats?.dead_stock_items, color: '#6b7280' },
+    { label: 'Dead Stock', value: deadStockData?.summary?.total_dead_stock ?? 0, color: '#6b7280' },
   ];
 
   // Show skeleton UI while loading
@@ -215,7 +215,7 @@ export function Dashboard() {
 
           {/* Smart Modules — data passed as props (fetched in parallel) */}
           <CashFlowOptimizer healthData={healthData} />
-          <DeadStockAnalyzer deadStockData={deadStockData} />
+          <DeadStockAnalyzer deadStockData={deadStockData} isLoading={deadStockLoading} isError={deadStockError} />
           <ReorderPredictor />
 
           {/* AI Stock Assistant */}
