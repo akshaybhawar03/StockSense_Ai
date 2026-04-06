@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { Card } from '../ui/card';
 import { Badge } from '../ui/badge';
@@ -40,6 +40,8 @@ interface DeadStockAnalyzerProps {
 }
 
 export function DeadStockAnalyzer({ deadStockData, isLoading, isError }: DeadStockAnalyzerProps) {
+    const [showAll, setShowAll] = useState(false);
+
     const formatCurrency = (val: number) => {
         if (val >= 100000) return `₹${(val / 100000).toFixed(1)}L`;
         if (val >= 1000) return `₹${(val / 1000).toFixed(1)}K`;
@@ -75,6 +77,8 @@ export function DeadStockAnalyzer({ deadStockData, isLoading, isError }: DeadSto
     // ── Data is loaded — extract values from API response ────────
     const summary = deadStockData?.summary;
     const deadStockItems: DeadStockItem[] = deadStockData?.items || [];
+    const displayedItems = showAll ? deadStockItems : deadStockItems.slice(0, 50);
+    const hasMore = deadStockItems.length > 50;
 
     const metrics = [
         { label: 'Total Dead Stock', value: (summary?.total_dead_stock ?? 0).toLocaleString(), icon: PackageX, color: 'red' },
@@ -148,7 +152,7 @@ export function DeadStockAnalyzer({ deadStockData, isLoading, isError }: DeadSto
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
-                                        {deadStockItems.length > 0 ? deadStockItems.map((item: DeadStockItem, i: number) => (
+                                        {displayedItems.length > 0 ? displayedItems.map((item: DeadStockItem, i: number) => (
                                             <TableRow key={item.product_id || i} className="hover:bg-gray-50/50 dark:hover:bg-gray-800/30">
                                                 <TableCell className="font-semibold">
                                                     <div>
@@ -186,6 +190,16 @@ export function DeadStockAnalyzer({ deadStockData, isLoading, isError }: DeadSto
                                     </TableBody>
                                 </Table>
                             </div>
+                            {hasMore && (
+                                <div className="p-3 border-t border-gray-200 dark:border-gray-800 text-center bg-gray-50/50 dark:bg-gray-800/20">
+                                    <button
+                                        onClick={() => setShowAll(!showAll)}
+                                        className="text-sm font-semibold text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 transition-colors py-1 px-4 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800"
+                                    >
+                                        {showAll ? 'Show Less' : `See More (${deadStockItems.length - 50} more items)`}
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     </div>
 
