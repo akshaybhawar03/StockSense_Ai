@@ -77,8 +77,8 @@ export function DeadStockAnalyzer({ deadStockData, isLoading, isError }: DeadSto
     // ── Data is loaded — extract values from API response ────────
     const summary = deadStockData?.summary;
     const deadStockItems: DeadStockItem[] = deadStockData?.items || [];
-    const displayedItems = showAll ? deadStockItems : deadStockItems.slice(0, 50);
-    const hasMore = deadStockItems.length > 50;
+    const displayedItems = showAll ? deadStockItems : deadStockItems.slice(0, 20);
+    const hasMore = deadStockItems.length > 20;
 
     const metrics = [
         { label: 'Total Dead Stock', value: (summary?.total_dead_stock ?? 0).toLocaleString(), icon: PackageX, color: 'red' },
@@ -196,7 +196,7 @@ export function DeadStockAnalyzer({ deadStockData, isLoading, isError }: DeadSto
                                         onClick={() => setShowAll(!showAll)}
                                         className="text-sm font-semibold text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 transition-colors py-1 px-4 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800"
                                     >
-                                        {showAll ? 'Show Less' : `See More (${deadStockItems.length - 50} more items)`}
+                                        {showAll ? 'Show Less' : `See More (${deadStockItems.length - 20} more items)`}
                                     </button>
                                 </div>
                             )}
