@@ -39,10 +39,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setIsLoading(true);
 
         try {
-            // Using the new JSON login endpoint
-            const response = await api.post("/auth/login/json", {
-                email,
-                password,
+            // Reverted back to standard OAuth2 form-data login endpoint because /auth/login/json returned 404 Not Found
+            const params = new URLSearchParams();
+            params.append("username", email);
+            params.append("password", password);
+
+            const response = await api.post("/auth/login", params.toString(), {
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                },
             });
 
             const token = response.data.access_token;
