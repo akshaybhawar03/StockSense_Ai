@@ -55,7 +55,14 @@ export function Register() {
             console.error("Register error:", err);
 
             if (err.response?.data?.detail) {
-                setError(err.response.data.detail);
+                const detail = err.response.data.detail;
+                if (Array.isArray(detail)) {
+                    setError(detail[0]?.msg || "Validation error");
+                } else if (typeof detail === "string") {
+                    setError(detail);
+                } else {
+                    setError("Unknown registration error");
+                }
             } else {
                 setError("Registration failed. Please try again.");
             }

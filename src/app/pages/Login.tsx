@@ -36,7 +36,15 @@ export function Login() {
             console.error("Login error:", err);
 
             if (err.response?.data?.detail) {
-                setError(err.response.data.detail);
+                const detail = err.response.data.detail;
+                // FastAPI returns detail as array for validation errors
+                if (Array.isArray(detail)) {
+                    setError(detail[0]?.msg || "Validation error");
+                } else if (typeof detail === "string") {
+                    setError(detail);
+                } else {
+                    setError("Unknown error occurred");
+                }
             } else {
                 setError("Login failed. Please try again.");
             }
