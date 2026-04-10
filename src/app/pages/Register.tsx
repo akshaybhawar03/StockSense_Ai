@@ -73,7 +73,7 @@ export function Register() {
                         Create an Account
                     </h1>
                     <p className="text-gray-500">
-                        Join AI Smart Inventory Predictor today
+                        Join SmartGodown today
                     </p>
                 </div>
 

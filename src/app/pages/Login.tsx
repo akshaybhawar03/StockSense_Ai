@@ -54,7 +54,7 @@ export function Login() {
                         System Login
                     </h1>
                     <p className="text-gray-500">
-                        Sign in to AI Smart Inventory Predictor
+                        Sign in to SmartGodown
                     </p>
                 </div>
 

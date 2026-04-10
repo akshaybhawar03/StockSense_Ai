@@ -202,7 +202,7 @@ export function HowItWorks() {
               Ready to Get Started?
             </h2>
             <p className="text-xl mb-8 opacity-90">
-              Join 2,500+ sellers who trust Smart Inventory Predictor
+              Join 2,500+ sellers who trust SmartGodown
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button size="lg" variant="secondary" className="bg-white text-[rgb(var(--accent-primary))] hover:bg-gray-100">

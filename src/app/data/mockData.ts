@@ -1,4 +1,4 @@
-// Mock data for the Smart Inventory Predictor application
+// Mock data for the SmartGodown application
 
 export const salesForecastData = [
   { date: 'Feb 1', actual: 45000, predicted: 47000 },

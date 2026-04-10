@@ -40,7 +40,7 @@ export function Demo() {
   };
 
   const benefits = [
-    'Personalized walkthrough of Smart Inventory Predictor',
+    'Personalized walkthrough of SmartGodown',
     'See how AI can identify your dead stock',
     'Get a custom ROI estimate for your business',
     'Learn integration options for your platform',
@@ -64,7 +64,7 @@ export function Demo() {
               Book Your Free Demo
             </h1>
             <p className="text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
-              See Smart Inventory Predictor in action. Get a personalized demo tailored to your business needs.
+              See SmartGodown in action. Get a personalized demo tailored to your business needs.
             </p>
           </motion.div>
         </div>

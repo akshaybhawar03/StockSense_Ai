@@ -13,10 +13,10 @@ export function Footer() {
           <div className="col-span-1 md:col-span-2">
             <div className="flex items-center space-x-2 mb-4">
               <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-[rgb(var(--accent-primary))] to-[rgb(var(--accent-secondary))] flex items-center justify-center">
-                <span className="text-white font-bold text-lg">SI</span>
+                <span className="text-white font-bold text-lg">SG</span>
               </div>
               <span className="font-bold text-xl text-gray-900 dark:text-white">
-                Smart Inventory Predictor
+                SmartGodown
               </span>
             </div>
             <p className="text-gray-600 dark:text-gray-400 mb-4">
@@ -89,7 +89,7 @@ export function Footer() {
         </div>
 
         <div className="mt-12 pt-8 border-t dark:border-gray-800 text-center text-gray-600 dark:text-gray-400">
-          <p>&copy; {new Date().getFullYear()} Smart Inventory Predictor. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} SmartGodown. All rights reserved.</p>
         </div>
       </div>
     </footer>
