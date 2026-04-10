@@ -1,8 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router';
-import { Menu, X, Moon, Sun, Globe } from 'lucide-react';
-import { useTheme } from '../contexts/ThemeContext';
-import { useLanguage } from '../contexts/LanguageContext';
+import { Menu, X } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router';
 import { Button } from './ui/button';
@@ -11,10 +9,6 @@ import { motion, AnimatePresence } from 'motion/react';
 export function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [showLangMenu, setShowLangMenu] = useState(false);
-  const [showAccentMenu, setShowAccentMenu] = useState(false);
-  const { mode, toggleMode, accentColor, setAccentColor } = useTheme();
-  const { t, language, setLanguage } = useLanguage();
   const { isLoggedIn, logout } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
@@ -28,25 +22,18 @@ export function Navbar() {
   }, []);
 
   const navLinks = [
-    { path: '/', label: t('nav.home') },
-    ...(isLoggedIn ? [{ path: '/dashboard', label: t('nav.dashboard') }] : []),
-    { path: '/features', label: t('nav.features') },
-    { path: '/pricing', label: t('nav.pricing') },
-    { path: '/how-it-works', label: t('nav.howItWorks') },
-    { path: '/contact', label: t('nav.contact') },
-  ];
-
-  const accentColors = [
-    { name: 'blue', color: 'bg-blue-500' },
-    { name: 'green', color: 'bg-green-500' },
-    { name: 'purple', color: 'bg-purple-500' },
-    { name: 'orange', color: 'bg-orange-500' },
+    { path: '/', label: 'Home' },
+    { path: '/about', label: 'About' },
+    { path: '/features', label: 'Features' },
+    { path: '/pricing', label: 'Pricing' },
+    { path: '/how-it-works', label: 'How It Works' },
+    { path: '/contact', label: 'Contact' },
   ];
 
   return (
     <nav
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled
-        ? 'bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg shadow-lg'
+        ? 'bg-white/80 backdrop-blur-lg shadow-lg'
         : 'bg-transparent'
         }`}
     >
@@ -54,115 +41,53 @@ export function Navbar() {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2">
-            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-[rgb(var(--accent-primary))] to-[rgb(var(--accent-secondary))] flex items-center justify-center">
-              <span className="text-white font-bold text-lg">SI</span>
+            <div className="w-10 h-10 rounded-[12px] bg-[#60A5FA] flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M3 21h18"></path><path d="M4 21V8l8-5 8 5v13"></path><path d="M9 21v-6h6v6"></path>
+              </svg>
             </div>
-            <span className="font-bold text-xl text-gray-900 dark:text-white hidden sm:block">
-              Smart Inventory
+            <span className="font-bold text-[22px] text-[#0f172a] dark:text-white hidden sm:block tracking-tight">
+              SmartGodown
             </span>
           </Link>
 
-          {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center space-x-6">
-            {navLinks.map((link) => (
-              <Link
-                key={link.path}
-                to={link.path}
-                className={`text-sm font-medium transition-colors ${location.pathname === link.path
-                  ? 'text-[rgb(var(--accent-primary))]'
-                  : 'text-gray-700 dark:text-gray-300 hover:text-[rgb(var(--accent-primary))]'
-                  }`}
-              >
-                {link.label}
-              </Link>
-            ))}
-          </div>
-
-          {/* Right Side Actions */}
-          <div className="flex items-center space-x-3">
-            {/* Language Switcher */}
-            <div className="relative flex items-center gap-1">
-              <button
-                onClick={() => {
-                  const langs = ['en', 'hi', 'mr'];
-                  const currentIndex = langs.indexOf(language);
-                  const nextIndex = (currentIndex + 1) % langs.length;
-                  setLanguage(langs[nextIndex] as any);
-                }}
-                className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors flex items-center gap-2 group"
-                title="Change Language"
-              >
-                <Globe className="w-5 h-5 text-gray-700 dark:text-gray-300" />
-                <span className="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase w-5 text-center transition-all">
-                  {language}
-                </span>
-              </button>
+            {/* Desktop Navigation */}
+            <div className="hidden lg:flex items-center space-x-8">
+              {navLinks.map((link) => (
+                <Link
+                  key={link.path}
+                  to={link.path}
+                  className={`text-[15px] font-semibold transition-colors ${location.pathname === link.path
+                    ? 'text-[#22C55E]'
+                    : 'text-[#475569] dark:text-gray-300 hover:text-[#22C55E]'
+                    }`}
+                >
+                  {link.label}
+                </Link>
+              ))}
             </div>
 
-            {/* Theme Toggle */}
-            <button
-              onClick={toggleMode}
-              className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-            >
-              {mode === 'light' ? (
-                <Moon className="w-5 h-5 text-gray-700" />
-              ) : (
-                <Sun className="w-5 h-5 text-gray-300" />
-              )}
-            </button>
-
-            {/* Accent Color Picker */}
-            <div className="relative hidden md:block">
-              <button
-                onClick={() => setShowAccentMenu(!showAccentMenu)}
-                className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-              >
-                <div className={`w-5 h-5 rounded-full ${accentColors.find(c => c.name === accentColor)?.color}`} />
-              </button>
-              <AnimatePresence>
-                {showAccentMenu && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    className="absolute right-0 mt-2 w-32 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-3"
-                  >
-                    <div className="grid grid-cols-4 gap-2">
-                      {accentColors.map((color) => (
-                        <button
-                          key={color.name}
-                          onClick={() => {
-                            setAccentColor(color.name as any);
-                            setShowAccentMenu(false);
-                          }}
-                          className={`w-8 h-8 rounded-full ${color.color} ${accentColor === color.name ? 'ring-2 ring-offset-2 ring-gray-900 dark:ring-white' : ''
-                            }`}
-                        />
-                      ))}
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
+            {/* Right Side Actions */}
+            <div className="flex items-center space-x-3">
 
             {/* Desktop Buttons */}
-            <div className="hidden md:flex items-center space-x-3">
+            <div className="hidden md:flex items-center space-x-6 ml-2">
               {isLoggedIn ? (
                 <>
-                  <Button variant="ghost" onClick={() => { logout(); navigate('/'); }}>
+                  <Button variant="ghost" onClick={() => { logout(); navigate('/'); }} className="text-gray-700 dark:text-gray-300 font-semibold text-[15px]">
                     Logout
                   </Button>
-                  <Button onClick={() => navigate('/dashboard')} className="bg-[rgb(var(--accent-primary))] hover:bg-[rgb(var(--accent-primary))]/90 text-white">
+                  <Button onClick={() => navigate('/dashboard')} className="bg-[#22C55E] hover:bg-[#22C55E]/90 text-white font-semibold text-[15px] rounded-[8px] px-6 py-5">
                     Dashboard
                   </Button>
                 </>
               ) : (
                 <>
-                  <Button variant="ghost" onClick={() => navigate('/login')}>
-                    {t('nav.login') || 'Login'}
-                  </Button>
-                  <Button onClick={() => navigate('/login')} className="bg-[rgb(var(--accent-primary))] hover:bg-[rgb(var(--accent-primary))]/90 text-white">
-                    {t('nav.startTrial')}
+                  <button onClick={() => navigate('/login')} className="text-[#0f172a] dark:text-white font-semibold text-[15px] hover:text-[#22C55E] bg-transparent">
+                    Login
+                  </button>
+                  <Button onClick={() => navigate('/register')} className="bg-[#22C55E] hover:bg-[#22C55E]/90 text-white font-semibold text-[15px] px-6 rounded-[8px] py-5">
+                    Start Free Trial
                   </Button>
                 </>
               )}

@@ -11,7 +11,7 @@ export function Login() {
     const navigate = useNavigate();
     const { login } = useAuth();
 
-    const [username, setUsername] = useState("");
+    const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
 
@@ -22,15 +22,15 @@ export function Login() {
         e.preventDefault();
         setError("");
 
-        if (!username || !password) {
-            setError("Please enter both username and password.");
+        if (!email || !password) {
+            setError("Please enter both email and password.");
             return;
         }
 
         setIsSubmitting(true);
 
         try {
-            await login(username, password);
+            await login(email, password);
             navigate("/dashboard");
         } catch (err: any) {
             console.error("Login error:", err);
@@ -46,11 +46,11 @@ export function Login() {
     };
 
     return (
-        <div className="min-h-screen pt-24 px-4 bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="min-h-screen pt-24 px-4 bg-gray-50 flex items-center justify-center">
             <div className="w-full max-w-md">
 
                 <div className="text-center mb-8">
-                    <h1 className="text-3xl font-bold text-teal-600 mb-2">
+                    <h1 className="text-3xl font-bold text-[#22C55E] mb-2">
                         System Login
                     </h1>
                     <p className="text-gray-500">
@@ -63,7 +63,7 @@ export function Login() {
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.3 }}
                 >
-                    <Card className="p-8 bg-white dark:bg-gray-800 shadow-xl rounded-2xl">
+                    <Card className="p-8 bg-white shadow-xl rounded-2xl">
 
                         {error && (
                             <div className="mb-6 p-3 rounded bg-red-100 text-red-600 text-sm text-center">
@@ -73,14 +73,14 @@ export function Login() {
 
                         <form onSubmit={handleLogin} className="space-y-5">
 
-                            {/* Username */}
+                            {/* Email */}
                             <div>
-                                <label className="block text-sm font-bold mb-2">Username</label>
+                                <label className="block text-sm font-bold mb-2">Email</label>
                                 <Input
-                                    type="text"
-                                    placeholder="Enter your username"
-                                    value={username}
-                                    onChange={(e) => setUsername(e.target.value)}
+                                    type="email"
+                                    placeholder="Enter your email"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
                                     required
                                 />
                             </div>
@@ -116,7 +116,7 @@ export function Login() {
                             <Button
                                 type="submit"
                                 disabled={isSubmitting}
-                                className="w-full py-5 bg-teal-600 hover:bg-teal-700 text-white"
+                                className="w-full py-5 bg-[#22C55E] hover:bg-[#22C55E]/90 text-white"
                             >
                                 {isSubmitting ? (
                                     <>
@@ -136,7 +136,7 @@ export function Login() {
                                 <button
                                     type="button"
                                     onClick={() => navigate("/register")}
-                                    className="ml-2 text-teal-600 hover:underline"
+                                    className="ml-2 text-[#22C55E] font-semibold hover:underline"
                                 >
                                     Create one
                                 </button>

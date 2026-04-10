@@ -65,15 +65,15 @@ export function Register() {
     };
 
     return (
-        <div className="min-h-screen pt-24 px-4 bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="min-h-screen pt-24 px-4 bg-gray-50 flex items-center justify-center">
             <div className="w-full max-w-md">
 
                 <div className="text-center mb-8">
-                    <h1 className="text-3xl font-bold text-teal-600 mb-2">
-                        Create an Account
+                    <h1 className="text-3xl font-bold text-[#22C55E] mb-2">
+                        Create Account
                     </h1>
                     <p className="text-gray-500">
-                        Join SmartGodown today
+                        Join SmartGodown for free
                     </p>
                 </div>
 
@@ -82,7 +82,7 @@ export function Register() {
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.3 }}
                 >
-                    <Card className="p-8 bg-white dark:bg-gray-800 shadow-xl rounded-2xl">
+                    <Card className="p-8 bg-white shadow-xl rounded-2xl">
 
                         {error && (
                             <div className="mb-4 p-3 rounded bg-red-100 text-red-600 text-sm text-center">
@@ -156,7 +156,7 @@ export function Register() {
                             <Button
                                 type="submit"
                                 disabled={isSubmitting}
-                                className="w-full py-5 bg-teal-600 hover:bg-teal-700 text-white"
+                                className="w-full py-5 bg-[#22C55E] hover:bg-[#22C55E]/90 text-white"
                             >
                                 {isSubmitting ? (
                                     <>
@@ -177,7 +177,7 @@ export function Register() {
                                 <button
                                     type="button"
                                     onClick={() => navigate("/login")}
-                                    className="ml-2 text-teal-600 hover:underline"
+                                    className="ml-2 text-[#22C55E] font-semibold hover:underline"
                                 >
                                     Sign in
                                 </button>

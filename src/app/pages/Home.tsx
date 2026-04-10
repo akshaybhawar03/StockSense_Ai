@@ -39,76 +39,58 @@ export function Home() {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="pt-32 pb-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-gray-50 via-white to-gray-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
+      <section className="pt-36 pb-24 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-[#e9edf1] via-[#f1f5f9] to-[#ffffff] relative overflow-hidden">
+        {/* Adds soft lighting effect like in the image */}
+        <div className="absolute top-0 left-[-10%] w-[50%] h-[50%] bg-[#ffffff] blur-[120px] rounded-full pointer-events-none"></div>
+        <div className="absolute bottom-0 right-[-10%] w-[50%] h-[50%] bg-[#ffffff] blur-[120px] rounded-full pointer-events-none"></div>
+        
+        <div className="max-w-7xl mx-auto flex flex-col items-center text-center relative z-10">
+          
+          {/* Badge */}
+          <div className="mb-10 inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full bg-[#22C55E]/10 text-[#22C55E] font-semibold text-sm border border-[#22C55E]/30 shadow-sm">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.2 1.2L3 12l5.8 1.9a2 2 0 0 1 1.2 1.2L12 21l1.9-5.8a2 2 0 0 1 1.2-1.2L21 12l-5.8-1.9a2 2 0 0 1-1.2-1.2Z"/></svg>
+            Trusted by 10,000+ Indian E-commerce Sellers
+          </div>
+
+          <div className="grid lg:grid-cols-2 gap-x-12 gap-y-12 items-center text-left w-full mt-4">
             <motion.div
               initial={{ opacity: 0, x: -50 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6 }}
+              className="w-full lg:max-w-[650px] xl:max-w-[700px] flex-shrink-0"
             >
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white mb-6">
-                {t('hero.title')}
+              <h1 className="text-[44px] sm:text-[52px] lg:text-[64px] xl:text-[70px] font-extrabold text-[#0F172A] leading-[1.1] mb-6 tracking-tight">
+                <span className="whitespace-nowrap">Stop Losing <span className="text-[#22C55E]">₹Lakhs</span></span><br />
+                on Dead Stock<br />
+                Every Month
               </h1>
-              <p className="text-xl text-gray-600 dark:text-gray-400 mb-8">
-                {t('hero.subtitle')}
+              <p className="text-[18px] sm:text-[20px] text-[#475569] mb-10 leading-[1.6] font-medium">
+                India's #1 AI-powered inventory management platform. Predict demand with 95% accuracy, get WhatsApp alerts for low stock, and recover trapped working capital in weeks.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 mb-8">
-                <Button size="lg" className="bg-[rgb(var(--accent-primary))] hover:bg-[rgb(var(--accent-primary))]/90 text-white">
-                  {t('hero.startTrial')}
+                <Button className="bg-[#22C55E] hover:bg-[#22C55E]/90 text-white px-8 py-7 text-[16px] font-semibold rounded-[10px] flex items-center justify-center gap-3 transition-colors shadow-md">
+                  Start 14-Day Free Trial 
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
                 </Button>
-                <Button size="lg" variant="outline">
-                  {t('hero.bookDemo')}
+                <Button variant="outline" className="px-8 py-7 text-[16px] font-semibold rounded-[10px] flex items-center justify-center gap-3 bg-white text-[#0F172A] border border-gray-200 shadow-sm hover:bg-gray-50 transition-colors">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                  Watch 2-Min Demo
                 </Button>
-              </div>
-
-              {/* Platform Badges with Infinite Marquee */}
-              <div className="mt-8 rounded-2xl bg-white/5 dark:bg-gray-900/50 backdrop-blur-md border border-white/20 dark:border-gray-800 shadow-[0_8px_32px_0_rgba(31,38,135,0.07)] overflow-hidden relative w-full">
-                {/* Gradient Fades for seamless edges */}
-                <div className="absolute left-0 top-0 bottom-0 w-16 bg-gradient-to-r from-gray-50 dark:from-gray-900 to-transparent z-10 hidden sm:block"></div>
-                <div className="absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-gray-50 dark:from-gray-900 to-transparent z-10 hidden sm:block"></div>
-
-                {/* Marquee Track */}
-                <div className="flex overflow-hidden relative items-center py-4">
-                  <div className="flex animate-marquee min-w-full items-center gap-12 whitespace-nowrap will-change-transform pr-12">
-                    {/* First Set */}
-                    <img src="/logos/amazon-in.svg" alt="Amazon India" className="h-10 w-auto object-contain dark:brightness-0 dark:invert" />
-                    <img src="/logos/shopify.svg" alt="Shopify" className="h-12 w-auto object-contain dark:brightness-0 dark:invert" />
-                    <img src="/logos/google.svg" alt="Google Ads" className="h-10 w-auto object-contain dark:brightness-0 dark:invert" />
-                    <img src="/logos/meta.svg" alt="Meta" className="h-10 w-auto object-contain dark:brightness-0 dark:invert" />
-                    <img src="/logos/meesho.svg" alt="Meesho" className="h-10 w-auto object-contain dark:brightness-0 dark:invert" />
-                    <img src="/logos/flipkart.svg" alt="Flipkart" className="h-10 w-auto object-contain dark:brightness-0 dark:invert" />
-                    <img src="/logos/myntra.svg" alt="Myntra" className="h-10 w-auto object-contain dark:brightness-0 dark:invert" />
-                    <img src="/logos/woo.svg" alt="WooCommerce" className="h-14 w-auto object-contain dark:brightness-0 dark:invert" />
-
-                    {/* Duplicate Set for Seamless Loop */}
-                    <img src="/logos/amazon-in.svg" alt="Amazon India" className="h-10 w-auto object-contain dark:brightness-0 dark:invert" />
-                    <img src="/logos/shopify.svg" alt="Shopify" className="h-12 w-auto object-contain dark:brightness-0 dark:invert" />
-                    <img src="/logos/google.svg" alt="Google Ads" className="h-10 w-auto object-contain dark:brightness-0 dark:invert" />
-                    <img src="/logos/meta.svg" alt="Meta" className="h-10 w-auto object-contain dark:brightness-0 dark:invert" />
-                    <img src="/logos/meesho.svg" alt="Meesho" className="h-10 w-auto object-contain dark:brightness-0 dark:invert" />
-                    <img src="/logos/flipkart.svg" alt="Flipkart" className="h-10 w-auto object-contain dark:brightness-0 dark:invert" />
-                    <img src="/logos/myntra.svg" alt="Myntra" className="h-10 w-auto object-contain dark:brightness-0 dark:invert" />
-                    <img src="/logos/woo.svg" alt="WooCommerce" className="h-14 w-auto object-contain dark:brightness-0 dark:invert" />
-                  </div>
-                </div>
               </div>
             </motion.div>
 
+            {/* Warehouse Image right side */}
             <motion.div
               initial={{ opacity: 0, x: 50 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className="relative"
+              className="relative w-full flex justify-end"
             >
-              <div className="relative">
-                <div className="absolute inset-0 bg-gradient-to-r from-[rgb(var(--accent-primary))] to-[rgb(var(--accent-secondary))] rounded-3xl blur-3xl opacity-20"></div>
-                <img
-                  src="https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=800&h=600&fit=crop"
-                  alt="Warehouse analytics"
-                  className="relative rounded-3xl shadow-2xl"
-                />
-              </div>
+              <img
+                src="https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=1200&h=800&fit=crop"
+                alt="Warehouse"
+                className="w-full max-w-[650px] rounded-[24px] shadow-[0_20px_50px_rgba(0,0,0,0.15)] object-cover aspect-[4/3]"
+              />
             </motion.div>
           </div>
         </div>

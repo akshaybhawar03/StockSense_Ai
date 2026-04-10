@@ -14,13 +14,13 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [mode, setMode] = useState<ThemeMode>('dark');
-  const [accentColor, setAccentColor] = useState<AccentColor>('blue');
+  const [mode, setMode] = useState<ThemeMode>('light');
+  const [accentColor, setAccentColor] = useState<AccentColor>('green');
 
   useEffect(() => {
     const root = document.documentElement;
-    root.classList.remove('light', 'dark');
-    root.classList.add(mode);
+    root.classList.remove('dark');
+    root.classList.add('light');
 
     // Set accent color CSS variables
     const accentColors = {

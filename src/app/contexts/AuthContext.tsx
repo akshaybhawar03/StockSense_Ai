@@ -35,13 +35,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }, []);
 
     // ---------------- LOGIN ----------------
-    const login = async (username: string, password: string) => {
+    const login = async (email: string, password: string) => {
         setIsLoading(true);
 
         try {
             // OAuth2PasswordRequestForm requires form-data
             const params = new URLSearchParams();
-            params.append("username", username);
+            params.append("username", email); // backend maps username -> email
             params.append("password", password);
 
             const response = await api.post("/auth/login", params.toString(), {
@@ -55,9 +55,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             if (!token) throw new Error("No token received");
 
             localStorage.setItem("access_token", token);
-            localStorage.setItem("userEmail", username);
+            localStorage.setItem("userEmail", email);
 
-            setUser({ email: username });
+            setUser({ email });
         } catch (error) {
             console.error("Login failed:", error);
             throw error;
