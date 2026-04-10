@@ -39,15 +39,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setIsLoading(true);
 
         try {
-            // OAuth2PasswordRequestForm requires form-data
-            const params = new URLSearchParams();
-            params.append("username", email); // backend maps username -> email
-            params.append("password", password);
-
-            const response = await api.post("/auth/login", params.toString(), {
-                headers: {
-                    "Content-Type": "application/x-www-form-urlencoded",
-                },
+            // Using the new JSON login endpoint
+            const response = await api.post("/auth/login/json", {
+                email,
+                password,
             });
 
             const token = response.data.access_token;
