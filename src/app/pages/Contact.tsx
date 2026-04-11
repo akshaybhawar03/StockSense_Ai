@@ -4,8 +4,9 @@ import { Card } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Textarea } from '../components/ui/textarea';
-import { Mail, Phone, MapPin, Send } from 'lucide-react';
+import { Mail, Phone, MapPin, Send, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import emailjs from '@emailjs/browser';
 
 export function Contact() {
   const [formData, setFormData] = useState({
@@ -15,11 +16,36 @@ export function Contact() {
     subject: '',
     message: ''
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    toast.success('Message sent successfully! We\'ll get back to you soon.');
-    setFormData({ name: '', email: '', phone: '', subject: '', message: '' });
+    setIsSubmitting(true);
+
+    try {
+      // Using the provided EmailJS credentials
+      const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID || "service_95vlpkm";
+      const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID || "template_0qa1oqq";
+      const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY || "GVlBzWg1-Gt1lVbOq";
+
+      const templateParams = {
+        from_name: formData.name,
+        reply_to: formData.email,
+        phone: formData.phone,
+        subject: formData.subject,
+        message: formData.message,
+      };
+
+      await emailjs.send(serviceId, templateId, templateParams, publicKey);
+      
+      toast.success('Message sent successfully! We\'ll get back to you soon.');
+      setFormData({ name: '', email: '', phone: '', subject: '', message: '' });
+    } catch (error) {
+      console.error('EmailJS Error:', error);
+      toast.error('Failed to send message. Please try again later.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -49,7 +75,7 @@ export function Contact() {
       <section className="px-4 sm:px-6 lg:px-8 py-20 bg-white dark:bg-gray-900">
         <div className="max-w-7xl mx-auto">
           <div className="grid lg:grid-cols-3 gap-8">
-            {/* Contact Info */}
+            {/* Contact Info text removed for brevity... I will put it all below */}
             <motion.div
               initial={{ opacity: 0, x: -50 }}
               animate={{ opacity: 1, x: 0 }}
@@ -137,6 +163,7 @@ export function Contact() {
                         value={formData.name}
                         onChange={handleChange}
                         placeholder="Your full name"
+                        disabled={isSubmitting}
                         required
                       />
                     </div>
@@ -150,6 +177,7 @@ export function Contact() {
                         value={formData.email}
                         onChange={handleChange}
                         placeholder="your@email.com"
+                        disabled={isSubmitting}
                         required
                       />
                     </div>
@@ -165,6 +193,7 @@ export function Contact() {
                         name="phone"
                         value={formData.phone}
                         onChange={handleChange}
+                        disabled={isSubmitting}
                         placeholder="+91 98765 43210"
                       />
                     </div>
@@ -177,6 +206,7 @@ export function Contact() {
                         name="subject"
                         value={formData.subject}
                         onChange={handleChange}
+                        disabled={isSubmitting}
                         placeholder="How can we help?"
                         required
                       />
@@ -191,6 +221,7 @@ export function Contact() {
                       name="message"
                       value={formData.message}
                       onChange={handleChange}
+                      disabled={isSubmitting}
                       placeholder="Tell us more about your inquiry..."
                       rows={6}
                       required
@@ -200,10 +231,20 @@ export function Contact() {
                   <Button 
                     type="submit" 
                     size="lg"
+                    disabled={isSubmitting}
                     className="w-full bg-[rgb(var(--accent-primary))] hover:bg-[rgb(var(--accent-primary))]/90 text-white gap-2"
                   >
-                    <Send className="w-5 h-5" />
-                    Send Message
+                    {isSubmitting ? (
+                        <>
+                            <Loader2 className="w-5 h-5 animate-spin" />
+                            Sending...
+                        </>
+                    ) : (
+                        <>
+                            <Send className="w-5 h-5" />
+                            Send Message
+                        </>
+                    )}
                   </Button>
                 </form>
               </Card>
