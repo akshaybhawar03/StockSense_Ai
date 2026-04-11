@@ -119,7 +119,7 @@ export function DashboardLayout() {
                         <div className="w-8 h-8 rounded-lg bg-white p-1 flex items-center justify-center text-white border border-gray-100 overflow-hidden shadow-sm">
                             <img src="/logos/main-logo.jpeg" alt="SmartGodown Logo" className="w-full h-full object-contain mix-blend-multiply" />
                         </div>
-                        <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[rgb(var(--accent-primary))] to-[rgb(var(--accent-secondary))]">
+                        <span className="text-xl font-bold text-[#0f172a] dark:text-white">
                             SmartGodown
                         </span>
                     </div>
