@@ -16,7 +16,7 @@ import { DashboardSkeleton } from '../components/skeletons/DashboardSkeleton';
 import toast from 'react-hot-toast';
 
 export function Dashboard() {
-  const { datasets } = useData();
+  const { datasets, kpis } = useData();
   const [isUploadOpen, setIsUploadOpen] = useState(false);
   const [isFullscreenPowerBI, setIsFullscreenPowerBI] = useState(false);
   const queryClient = useQueryClient();
@@ -63,27 +63,27 @@ export function Dashboard() {
   }, [handleCsvUploaded]);
 
   const statCards = [
-    { label: 'Total Products', value: (stats?.total_products || 0).toLocaleString(), icon: Package, accent: 'text-green-500', bg: 'bg-green-50 dark:bg-green-900/20' },
-    { label: 'Inventory Value', value: formatINR(stats?.inventory_value), icon: DollarSign, accent: 'text-green-500', bg: 'bg-green-50 dark:bg-green-900/20' },
-    { label: 'Low Stock Items', value: (stats?.low_stock_items || 0).toLocaleString(), icon: AlertTriangle, accent: 'text-green-500', bg: 'bg-green-50 dark:bg-green-900/20', warning: (stats?.low_stock_items || 0) > 0 },
-    { label: 'Out of Stock', value: (stats?.out_of_stock || 0).toLocaleString(), icon: TrendingDown, accent: 'text-red-500', bg: 'bg-red-50 dark:bg-red-900/20', danger: (stats?.out_of_stock || 0) > 0 },
-    { label: 'Dead Stock Items', value: (deadStockData?.summary?.total_dead_stock ?? 0).toLocaleString(), icon: Clock, accent: 'text-green-500', bg: 'bg-green-50 dark:bg-green-900/20' },
-    { label: 'Total Sales', value: (stats?.total_sales || 0).toLocaleString(), icon: Activity, accent: 'text-green-500', bg: 'bg-green-50 dark:bg-green-900/20' },
-    { label: 'Monthly Revenue', value: formatINR(stats?.monthly_revenue), icon: TrendingUp, accent: 'text-green-500', bg: 'bg-green-50 dark:bg-green-900/20' },
-    { label: 'Turnover Rate', value: `${stats?.turnover_rate || 0}%`, icon: RefreshCw, accent: 'text-green-500', bg: 'bg-green-50 dark:bg-green-900/20' },
+    { label: 'Total Products', value: (stats?.total_products || kpis?.totalProducts || 0).toLocaleString(), icon: Package, accent: 'text-green-500', bg: 'bg-green-50 dark:bg-green-900/20' },
+    { label: 'Inventory Value', value: formatINR(stats?.inventory_value || kpis?.inventoryValue), icon: DollarSign, accent: 'text-green-500', bg: 'bg-green-50 dark:bg-green-900/20' },
+    { label: 'Low Stock Items', value: (stats?.low_stock_items || kpis?.lowStock || 0).toLocaleString(), icon: AlertTriangle, accent: 'text-green-500', bg: 'bg-green-50 dark:bg-green-900/20', warning: (stats?.low_stock_items || kpis?.lowStock || 0) > 0 },
+    { label: 'Out of Stock', value: (stats?.out_of_stock || kpis?.outOfStock || 0).toLocaleString(), icon: TrendingDown, accent: 'text-red-500', bg: 'bg-red-50 dark:bg-red-900/20', danger: (stats?.out_of_stock || kpis?.outOfStock || 0) > 0 },
+    { label: 'Dead Stock Items', value: (deadStockData?.summary?.total_dead_stock ?? kpis?.deadStock ?? 0).toLocaleString(), icon: Clock, accent: 'text-green-500', bg: 'bg-green-50 dark:bg-green-900/20' },
+    { label: 'Total Sales', value: (stats?.total_sales || kpis?.totalSales || 0).toLocaleString(), icon: Activity, accent: 'text-green-500', bg: 'bg-green-50 dark:bg-green-900/20' },
+    { label: 'Monthly Revenue', value: formatINR(stats?.monthly_revenue || kpis?.monthlyRevenue), icon: TrendingUp, accent: 'text-green-500', bg: 'bg-green-50 dark:bg-green-900/20' },
+    { label: 'Turnover Rate', value: `${stats?.turnover_rate || kpis?.turnoverRate || 0}%`, icon: RefreshCw, accent: 'text-green-500', bg: 'bg-green-50 dark:bg-green-900/20' },
   ];
 
-  const total = stats?.total_products || 1;
-  const healthy = total - (stats?.out_of_stock || 0) - (stats?.low_stock_items || 0);
+  const total = stats?.total_products || kpis?.totalProducts || 1;
+  const healthy = total - (stats?.out_of_stock || kpis?.outOfStock || 0) - (stats?.low_stock_items || kpis?.lowStock || 0);
   const segments = [
     { label: 'Healthy', value: healthy, color: '#10b981' },
-    { label: 'Low Stock', value: stats?.low_stock_items, color: '#f59e0b' },
-    { label: 'Out of Stock', value: stats?.out_of_stock, color: '#ef4444' },
-    { label: 'Dead Stock', value: deadStockData?.summary?.total_dead_stock ?? 0, color: '#6b7280' },
+    { label: 'Low Stock', value: stats?.low_stock_items || kpis?.lowStock || 0, color: '#f59e0b' },
+    { label: 'Out of Stock', value: stats?.out_of_stock || kpis?.outOfStock || 0, color: '#ef4444' },
+    { label: 'Dead Stock', value: deadStockData?.summary?.total_dead_stock ?? kpis?.deadStock ?? 0, color: '#6b7280' },
   ];
 
-  // Show skeleton UI while loading
-  if (loading) {
+  // Show skeleton UI only if completely empty and no local KPI data
+  if (loading && !stats && !kpis?.totalProducts) {
     return <DashboardSkeleton />;
   }
 
@@ -179,31 +179,26 @@ export function Dashboard() {
             ))}
           </div>
 
-          <div style={{
-            background: '#0f172a', borderRadius: 12, padding: '16px 20px',
-            border: '1px solid #1e293b', marginBottom: 24
-          }}>
-            <p style={{ color: '#64748b', fontSize: 12, marginBottom: 10 }}>
-              Stock health overview
-            </p>
-            <div style={{ display: 'flex', height: 8, borderRadius: 99, overflow: 'hidden', gap: 2 }}>
-              {segments.map((s, i) => (
-                <div key={i} style={{
-                  flex: s.value / total,
-                  background: s.color,
-                  minWidth: s.value > 0 ? 4 : 0,
-                  transition: 'flex 0.6s ease'
-                }} />
-              ))}
-            </div>
-            <div style={{ display: 'flex', gap: 16, marginTop: 10, flexWrap: 'wrap' }}>
-              {segments.map((s, i) => (
-                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                  <div style={{
-                    width: 8, height: 8, borderRadius: '50%', background: s.color
+<div className="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm mb-6">
+              <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-3">
+                Stock health overview
+              </p>
+              <div className="flex h-3 rounded-full overflow-hidden gap-1 bg-gray-100 dark:bg-gray-700 mb-4">
+                {segments.map((s, i) => (
+                  <div key={i} style={{
+                    flex: s.value / total,
+                    background: s.color,
+                    minWidth: s.value > 0 ? 4 : 0,
+                    transition: 'flex 0.6s ease'
                   }} />
-                  <span style={{ color: '#94a3b8', fontSize: 11 }}>
-                    {s.label}: <strong style={{ color: 'white' }}>{s.value || 0}</strong>
+                ))}
+              </div>
+              <div className="flex gap-6 flex-wrap">
+                {segments.map((s, i) => (
+                  <div key={i} className="flex items-center gap-2">
+                    <div style={{ background: s.color }} className="w-2.5 h-2.5 rounded-full shadow-sm" />
+                    <span className="text-xs font-medium text-gray-600 dark:text-gray-300">
+                      {s.label}: <strong className="text-gray-900 dark:text-white">{s.value || 0}</strong>
                   </span>
                 </div>
               ))}

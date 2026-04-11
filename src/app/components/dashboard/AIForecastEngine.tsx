@@ -28,7 +28,8 @@ export function AIForecastEngine() {
         return data; 
     }, [data]);
 
-    if (isLoading) return <ForecastSkeleton />;
+    // Show skeleton only if we don't even have baseline data yet
+    if (isLoading && !data?.length) return <ForecastSkeleton />;
 
     const getBadgeStyle = () => {
         if (state === 'STATE_A') return 'bg-green-50 border-green-200 text-green-300';

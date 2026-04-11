@@ -5,6 +5,7 @@ export const updateItem = (id: string, data: any) => api.put(`/inventory/${id}`,
 export const deleteItem = (id: string) => api.delete(`/inventory/${id}`);
 export const getCategories = (signal?: AbortSignal) => api.get('/inventory/categories', { signal });
 export const uploadInventoryBatch = (data: any[]) => api.post('/inventory/batch', data);
+export const recordSale = (data: { product_id: string, quantity: number, sale_price: number, notes?: string }) => api.post('/stock/record-sale', data);
 export const uploadCSV = (file: File) => {
   const formData = new FormData();
   formData.append('file', file);

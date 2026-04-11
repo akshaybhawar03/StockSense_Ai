@@ -32,13 +32,6 @@ export function CashFlowOptimizer({ healthData }: CashFlowOptimizerProps) {
                 <div className="absolute bottom-0 left-0 w-64 h-64 bg-green-500/10 rounded-full blur-3xl" />
 
                 {/* Issue 2: show skeleton while data is loading */}
-                {isLoading && (
-                    <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-4 bg-white/60 dark:bg-gray-900/60 backdrop-blur-sm rounded-xl">
-                        <div className="w-10 h-10 border-4 border-green-500 border-t-transparent rounded-full animate-spin" />
-                        <p className="text-sm text-gray-500 dark:text-gray-400">Loading health score…</p>
-                    </div>
-                )}
-
                 <div className="relative z-10">
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
                         <div>
@@ -141,3 +134,6 @@ export function CashFlowOptimizer({ healthData }: CashFlowOptimizerProps) {
         </motion.div>
     );
 }
+
+
+

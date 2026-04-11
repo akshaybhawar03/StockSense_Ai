@@ -4,10 +4,11 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '.
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Card } from '../ui/card';
-import { Search, Edit2, Trash2, ArrowUpDown, Download, Check, X } from 'lucide-react';
+import { Search, Edit2, Trash2, ArrowUpDown, Download, Check, X, Tag } from 'lucide-react';
 import { StatusBadge } from './LowStockAlert';
 import { Product } from '../../types/inventory';
 import toast from 'react-hot-toast';
+import { RecordSaleModal } from './RecordSaleModal';
 
 export function ProductTable() {
     const [page, setPage] = useState(1);
@@ -15,6 +16,7 @@ export function ProductTable() {
     const [editingId, setEditingId] = useState<number | null>(null);
     const [editForm, setEditForm] = useState<{ stock: number, price: number }>({ stock: 0, price: 0 });
     const [selectedIds, setSelectedIds] = useState<number[]>([]);
+    const [saleProduct, setSaleProduct] = useState<Product | null>(null);
 
     const { data, isLoading } = useProducts(page);
     const deleteMutation = useDeleteProducts();
@@ -123,6 +125,7 @@ export function ProductTable() {
                                         </div>
                                     ) : (
                                         <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <Button size="icon" variant="ghost" className="h-8 w-8 text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30" onClick={() => setSaleProduct(p)} title="Record Sale"><Tag className="w-4 h-4" /></Button>
                                             <Button size="icon" variant="ghost" className="h-8 w-8 text-gray-400 hover:text-[rgb(var(--accent-primary))] hover:bg-green-50 dark:hover:bg-green-900/30" onClick={() => handleEditStart(p)}><Edit2 className="w-4 h-4" /></Button>
                                             <Button size="icon" variant="ghost" className="h-8 w-8 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30" onClick={() => { setSelectedIds([p.id]); handleBulkDelete(); }}><Trash2 className="w-4 h-4" /></Button>
                                         </div>
@@ -141,6 +144,12 @@ export function ProductTable() {
                     <Button variant="outline" size="sm" onClick={() => setPage(p => p + 1)}>Next</Button>
                 </div>
             </div>
+            {saleProduct && (
+                <RecordSaleModal
+                    product={saleProduct}
+                    onClose={() => setSaleProduct(null)}
+                />
+            )}
         </Card>
     );
 }

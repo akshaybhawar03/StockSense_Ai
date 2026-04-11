@@ -25,7 +25,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     // Set accent color CSS variables
     const accentColors = {
       blue: { primary: '59 130 246', secondary: '147 197 253' },
-      green: { primary: '34 197 94', secondary: '134 239 172' },
+      green: { primary: '75 226 119', secondary: '34 197 94' }, // The Algorithmic Architect Green
       purple: { primary: '168 85 247', secondary: '216 180 254' },
       orange: { primary: '249 115 22', secondary: '251 146 60' },
     };
