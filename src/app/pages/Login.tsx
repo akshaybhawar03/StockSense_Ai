@@ -75,8 +75,8 @@ export function Login() {
                         transition={{ delay: 0.2, duration: 0.6 }}
                     >
                         <h1 className="text-4xl lg:text-5xl font-bold text-white mb-6 leading-[1.1] tracking-tight">
-                            The Algorithmic <br />
-                            <span className="text-[rgb(var(--accent-primary))]">Architect</span>
+                            Your Godown. <br />
+                            <span className="text-[rgb(var(--accent-primary))]">Always in Control.</span>
                         </h1>
                         <p className="text-gray-400 text-lg max-w-md font-light leading-relaxed mb-10">
                             Eliminate dead stock. Optimize cash flow. Maximize revenue with AI-powered predictive analytics.

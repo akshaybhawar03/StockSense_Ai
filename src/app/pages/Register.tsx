@@ -10,6 +10,7 @@ export function Register() {
     const navigate = useNavigate();
     const { register } = useAuth();
 
+    const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
@@ -25,7 +26,7 @@ export function Register() {
         setError("");
         setSuccess("");
 
-        if (!email || !password || !confirmPassword) {
+        if (!name || !email || !password || !confirmPassword) {
             setError("Please fill in all fields.");
             return;
         }
@@ -43,7 +44,7 @@ export function Register() {
         setIsSubmitting(true);
 
         try {
-            await register(email, password);
+            await register(name, email, password);
 
             setSuccess("Registration successful! Redirecting to login...");
 
@@ -95,8 +96,8 @@ export function Register() {
                         className="mt-20"
                     >
                         <h1 className="text-4xl lg:text-5xl font-bold text-white mb-6 leading-[1.1] tracking-tight">
-                            The Algorithmic <br />
-                            <span className="text-[rgb(var(--accent-primary))]">Architect</span>
+                            Your Godown. <br />
+                            <span className="text-[rgb(var(--accent-primary))]">Always in Control.</span>
                         </h1>
                         <p className="text-gray-400 text-lg max-w-md font-light leading-relaxed mb-10">
                             Eliminate dead stock. Optimize cash flow. Maximize revenue with AI-powered predictive analytics.
@@ -178,6 +179,18 @@ export function Register() {
                         )}
 
                         <form onSubmit={handleRegister} className="space-y-4">
+
+                            <div className="group">
+                                <label className="block text-[13px] font-semibold text-gray-700 mb-1.5 uppercase tracking-wide">Full Name</label>
+                                <Input
+                                    type="text"
+                                    placeholder="Enter your name"
+                                    value={name}
+                                    onChange={(e) => setName(e.target.value)}
+                                    required
+                                    className="w-full h-12 px-4 rounded-xl border border-gray-200 bg-gray-50/50 hover:bg-white focus:bg-white focus:ring-2 focus:ring-[rgb(var(--accent-primary))]/50 focus:border-[rgb(var(--accent-primary))] transition-all text-base shadow-sm"
+                                />
+                            </div>
                             
                             <div className="group">
                                 <label className="block text-[13px] font-semibold text-gray-700 mb-1.5 uppercase tracking-wide">Email address</label>
