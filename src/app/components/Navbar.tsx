@@ -41,10 +41,8 @@ export function Navbar() {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2">
-            <div className="w-10 h-10 rounded-[12px] bg-[#60A5FA] flex items-center justify-center">
-              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M3 21h18"></path><path d="M4 21V8l8-5 8 5v13"></path><path d="M9 21v-6h6v6"></path>
-              </svg>
+            <div className="w-10 h-10 flex items-center justify-center">
+              <img src="/logos/main-logo.jpeg" alt="SmartGodown Logo" className="w-full h-full object-contain mix-blend-multiply" />
             </div>
             <span className="font-bold text-[22px] text-[#0f172a] dark:text-white hidden sm:block tracking-tight">
               SmartGodown
