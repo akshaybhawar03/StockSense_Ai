@@ -58,9 +58,9 @@ export function Contact() {
   };
 
   return (
-    <div className="min-h-screen pt-24 pb-12">
+    <div className="min-h-screen pt-12 pb-12">
       {/* Hero */}
-      <section className="px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-gray-50 via-white to-gray-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800 py-20">
+      <section className="px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-gray-50 via-white to-gray-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800 py-12">
         <div className="max-w-7xl mx-auto text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -77,7 +77,7 @@ export function Contact() {
       </section>
 
       {/* Contact Section */}
-      <section className="px-4 sm:px-6 lg:px-8 py-20 bg-white dark:bg-gray-900">
+      <section className="px-4 sm:px-6 lg:px-8 pb-20 bg-white dark:bg-gray-900">
         <div className="max-w-7xl mx-auto">
           <div className="grid lg:grid-cols-3 gap-8">
             {/* Contact Info text removed for brevity... I will put it all below */}
@@ -97,8 +97,8 @@ export function Contact() {
                     </div>
                     <div>
                       <h3 className="font-semibold text-gray-900 dark:text-white mb-1">Email</h3>
-                      <a href="mailto:support@smartinventory.com" className="text-gray-600 dark:text-gray-400 hover:text-[rgb(var(--accent-primary))]">
-                        support@smartinventory.com
+                      <a href="mailto:smartgodownindia@gmail.com" className="text-gray-600 dark:text-gray-400 hover:text-[rgb(var(--accent-primary))]">
+                        smartgodownindia@gmail.com
                       </a>
                     </div>
                   </div>
@@ -111,8 +111,8 @@ export function Contact() {
                     </div>
                     <div>
                       <h3 className="font-semibold text-gray-900 dark:text-white mb-1">Phone</h3>
-                      <a href="tel:+919876543210" className="text-gray-600 dark:text-gray-400 hover:text-[rgb(var(--accent-primary))]">
-                        +91 98765 43210
+                      <a href="tel:+919607275596" className="text-gray-600 dark:text-gray-400 hover:text-[rgb(var(--accent-primary))]">
+                        +91 96072 75596
                       </a>
                     </div>
                   </div>
@@ -126,8 +126,8 @@ export function Contact() {
                     <div>
                       <h3 className="font-semibold text-gray-900 dark:text-white mb-1">Office</h3>
                       <p className="text-gray-600 dark:text-gray-400">
-                        Koramangala, Bangalore<br />
-                        Karnataka, India - 560034
+                        Pune, Maharashtra<br />
+                        India
                       </p>
                     </div>
                   </div>
@@ -139,9 +139,9 @@ export function Contact() {
                   Business Hours
                 </h3>
                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                  Monday - Friday: 9:00 AM - 7:00 PM IST<br />
-                  Saturday: 10:00 AM - 4:00 PM IST<br />
-                  Sunday: Closed
+                  Platform Access: 24/7, 365 Days<br />
+                  Email Support: 24/7<br />
+                  Expected Response Time: Within 24 hours
                 </p>
               </Card>
             </motion.div>
