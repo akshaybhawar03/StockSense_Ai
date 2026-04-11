@@ -29,11 +29,16 @@ export function Contact() {
       const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY || "GVlBzWg1-Gt1lVbOq";
 
       const templateParams = {
-        from_name: formData.name,
-        reply_to: formData.email,
-        phone: formData.phone,
-        subject: formData.subject,
-        message: formData.message,
+        from_name: formData.name,       // Tumhare main email ke liye
+        reply_to: formData.email,       // Tumhare main email ke liye
+        phone: formData.phone,          // Tumhare main email ke liye
+        subject: formData.subject,      // Tumhare main email ke liye
+        message: formData.message,      // Tumhare main email ke liye
+        
+        // Niche wale Auto-Reply template ke liye hain jo tumne image me bheje:
+        name: formData.name,            // Hi {{name}} ke liye
+        title: formData.subject,        // request: "{{title}}" ke liye
+        email: formData.email           // Auto-reply bhejne ke liye (To: {{email}})
       };
 
       await emailjs.send(serviceId, templateId, templateParams, publicKey);
