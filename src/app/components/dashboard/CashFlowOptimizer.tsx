@@ -40,7 +40,7 @@ export function CashFlowOptimizer({ healthData }: CashFlowOptimizerProps) {
                                 Inventory Health Score
                             </h2>
                             <p className="text-gray-600 dark:text-gray-400 mt-2 text-lg">
-                                Stock Sense analyzes how your money is trapped inside inventory and shows how much cash you can recover.
+                                SmartGodown analyzes how your money is trapped inside inventory and shows how much cash you can recover.
                             </p>
                         </div>
 

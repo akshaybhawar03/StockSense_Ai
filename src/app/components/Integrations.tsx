@@ -96,7 +96,7 @@ export function Integrations() {
 
                         <div className="relative z-10 flex flex-col items-center text-center">
                             <h3 className="text-xl md:text-2xl font-black bg-gradient-to-br from-gray-900 to-gray-600 dark:from-white dark:to-gray-200 bg-clip-text text-transparent leading-tight drop-shadow-sm group-hover:scale-105 transition-transform duration-500">
-                                Stock Sense
+                                SmartGodown
                             </h3>
                         </div>
                     </div>
