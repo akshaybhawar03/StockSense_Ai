@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { Outlet, NavLink, useLocation } from 'react-router';
 import {
     LayoutDashboard,
@@ -16,6 +16,8 @@ import {
     Sparkles,
     BarChart3
 } from 'lucide-react';
+import { NotificationBell } from './NotificationBell';
+import { triggerScan } from '../../services/notificationService';
 import { useAuth } from '../../contexts/AuthContext';
 import { Button } from '../ui/button';
 import { CsvUploadModal } from './CsvUploadModal';
@@ -63,6 +65,19 @@ export function DashboardLayout() {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [isUploadOpen, setIsUploadOpen] = useState(false);
     const queryClient = useQueryClient();
+
+    useEffect(() => {
+        const lastScan = localStorage.getItem('lastNotificationScan');
+        const now = Date.now();
+        if (!lastScan || now - parseInt(lastScan, 10) > 5 * 60 * 1000) {
+            const token = localStorage.getItem('access_token');
+            if (token) {
+                triggerScan(token).then(() => {
+                    localStorage.setItem('lastNotificationScan', now.toString());
+                }).catch(console.error);
+            }
+        }
+    }, [location.pathname]);
 
     const navItems = [
         { name: 'Dashboard', icon: LayoutDashboard, path: '/dashboard' },
@@ -203,10 +218,7 @@ export function DashboardLayout() {
                             <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
                             Live Sync
                         </div>
-                        <button className="relative p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
-                            <Bell className="w-5 h-5" />
-                            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white dark:border-gray-800"></span>
-                        </button>
+                        <NotificationBell />
                     </div>
                 </header>
 

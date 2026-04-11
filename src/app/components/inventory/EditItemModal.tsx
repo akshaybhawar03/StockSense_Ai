@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { updateItem } from '../../services/inventory';
+import { triggerScan } from '../../services/notificationService';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 
@@ -48,6 +49,8 @@ export function EditItemModal({ item, onClose, onSaved }: { item: any; onClose: 
     },
     onSuccess: () => {
       toast.success('Item updated');
+      const token = localStorage.getItem('access_token');
+      if (token) triggerScan(token).catch(console.error);
       onSaved();
       onClose();
     },

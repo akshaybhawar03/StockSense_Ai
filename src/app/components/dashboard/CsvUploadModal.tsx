@@ -7,6 +7,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useData } from '../../contexts/DataContext';
 import { Button } from '../ui/button';
 import { uploadCSV } from '../../services/inventory';
+import { triggerScan } from '../../services/notificationService';
 import { api } from '../../services/api';
 import toast from 'react-hot-toast';
 
@@ -150,6 +151,11 @@ export function CsvUploadModal({ isOpen, onClose }: Props) {
             setSuccess(true);
             window.dispatchEvent(new CustomEvent('csv-uploaded'));
             refreshData().catch(() => {});
+            
+            // Fire and forget scan
+            const token = localStorage.getItem('access_token');
+            if (token) triggerScan(token).catch(console.error);
+            
         } catch (err: any) {
             const status = err.response?.status;
             const data = err.response?.data || {};
