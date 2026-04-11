@@ -114,22 +114,6 @@ export function Login() {
 
                     </motion.div>
                 </div>
-
-                {/* Bottom Section */}
-                <div className="relative z-10 p-10 lg:p-14 border-t border-white/5 bg-white/5 backdrop-blur-sm">
-                    <div className="flex items-center gap-4">
-                        <div className="flex -space-x-3">
-                            <div className="w-10 h-10 rounded-full bg-gray-600 border-2 border-[#0b1326] flex items-center justify-center overflow-hidden"><img src="https://i.pravatar.cc/100?img=1" alt="user" /></div>
-                            <div className="w-10 h-10 rounded-full bg-gray-600 border-2 border-[#0b1326] flex items-center justify-center overflow-hidden"><img src="https://i.pravatar.cc/100?img=2" alt="user" /></div>
-                            <div className="w-10 h-10 rounded-full bg-gray-600 border-2 border-[#0b1326] flex items-center justify-center overflow-hidden"><img src="https://i.pravatar.cc/100?img=3" alt="user" /></div>
-                            <div className="w-10 h-10 rounded-full bg-[rgb(var(--accent-primary))] border-2 border-[#0b1326] flex items-center justify-center text-xs font-bold text-[#0b1326]">10k+</div>
-                        </div>
-                        <div className="text-sm text-gray-400">
-                            Trusted by <br />
-                            <strong className="text-white">leading E-commerce</strong> brands
-                        </div>
-                    </div>
-                </div>
             </div>
 
             {/* Right Side: Login Form */}

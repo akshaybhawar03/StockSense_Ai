@@ -6,11 +6,11 @@ import { AlertsSkeleton } from '../skeletons/AlertsSkeleton';
 
 // These are the 5 groups the backend returns
 const GROUPS = [
-    { key: 'out_of_stock',   label: 'Out of Stock',                      header: 'bg-red-900/30 border-red-700/50 text-red-400' },
-    { key: 'critical_low',   label: 'Critical Low (1–5 units)',          header: 'bg-red-900/20 border-red-700/30 text-red-400' },
-    { key: 'low_stock',      label: 'Low Stock (6–10 units)',            header: 'bg-green-900/30 border-green-700/50 text-green-400' },
-    { key: 'fast_mover_low', label: 'Urgent Reorder (fast moving + low qty)', header: 'bg-green-900/30 border-green-700/50 text-green-400' },
-    { key: 'dead_stock',     label: 'Dead Stock (no sale 90+ days)',     header: 'bg-gray-800/50 border-gray-700/50 text-gray-400' },
+    { key: 'out_of_stock',   label: 'Out of Stock',                      header: 'bg-red-100 border-red-200 text-red-800 dark:bg-red-900/30 dark:border-red-700/50 dark:text-red-400' },
+    { key: 'critical_low',   label: 'Critical Low (1-5 units)',          header: 'bg-orange-100 border-orange-200 text-orange-800 dark:bg-orange-900/20 dark:border-orange-700/30 dark:text-orange-400' },
+    { key: 'low_stock',      label: 'Low Stock (6-10 units)',            header: 'bg-yellow-100 border-yellow-200 text-yellow-800 dark:bg-yellow-900/30 dark:border-yellow-700/50 dark:text-yellow-400' },
+    { key: 'fast_mover_low', label: 'Urgent Reorder (fast moving + low qty)', header: 'bg-blue-100 border-blue-200 text-blue-800 dark:bg-blue-900/30 dark:border-blue-700/50 dark:text-blue-400' },
+    { key: 'dead_stock',     label: 'Dead Stock (no sale 90+ days)',     header: 'bg-gray-100 border-gray-300 text-gray-800 dark:bg-gray-800/50 dark:border-gray-700/50 dark:text-gray-400' },
 ];
 
 export function AlertsPage() {
@@ -24,8 +24,8 @@ export function AlertsPage() {
 
     if (error) return (
         <div className='p-6'>
-            <div className='bg-red-900/20 border border-red-700/50 rounded-xl p-4'>
-                <p className='text-red-400 text-sm'>Failed to load alerts. Check backend connection.</p>
+            <div className='bg-red-50 border-red-200 dark:bg-red-900/20 border dark:border-red-700/50 rounded-xl p-4'>
+                <p className='text-red-700 dark:text-red-400 text-sm'>Failed to load alerts. Check backend connection.</p>
             </div>
         </div>
     );
@@ -35,9 +35,9 @@ export function AlertsPage() {
     return (
         <div className='p-6 max-w-4xl mx-auto'>
             <div className='flex items-center gap-3 mb-6'>
-                <h1 className='text-2xl font-semibold text-white'>Stock Alerts</h1>
+                <h1 className='text-2xl font-semibold text-gray-900 dark:text-white'>Stock Alerts</h1>
                 {total > 0 && (
-                    <span className='bg-red-500/20 text-red-400 text-sm font-medium px-3 py-0.5 rounded-full'>
+                    <span className='bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-400 text-sm font-medium px-3 py-0.5 rounded-full'>
                         {total} items need attention
                     </span>
                 )}
@@ -45,7 +45,7 @@ export function AlertsPage() {
 
             {total === 0 && (
                 <div className='text-center py-20'>
-                    <p className='text-gray-400'>All stock levels are healthy. No alerts.</p>
+                    <p className='text-gray-500 dark:text-gray-400'>All stock levels are healthy. No alerts.</p>
                 </div>
             )}
 
@@ -61,20 +61,20 @@ export function AlertsPage() {
                                 className='w-full flex items-center justify-between px-4 py-3'
                             >
                                 <span className='font-medium text-sm'>{label}</span>
-                                <span className='text-sm'>{items.length} items {isOpen ? '▲' : '▼'}</span>
+                                <span className='text-sm'>{items.length} items {isOpen ? '?' : '?'}</span>
                             </button>
                             {isOpen && (
-                                <div className='bg-gray-900/50 divide-y divide-gray-700/50'>
+                                <div className='bg-white dark:bg-gray-900/50 divide-y divide-gray-100 dark:divide-gray-700/50'>
                                     {items.map((item: any) => (
                                         <div key={item.id} className='flex items-center justify-between px-4 py-3'>
                                             <div>
-                                                <p className='text-sm font-medium text-white'>{item.name}</p>
-                                                <p className='text-xs text-gray-400 mt-0.5 font-mono'>
-                                                    {item.sku} · {item.category}
+                                                <p className='text-sm font-medium text-gray-900 dark:text-white'>{item.name}</p>
+                                                <p className='text-xs text-gray-500 dark:text-gray-400 mt-0.5 font-mono'>
+                                                    {item.sku} � {item.category}
                                                 </p>
                                             </div>
                                             <div className='flex items-center gap-3'>
-                                                <span className='text-sm text-gray-300'>Qty: {item.quantity}</span>
+                                                <span className='text-sm text-gray-600 dark:text-gray-300'>Qty: {item.quantity}</span>
                                             </div>
                                         </div>
                                     ))}
