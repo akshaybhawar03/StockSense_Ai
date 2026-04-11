@@ -22,8 +22,6 @@ export function AlertsPage() {
         staleTime: 60_000,
     });
 
-    if (isLoading) return <AlertsSkeleton />;
-
     if (error) return (
         <div className='p-6'>
             <div className='bg-red-900/20 border border-red-700/50 rounded-xl p-4'>
@@ -32,9 +30,7 @@ export function AlertsPage() {
         </div>
     );
 
-    if (!data) return null;
-
-    const total = GROUPS.reduce((s, g) => s + (data[g.key]?.length || 0), 0);
+    const total = data ? GROUPS.reduce((s, g) => s + (data[g.key]?.length || 0), 0) : 0;
 
     return (
         <div className='p-6 max-w-4xl mx-auto'>

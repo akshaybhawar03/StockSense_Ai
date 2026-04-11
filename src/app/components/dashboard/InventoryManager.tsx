@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+﻿import React, { useState, useEffect, useCallback } from 'react';
 import { motion } from 'motion/react';
 import { Card } from '../ui/card';
 import { Input } from '../ui/input';
@@ -125,9 +125,7 @@ export function InventoryManager() {
 
     const totalPages = Math.ceil(total / PAGE_SIZE);
 
-    if (loading) {
-        return <InventorySkeleton />;
-    }
+    
 
     return (
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
@@ -228,7 +226,7 @@ export function InventoryManager() {
                                         {Number(item.quantity ?? 0).toLocaleString('en-IN')}
                                     </TableCell>
                                     <TableCell className="text-right font-medium text-[rgb(var(--accent-primary))]">
-                                        {'₹' + Number(item.unit_price ?? item.price ?? 0).toLocaleString('en-IN', {
+                                        {'â‚¹' + Number(item.unit_price ?? item.price ?? 0).toLocaleString('en-IN', {
                                             minimumFractionDigits: 2,
                                             maximumFractionDigits: 2
                                         })}
@@ -264,7 +262,7 @@ export function InventoryManager() {
 
                 <div className="p-4 border-t border-gray-100 dark:border-gray-800 flex justify-between items-center bg-gray-50/50 dark:bg-gray-800/30">
                     <span className="text-sm text-gray-500 dark:text-gray-400">
-                        Showing {items.length ? (page - 1) * PAGE_SIZE + 1 : 0}–{Math.min(page * PAGE_SIZE, total)} of {total.toLocaleString('en-IN')} products
+                        Showing {items.length ? (page - 1) * PAGE_SIZE + 1 : 0}â€“{Math.min(page * PAGE_SIZE, total)} of {total.toLocaleString('en-IN')} products
                     </span>
                     <div className="flex gap-2">
                         <Button
@@ -300,3 +298,4 @@ export function InventoryManager() {
         </motion.div>
     );
 }
+

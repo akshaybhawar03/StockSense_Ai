@@ -111,8 +111,6 @@ export function AnalyticsPage() {
         };
     }, [products]);
 
-    if (isLoading) return <AnalyticsSkeleton />;
-
     if (error) return (
         <div className='p-6'>
             <div className='bg-red-900/20 border border-red-700/50 rounded-xl p-4'>
