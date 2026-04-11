@@ -84,7 +84,7 @@ export function About() {
           ].map((item, idx) => (
             <div key={idx} className="flex flex-col items-center justify-center space-y-2">
               <span className="text-4xl md:text-5xl font-extrabold">{item.stat}</span>
-              <span className="text-emerald-100 font-medium">{item.label}</span>
+              <span className="text-green-100 font-medium">{item.label}</span>
             </div>
           ))}
         </div>

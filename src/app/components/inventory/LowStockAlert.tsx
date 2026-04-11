@@ -47,6 +47,6 @@ export function LowStockAlert() {
 
 export const StatusBadge = ({ stock }: { stock: number }) => {
     if (stock === 0) return <Badge variant="destructive" className="bg-red-500 hover:bg-red-600 text-white border-0 shadow-sm animate-pulse">Critical Out</Badge>;
-    if (stock <= 10) return <Badge variant="default" className="bg-orange-500 hover:bg-orange-600 text-white border-0 shadow-sm">Warning Low</Badge>;
+    if (stock <= 10) return <Badge variant="default" className="bg-green-500 hover:bg-green-600 text-white border-0 shadow-sm">Warning Low</Badge>;
     return <Badge variant="secondary" className="bg-green-100 text-green-700 hover:bg-green-200 border-0 dark:bg-green-900/40 dark:text-green-400">Stock OK</Badge>;
 };

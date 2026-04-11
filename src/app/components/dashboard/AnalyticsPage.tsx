@@ -99,7 +99,7 @@ export function AnalyticsPage() {
         if (stockHealthScore < 40) {
             scoreColor = 'text-red-500';
         } else if (stockHealthScore <= 70) {
-            scoreColor = 'text-orange-500';
+            scoreColor = 'text-green-500';
         }
 
         return {
@@ -146,7 +146,7 @@ export function AnalyticsPage() {
                 </div>
                 <div className='bg-gray-800/50 border border-gray-700/50 rounded-xl p-4'>
                     <h3 className='text-xs font-medium text-gray-400 mb-1'>Items Needing Attention</h3>
-                    <p className='text-xl font-bold text-orange-400'>
+                    <p className='text-xl font-bold text-green-400'>
                         {summaryCards.attentionItems} items
                     </p>
                 </div>

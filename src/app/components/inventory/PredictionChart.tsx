@@ -41,8 +41,8 @@ export function PredictionChart({ productId }: { productId?: number }) {
     return (
         <Card className="p-6 bg-gradient-to-br from-white to-gray-50/50 dark:from-gray-900 dark:to-gray-800/50 border border-gray-100 dark:border-gray-800 shadow-lg">
             <div className="flex items-center gap-3 mb-6">
-                <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
-                    <Brain className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
+                    <Brain className="w-5 h-5 text-green-600 dark:text-green-400" />
                 </div>
                 <div>
                     <h3 className="text-lg font-bold text-gray-900 dark:text-white">Demand Forecast AI</h3>

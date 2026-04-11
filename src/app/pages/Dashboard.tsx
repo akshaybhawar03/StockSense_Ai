@@ -63,14 +63,14 @@ export function Dashboard() {
   }, [handleCsvUploaded]);
 
   const statCards = [
-    { label: 'Total Products', value: (stats?.total_products || 0).toLocaleString(), icon: Package, accent: 'text-blue-500', bg: 'bg-blue-50 dark:bg-blue-900/20' },
-    { label: 'Inventory Value', value: formatINR(stats?.inventory_value), icon: DollarSign, accent: 'text-blue-500', bg: 'bg-blue-50 dark:bg-blue-900/20' },
-    { label: 'Low Stock Items', value: (stats?.low_stock_items || 0).toLocaleString(), icon: AlertTriangle, accent: 'text-amber-500', bg: 'bg-amber-50 dark:bg-amber-900/20', warning: (stats?.low_stock_items || 0) > 0 },
+    { label: 'Total Products', value: (stats?.total_products || 0).toLocaleString(), icon: Package, accent: 'text-green-500', bg: 'bg-green-50 dark:bg-green-900/20' },
+    { label: 'Inventory Value', value: formatINR(stats?.inventory_value), icon: DollarSign, accent: 'text-green-500', bg: 'bg-green-50 dark:bg-green-900/20' },
+    { label: 'Low Stock Items', value: (stats?.low_stock_items || 0).toLocaleString(), icon: AlertTriangle, accent: 'text-green-500', bg: 'bg-green-50 dark:bg-green-900/20', warning: (stats?.low_stock_items || 0) > 0 },
     { label: 'Out of Stock', value: (stats?.out_of_stock || 0).toLocaleString(), icon: TrendingDown, accent: 'text-red-500', bg: 'bg-red-50 dark:bg-red-900/20', danger: (stats?.out_of_stock || 0) > 0 },
-    { label: 'Dead Stock Items', value: (deadStockData?.summary?.total_dead_stock ?? 0).toLocaleString(), icon: Clock, accent: 'text-purple-500', bg: 'bg-purple-50 dark:bg-purple-900/20' },
-    { label: 'Total Sales', value: (stats?.total_sales || 0).toLocaleString(), icon: Activity, accent: 'text-emerald-500', bg: 'bg-emerald-50 dark:bg-emerald-900/20' },
-    { label: 'Monthly Revenue', value: formatINR(stats?.monthly_revenue), icon: TrendingUp, accent: 'text-emerald-500', bg: 'bg-emerald-50 dark:bg-emerald-900/20' },
-    { label: 'Turnover Rate', value: `${stats?.turnover_rate || 0}%`, icon: RefreshCw, accent: 'text-cyan-500', bg: 'bg-cyan-50 dark:bg-cyan-900/20' },
+    { label: 'Dead Stock Items', value: (deadStockData?.summary?.total_dead_stock ?? 0).toLocaleString(), icon: Clock, accent: 'text-green-500', bg: 'bg-green-50 dark:bg-green-900/20' },
+    { label: 'Total Sales', value: (stats?.total_sales || 0).toLocaleString(), icon: Activity, accent: 'text-green-500', bg: 'bg-green-50 dark:bg-green-900/20' },
+    { label: 'Monthly Revenue', value: formatINR(stats?.monthly_revenue), icon: TrendingUp, accent: 'text-green-500', bg: 'bg-green-50 dark:bg-green-900/20' },
+    { label: 'Turnover Rate', value: `${stats?.turnover_rate || 0}%`, icon: RefreshCw, accent: 'text-green-500', bg: 'bg-green-50 dark:bg-green-900/20' },
   ];
 
   const total = stats?.total_products || 1;
@@ -100,7 +100,7 @@ export function Dashboard() {
             <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 flex flex-col gap-6 min-h-full">
               <div className="flex justify-between items-center bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 mx-auto w-full">
                 <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                  <Maximize className="w-5 h-5 text-teal-500" />
+                  <Maximize className="w-5 h-5 text-green-500" />
                   Full Screen Data Visualization
                 </h2>
                 <button
@@ -122,7 +122,7 @@ export function Dashboard() {
           <PowerBIDashboard />
         ) : (
           <Card className="p-8 border border-dashed border-gray-300 dark:border-gray-700 shadow-sm bg-gray-50 dark:bg-gray-800/50 flex flex-col items-center justify-center text-center">
-            <div className="w-16 h-16 rounded-full bg-teal-100 dark:bg-teal-900/30 flex items-center justify-center text-teal-600 dark:text-teal-400 mb-4">
+            <div className="w-16 h-16 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center text-green-600 dark:text-green-400 mb-4">
               <CloudUpload className="w-8 h-8" />
             </div>
             <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">No Data Found</h2>
@@ -131,7 +131,7 @@ export function Dashboard() {
             </p>
             <button
               onClick={() => setIsUploadOpen(true)}
-              className="px-6 py-3 bg-teal-600 hover:bg-teal-700 text-white font-medium rounded-lg transition-colors shadow-sm cursor-pointer"
+              className="px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors shadow-sm cursor-pointer"
             >
               Upload Inventory Data
             </button>
@@ -144,7 +144,7 @@ export function Dashboard() {
             {datasets && datasets.length > 0 && (
               <button
                 onClick={() => setIsFullscreenPowerBI(true)}
-                className="px-4 py-2 bg-gradient-to-r from-teal-500 to-emerald-600 text-white font-medium rounded-lg text-sm flex items-center gap-2 shadow-sm hover:shadow-md transition-all active:scale-95"
+                className="px-4 py-2 bg-gradient-to-r from-green-500 to-green-600 text-white font-medium rounded-lg text-sm flex items-center gap-2 shadow-sm hover:shadow-md transition-all active:scale-95"
               >
                 <BarChart3 className="w-4 h-4" />
                 View Raw Data Dashboard

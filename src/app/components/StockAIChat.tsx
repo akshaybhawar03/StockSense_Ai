@@ -190,26 +190,26 @@ export function StockAIChat() {
   return (
     <Card className="flex flex-col bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-teal-500/10 to-emerald-500/10">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-green-500/10 to-green-500/10">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-teal-500 to-emerald-600 flex items-center justify-center">
+          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center">
             <Bot className="w-5 h-5 text-white" />
           </div>
           <div>
             <h3 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
               Stock AI Assistant
-              <Sparkles className="w-4 h-4 text-amber-500" />
+              <Sparkles className="w-4 h-4 text-green-500" />
             </h3>
             <div className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400">
               <span
                 className={`w-2 h-2 rounded-full ${
                   isSyncing
-                    ? 'bg-amber-500 animate-pulse'
+                    ? 'bg-green-500 animate-pulse'
                     : healthStatus === null
                       ? 'bg-gray-400'
                       : healthStatus > 0
                         ? 'bg-green-500'
-                        : 'bg-amber-500'
+                        : 'bg-green-500'
                 }`}
               />
               {isSyncing
@@ -226,7 +226,7 @@ export function StockAIChat() {
         <button
           onClick={handleReindex}
           disabled={isReindexing}
-          className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-teal-600 dark:text-teal-400 hover:bg-teal-50 dark:hover:bg-teal-900/20 rounded-lg transition-colors disabled:opacity-50"
+          className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-colors disabled:opacity-50"
         >
           <RefreshCw className={`w-4 h-4 ${isReindexing ? 'animate-spin' : ''}`} />
           {isReindexing ? 'Refreshing...' : 'Refresh Data'}
@@ -243,7 +243,7 @@ export function StockAIChat() {
                 key={idx}
                 onClick={() => handleSendMessage(question)}
                 disabled={isLoading}
-                className="px-3 py-1.5 text-xs bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full hover:bg-teal-100 dark:hover:bg-teal-900/30 hover:text-teal-700 dark:hover:text-teal-300 transition-colors disabled:opacity-50"
+                className="px-3 py-1.5 text-xs bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full hover:bg-green-100 dark:hover:bg-green-900/30 hover:text-green-700 dark:hover:text-green-300 transition-colors disabled:opacity-50"
               >
                 {question}
               </button>
@@ -276,8 +276,8 @@ export function StockAIChat() {
               >
                 <div
                   className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${message.role === 'user'
-                      ? 'bg-teal-500'
-                      : 'bg-gradient-to-br from-purple-500 to-indigo-600'
+                      ? 'bg-green-500'
+                      : 'bg-gradient-to-br from-green-500 to-green-600'
                     }`}
                 >
                   {message.role === 'user' ? (
@@ -288,14 +288,14 @@ export function StockAIChat() {
                 </div>
                 <div
                   className={`px-4 py-2.5 rounded-2xl ${message.role === 'user'
-                      ? 'bg-teal-500 text-white rounded-tr-sm'
+                      ? 'bg-green-500 text-white rounded-tr-sm'
                       : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-tl-sm'
                     }`}
                 >
                   <p className="text-sm whitespace-pre-wrap">{message.content}</p>
                   <p
                     className={`text-xs mt-1 ${message.role === 'user'
-                        ? 'text-teal-100'
+                        ? 'text-green-100'
                         : 'text-gray-400 dark:text-gray-500'
                       }`}
                   >
@@ -318,7 +318,7 @@ export function StockAIChat() {
             className="flex justify-start"
           >
             <div className="flex items-center gap-2 px-4 py-2.5 bg-gray-100 dark:bg-gray-700 rounded-2xl rounded-tl-sm">
-              <Loader2 className="w-4 h-4 animate-spin text-teal-500" />
+              <Loader2 className="w-4 h-4 animate-spin text-green-500" />
               <span className="text-sm text-gray-500 dark:text-gray-400">
                 Analyzing your inventory...
               </span>
@@ -341,7 +341,7 @@ export function StockAIChat() {
             {isTimeout && (
               <button
                 onClick={handleRetry}
-                className="flex items-center gap-2 self-start ml-2 px-4 py-2 text-sm font-medium text-white bg-teal-500 hover:bg-teal-600 rounded-lg transition-colors shadow-sm"
+                className="flex items-center gap-2 self-start ml-2 px-4 py-2 text-sm font-medium text-white bg-green-500 hover:bg-green-600 rounded-lg transition-colors shadow-sm"
               >
                 <RotateCcw className="w-4 h-4" />
                 Retry
@@ -363,12 +363,12 @@ export function StockAIChat() {
             onKeyDown={handleKeyPress}
             placeholder="Ask about your inventory..."
             disabled={isLoading}
-            className="flex-1 px-4 py-2.5 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent disabled:opacity-50"
+            className="flex-1 px-4 py-2.5 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent disabled:opacity-50"
           />
           <button
             onClick={() => handleSendMessage(input)}
             disabled={isLoading || !input.trim()}
-            className="p-2.5 bg-teal-500 hover:bg-teal-600 text-white rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="p-2.5 bg-green-500 hover:bg-green-600 text-white rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isLoading ? (
               <Loader2 className="w-5 h-5 animate-spin" />

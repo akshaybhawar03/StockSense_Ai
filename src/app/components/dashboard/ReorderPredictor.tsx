@@ -72,8 +72,8 @@ export function ReorderPredictor() {
     const getUrgencyColor = (urgency: string) => {
         switch (urgency) {
             case 'Critical': return 'bg-red-500 shadow-red-500/30';
-            case 'Urgent': return 'bg-orange-500 shadow-orange-500/30';
-            case 'Moderate': return 'bg-yellow-500 shadow-yellow-500/30';
+            case 'Urgent': return 'bg-green-500 shadow-green-500/30';
+            case 'Moderate': return 'bg-green-500 shadow-green-500/30';
             case 'Safe': return 'bg-green-500 shadow-green-500/30';
             default: return 'bg-gray-500';
         }

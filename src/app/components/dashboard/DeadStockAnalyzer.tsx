@@ -19,18 +19,18 @@ function getDaysBadgeStyle(days: number | null): string {
     if (days > 180)
         return 'bg-red-900/30 text-red-400 border border-red-700';
     if (days > 90)
-        return 'bg-orange-900/30 text-orange-400 border border-orange-700';
+        return 'bg-green-900/30 text-green-400 border border-green-700';
     if (days > 30)
-        return 'bg-yellow-900/30 text-yellow-400 border border-yellow-700';
+        return 'bg-green-900/30 text-green-400 border border-green-700';
     return 'bg-green-900/30 text-green-400 border border-green-700';
 }
 
 // ── AI suggestion color ──────────────────────────────────────────
 function getSuggestionColor(suggestion: string): string {
     if (suggestion.includes('Liquidate')) return 'text-red-400';
-    if (suggestion.includes('High priority')) return 'text-orange-400';
+    if (suggestion.includes('High priority')) return 'text-green-400';
     if (suggestion.includes('Never sold')) return 'text-gray-400';
-    return 'text-yellow-400';
+    return 'text-green-400';
 }
 
 interface DeadStockAnalyzerProps {
@@ -129,7 +129,7 @@ export function DeadStockAnalyzer({ deadStockData, isLoading, isError }: DeadSto
 
                 <div className="grid lg:grid-cols-3 gap-6">
                     <div className="lg:col-span-2 relative">
-                        <div className="absolute inset-0 bg-gradient-to-r from-red-50 to-orange-50 dark:from-red-900/10 dark:to-orange-900/10 rounded-2xl -m-2 p-2 -z-10" />
+                        <div className="absolute inset-0 bg-gradient-to-r from-red-50 to-green-50 dark:from-red-900/10 dark:to-green-900/10 rounded-2xl -m-2 p-2 -z-10" />
                         <div className="flex items-center justify-between mb-4 px-2">
                             <h3 className="text-lg font-bold text-gray-900 dark:text-white tracking-wide">
                                 DEAD STOCK ANALYZER

@@ -209,7 +209,7 @@ export function CsvUploadModal({ isOpen, onClose }: Props) {
                     {!uploadResult ? (
                         <>
                             <div className="mb-6 flex justify-between items-center">
-                                <Button variant="outline" size="sm" onClick={handleDownloadTemplate} className="text-sm border-teal-200 text-teal-700 hover:bg-teal-50 dark:border-teal-800 dark:text-teal-400 dark:hover:bg-teal-900/30">
+                                <Button variant="outline" size="sm" onClick={handleDownloadTemplate} className="text-sm border-green-200 text-green-700 hover:bg-green-50 dark:border-green-800 dark:text-green-400 dark:hover:bg-green-900/30">
                                     <DownloadCloud className="w-4 h-4 mr-2" /> Download Sample Template
                                 </Button>
                             </div>
@@ -217,7 +217,7 @@ export function CsvUploadModal({ isOpen, onClose }: Props) {
                             <div className="mb-6">
                                 <button 
                                     onClick={() => setIsColsExpanded(!isColsExpanded)} 
-                                    className="flex items-center text-sm text-gray-700 dark:text-gray-300 hover:text-teal-600 dark:hover:text-teal-400 transition-colors"
+                                    className="flex items-center text-sm text-gray-700 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400 transition-colors"
                                 >
                                     {isColsExpanded ? <ChevronDown className="w-4 h-4 mr-1" /> : <ChevronRight className="w-4 h-4 mr-1" />}
                                     Accepted column names
@@ -247,7 +247,7 @@ export function CsvUploadModal({ isOpen, onClose }: Props) {
                             </div>
 
                             <div
-                                className={`relative border-2 border-dashed rounded-xl p-8 text-center transition-colors ${isDragging ? 'border-teal-500 bg-teal-50 dark:bg-teal-900/20' : 'border-gray-300 dark:border-gray-600'
+                                className={`relative border-2 border-dashed rounded-xl p-8 text-center transition-colors ${isDragging ? 'border-green-500 bg-green-50 dark:bg-green-900/20' : 'border-gray-300 dark:border-gray-600'
                                     } ${file ? 'bg-gray-50 dark:bg-gray-800/50' : ''}`}
                                 onDragEnter={handleDrag}
                                 onDragLeave={handleDrag}
@@ -264,7 +264,7 @@ export function CsvUploadModal({ isOpen, onClose }: Props) {
 
                                 {file ? (
                                     <div className="flex flex-col items-center">
-                                        <div className="p-3 bg-teal-100 dark:bg-teal-900/50 text-teal-600 dark:text-teal-400 rounded-full mb-4">
+                                        <div className="p-3 bg-green-100 dark:bg-green-900/50 text-green-600 dark:text-green-400 rounded-full mb-4">
                                             <CheckCircle className="w-8 h-8" />
                                         </div>
                                         <p className="text-sm font-medium text-gray-900 dark:text-white truncate max-w-sm">{file.name}</p>
@@ -279,7 +279,7 @@ export function CsvUploadModal({ isOpen, onClose }: Props) {
                                             </div>
                                         )}
 
-                                        <label htmlFor="csv-upload" className="mt-4 text-xs font-medium text-teal-600 hover:text-teal-700 dark:text-teal-400 dark:hover:text-teal-300 cursor-pointer">
+                                        <label htmlFor="csv-upload" className="mt-4 text-xs font-medium text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300 cursor-pointer">
                                             Choose a different file
                                         </label>
                                     </div>
@@ -310,7 +310,7 @@ export function CsvUploadModal({ isOpen, onClose }: Props) {
                                 <Button
                                     onClick={processData}
                                     disabled={!file || isUploading || !!error}
-                                    className="bg-teal-600 hover:bg-teal-700 text-white min-w-[120px]"
+                                    className="bg-green-600 hover:bg-green-700 text-white min-w-[120px]"
                                 >
                                     {isUploading ? (
                                         <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Processing</>
@@ -335,12 +335,12 @@ export function CsvUploadModal({ isOpen, onClose }: Props) {
                                             Imported: <span className="font-bold ml-1">{uploadResult.imported}</span> products
                                         </p>
                                         <p className="text-gray-700 dark:text-gray-300 font-medium flex items-center">
-                                            <span className={`w-2 h-2 rounded-full mr-2 ${uploadResult.skipped > 0 ? 'bg-orange-500' : 'bg-gray-300'}`}></span>
+                                            <span className={`w-2 h-2 rounded-full mr-2 ${uploadResult.skipped > 0 ? 'bg-green-500' : 'bg-gray-300'}`}></span>
                                             Skipped: <span className="font-bold ml-1">{uploadResult.skipped}</span> rows
                                         </p>
                                         
                                         {uploadResult.skippedReasons?.length > 0 && (
-                                            <ul className="text-xs text-orange-600 dark:text-orange-400 ml-4 list-disc pl-2 space-y-1 mt-1">
+                                            <ul className="text-xs text-green-600 dark:text-green-400 ml-4 list-disc pl-2 space-y-1 mt-1">
                                                 {uploadResult.skippedReasons.map((reason: string, i: number) => (
                                                     <li key={i}>{reason}</li>
                                                 ))}
@@ -366,12 +366,12 @@ export function CsvUploadModal({ isOpen, onClose }: Props) {
                                         )}
                                         
                                         {uploadResult.warnings?.length > 0 && (
-                                            <div className="mt-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
-                                                <p className="text-sm font-semibold text-yellow-800 dark:text-yellow-400 mb-1 flex items-center">
+                                            <div className="mt-4 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                                                <p className="text-sm font-semibold text-green-800 dark:text-green-400 mb-1 flex items-center">
                                                     <AlertCircle className="w-4 h-4 mr-1" />
                                                     Warnings:
                                                 </p>
-                                                <ul className="text-xs text-yellow-700 dark:text-yellow-500 list-disc pl-5 space-y-1 max-h-20 overflow-y-auto">
+                                                <ul className="text-xs text-green-700 dark:text-green-500 list-disc pl-5 space-y-1 max-h-20 overflow-y-auto">
                                                     {uploadResult.warnings.map((warn: string, i: number) => (
                                                         <li key={i}>{warn}</li>
                                                     ))}
@@ -382,7 +382,7 @@ export function CsvUploadModal({ isOpen, onClose }: Props) {
 
                                     <div className="flex gap-3 justify-end mt-6">
                                         <Button variant="outline" onClick={() => { setUploadResult(null); setFile(null); }}>Upload Another</Button>
-                                        <Button onClick={() => window.location.href = '/dashboard/inventory'} className="bg-teal-600 hover:bg-teal-700 text-white">
+                                        <Button onClick={() => window.location.href = '/dashboard/inventory'} className="bg-green-600 hover:bg-green-700 text-white">
                                             View Inventory
                                         </Button>
                                     </div>

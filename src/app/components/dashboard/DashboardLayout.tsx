@@ -124,7 +124,7 @@ export function DashboardLayout() {
                                 <path d="M8 17v-3" />
                             </svg>
                         </div>
-                        <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[rgb(var(--accent-primary))] to-teal-400">
+                        <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[rgb(var(--accent-primary))] to-green-400">
                             StockSense
                         </span>
                     </div>
@@ -146,18 +146,18 @@ export function DashboardLayout() {
                                 to={item.path}
                                 onMouseEnter={() => handleNavHover(item.path)}
                                 className={`flex items-center justify-between px-3 py-2.5 rounded-lg transition-colors group ${isActive
-                                    ? 'bg-blue-50/50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400'
+                                    ? 'bg-green-50/50 text-green-600 dark:bg-green-900/20 dark:text-green-400'
                                     : 'text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-800/50'
                                     }`}
                             >
                                 <div className="flex items-center gap-3">
-                                    <item.icon className={`w-5 h-5 ${isActive ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300'}`} />
-                                    <span className={`text-sm font-medium ${isActive ? 'text-blue-600 dark:text-blue-400' : ''}`}>
+                                    <item.icon className={`w-5 h-5 ${isActive ? 'text-green-600 dark:text-green-400' : 'text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300'}`} />
+                                    <span className={`text-sm font-medium ${isActive ? 'text-green-600 dark:text-green-400' : ''}`}>
                                         {item.name}
                                     </span>
                                 </div>
                                 {item.badge && (
-                                    <span className="px-2 py-0.5 text-[10px] font-bold tracking-wider text-blue-600 bg-blue-100 rounded-full dark:bg-blue-900/40 dark:text-blue-400">
+                                    <span className="px-2 py-0.5 text-[10px] font-bold tracking-wider text-green-600 bg-green-100 rounded-full dark:bg-green-900/40 dark:text-green-400">
                                         {item.badge}
                                     </span>
                                 )}
@@ -208,7 +208,7 @@ export function DashboardLayout() {
                     <div className="flex items-center gap-4">
                         <Button
                             onClick={() => setIsUploadOpen(true)}
-                            className="bg-teal-600 hover:bg-teal-700 text-white flex items-center gap-2"
+                            className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2"
                             size="sm"
                         >
                             <UploadCloud className="w-4 h-4" />

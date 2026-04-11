@@ -8,8 +8,8 @@ import { AlertsSkeleton } from '../skeletons/AlertsSkeleton';
 const GROUPS = [
     { key: 'out_of_stock',   label: 'Out of Stock',                      header: 'bg-red-900/30 border-red-700/50 text-red-400' },
     { key: 'critical_low',   label: 'Critical Low (1–5 units)',          header: 'bg-red-900/20 border-red-700/30 text-red-400' },
-    { key: 'low_stock',      label: 'Low Stock (6–10 units)',            header: 'bg-amber-900/30 border-amber-700/50 text-amber-400' },
-    { key: 'fast_mover_low', label: 'Urgent Reorder (fast moving + low qty)', header: 'bg-orange-900/30 border-orange-700/50 text-orange-400' },
+    { key: 'low_stock',      label: 'Low Stock (6–10 units)',            header: 'bg-green-900/30 border-green-700/50 text-green-400' },
+    { key: 'fast_mover_low', label: 'Urgent Reorder (fast moving + low qty)', header: 'bg-green-900/30 border-green-700/50 text-green-400' },
     { key: 'dead_stock',     label: 'Dead Stock (no sale 90+ days)',     header: 'bg-gray-800/50 border-gray-700/50 text-gray-400' },
 ];
 

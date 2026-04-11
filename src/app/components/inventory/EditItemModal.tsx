@@ -116,7 +116,7 @@ export function EditItemModal({ item, onClose, onSaved }: { item: any; onClose: 
           <button
             onClick={handleSave}
             disabled={saving}
-            className='flex-1 bg-blue-600 text-white rounded-lg py-2 text-sm font-medium hover:bg-blue-700 disabled:opacity-50'
+            className='flex-1 bg-green-600 text-white rounded-lg py-2 text-sm font-medium hover:bg-green-700 disabled:opacity-50'
           >
             {saving ? 'Saving...' : 'Save changes'}
           </button>

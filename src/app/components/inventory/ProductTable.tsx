@@ -80,7 +80,7 @@ export function ProductTable() {
                     <TableHeader className="bg-gray-50/80 dark:bg-gray-800/80 text-gray-700 dark:text-gray-300">
                         <TableRow>
                             <TableHead className="w-12 text-center">
-                                <input type="checkbox" onChange={(e) => setSelectedIds(e.target.checked ? products.map((p: Product) => p.id) : [])} checked={products.length > 0 && selectedIds.length === products.length} className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
+                                <input type="checkbox" onChange={(e) => setSelectedIds(e.target.checked ? products.map((p: Product) => p.id) : [])} checked={products.length > 0 && selectedIds.length === products.length} className="rounded border-gray-300 text-green-600 focus:ring-green-500" />
                             </TableHead>
                             <TableHead>Product <ArrowUpDown className="inline w-3 h-3 ml-1 opacity-50" /></TableHead>
                             <TableHead>Category</TableHead>
@@ -94,7 +94,7 @@ export function ProductTable() {
                         {filteredProducts.map((p: Product) => (
                             <TableRow key={p.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-800/30 group transition-colors even:bg-gray-50/20 dark:even:bg-gray-800/10">
                                 <TableCell className="text-center">
-                                    <input type="checkbox" checked={selectedIds.includes(p.id)} onChange={(e) => setSelectedIds(prev => e.target.checked ? [...prev, p.id] : prev.filter(id => id !== p.id))} className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
+                                    <input type="checkbox" checked={selectedIds.includes(p.id)} onChange={(e) => setSelectedIds(prev => e.target.checked ? [...prev, p.id] : prev.filter(id => id !== p.id))} className="rounded border-gray-300 text-green-600 focus:ring-green-500" />
                                 </TableCell>
                                 <TableCell>
                                     <div className="font-medium text-gray-900 dark:text-gray-100">{p.name}</div>
@@ -123,7 +123,7 @@ export function ProductTable() {
                                         </div>
                                     ) : (
                                         <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <Button size="icon" variant="ghost" className="h-8 w-8 text-gray-400 hover:text-[rgb(var(--accent-primary))] hover:bg-blue-50 dark:hover:bg-blue-900/30" onClick={() => handleEditStart(p)}><Edit2 className="w-4 h-4" /></Button>
+                                            <Button size="icon" variant="ghost" className="h-8 w-8 text-gray-400 hover:text-[rgb(var(--accent-primary))] hover:bg-green-50 dark:hover:bg-green-900/30" onClick={() => handleEditStart(p)}><Edit2 className="w-4 h-4" /></Button>
                                             <Button size="icon" variant="ghost" className="h-8 w-8 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30" onClick={() => { setSelectedIds([p.id]); handleBulkDelete(); }}><Trash2 className="w-4 h-4" /></Button>
                                         </div>
                                     )}

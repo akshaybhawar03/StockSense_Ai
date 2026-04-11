@@ -29,12 +29,12 @@ export function CashFlowOptimizer({ healthData }: CashFlowOptimizerProps) {
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
             <Card className="p-6 md:p-8 bg-gradient-to-br from-white/80 to-white/40 dark:from-gray-900/80 dark:to-gray-900/40 backdrop-blur-xl border border-white/20 dark:border-gray-800/50 shadow-2xl relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-green-500/10 rounded-full blur-3xl" />
-                <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl" />
+                <div className="absolute bottom-0 left-0 w-64 h-64 bg-green-500/10 rounded-full blur-3xl" />
 
                 {/* Issue 2: show skeleton while data is loading */}
                 {isLoading && (
                     <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-4 bg-white/60 dark:bg-gray-900/60 backdrop-blur-sm rounded-xl">
-                        <div className="w-10 h-10 border-4 border-teal-500 border-t-transparent rounded-full animate-spin" />
+                        <div className="w-10 h-10 border-4 border-green-500 border-t-transparent rounded-full animate-spin" />
                         <p className="text-sm text-gray-500 dark:text-gray-400">Loading health score…</p>
                     </div>
                 )}
@@ -81,11 +81,11 @@ export function CashFlowOptimizer({ healthData }: CashFlowOptimizerProps) {
 
                     <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
                         {[
-                            { label: 'Total Value', value: formatCurrency(healthData?.total_value), icon: DollarSign, color: 'text-blue-600', bg: 'bg-blue-100 dark:bg-blue-900/20' },
+                            { label: 'Total Value', value: formatCurrency(healthData?.total_value), icon: DollarSign, color: 'text-green-600', bg: 'bg-green-100 dark:bg-green-900/20' },
                             { label: 'Dead Stock', value: formatCurrency(healthData?.dead_stock_value), icon: ShieldAlert, color: 'text-red-600', bg: 'bg-red-100 dark:bg-red-900/20' },
                             { label: 'Recoverable', value: formatCurrency(healthData?.recoverable_value), icon: RefreshCw, color: 'text-green-600', bg: 'bg-green-100 dark:bg-green-900/20' },
-                            { label: 'Turnover Ratio', value: `${healthData?.turnover_ratio || 0}x`, icon: TrendingUp, color: 'text-purple-600', bg: 'bg-purple-100 dark:bg-purple-900/20' },
-                            { label: 'Next 30D Sales', value: formatCurrency(healthData?.next_30d_sales), icon: BarChart3, color: 'text-orange-600', bg: 'bg-orange-100 dark:bg-orange-900/20' }
+                            { label: 'Turnover Ratio', value: `${healthData?.turnover_ratio || 0}x`, icon: TrendingUp, color: 'text-green-600', bg: 'bg-green-100 dark:bg-green-900/20' },
+                            { label: 'Next 30D Sales', value: formatCurrency(healthData?.next_30d_sales), icon: BarChart3, color: 'text-green-600', bg: 'bg-green-100 dark:bg-green-900/20' }
                         ].map((stat, idx) => (
                             <motion.div key={idx} whileHover={{ y: -5 }} className="bg-white/60 dark:bg-gray-800/60 p-4 rounded-xl border border-white/20 dark:border-gray-700/50 shadow-sm backdrop-blur-md">
                                 <div className={`w-10 h-10 rounded-lg ${stat.bg} flex items-center justify-center mb-3`}>

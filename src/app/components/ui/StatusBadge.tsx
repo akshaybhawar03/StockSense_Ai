@@ -6,7 +6,7 @@ export default function StatusBadge({ type, item }: { type?: string, item?: any 
 
   const statusConfig: Record<string, { label: string, cls: string }> = {
     out_of_stock:  { label: 'Out of Stock',  cls: 'bg-red-500/20 text-red-400 border border-red-500/30' },
-    low:           { label: 'Low Stock',     cls: 'bg-amber-500/20 text-amber-400 border border-amber-500/30' },
+    low:           { label: 'Low Stock',     cls: 'bg-green-500/20 text-green-400 border border-green-500/30' },
     healthy:       { label: 'In Stock',      cls: 'bg-green-500/20 text-green-400 border border-green-500/30' },
     dead:          { label: 'Dead Stock',    cls: 'bg-gray-500/20 text-gray-400 border border-gray-500/30' },
   };

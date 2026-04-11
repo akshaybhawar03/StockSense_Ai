@@ -99,7 +99,7 @@ export function PowerBIDashboard() {
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm">
                 <div>
                     <h2 className="text-xl font-bold flex items-center gap-2 text-gray-900 dark:text-white">
-                        <BarChart3 className="w-5 h-5 text-teal-500" />
+                        <BarChart3 className="w-5 h-5 text-green-500" />
                         Dynamic Dataset View
                     </h2>
                     <p className="text-sm text-gray-500 mt-1 flex items-center gap-2">
@@ -110,7 +110,7 @@ export function PowerBIDashboard() {
 
                 {datasets.length > 1 && (
                     <select 
-                        className="p-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-sm outline-none focus:ring-2 focus:ring-teal-500"
+                        className="p-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-sm outline-none focus:ring-2 focus:ring-green-500"
                         value={activeDataset.id}
                         onChange={(e) => setSelectedDatasetId(e.target.value)}
                     >
@@ -131,7 +131,7 @@ export function PowerBIDashboard() {
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: idx * 0.1 }}
                         >
-                            <Card className="p-4 border-l-4 border-l-teal-500 bg-white/50 backdrop-blur-sm dark:bg-gray-800/50 shadow-sm hover:shadow-md transition-all">
+                            <Card className="p-4 border-l-4 border-l-green-500 bg-white/50 backdrop-blur-sm dark:bg-gray-800/50 shadow-sm hover:shadow-md transition-all">
                                 <div className="flex justify-between items-start">
                                     <div>
                                         <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1 line-clamp-1">Total {kpi.label}</p>
@@ -141,7 +141,7 @@ export function PowerBIDashboard() {
                                                 : kpi.value.toLocaleString(undefined, { maximumFractionDigits: 2 })}
                                         </p>
                                     </div>
-                                    <div className="p-2 bg-teal-50 dark:bg-teal-900/30 text-teal-600 rounded-lg">
+                                    <div className="p-2 bg-green-50 dark:bg-green-900/30 text-green-600 rounded-lg">
                                         <Hash className="w-4 h-4" />
                                     </div>
                                 </div>
@@ -156,7 +156,7 @@ export function PowerBIDashboard() {
                 <Card className="p-6 bg-white dark:bg-gray-800 shadow-sm border-gray-100 dark:border-gray-700">
                     <div className="flex justify-between items-center mb-6">
                         <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                            <BarChart3 className="w-5 h-5 text-indigo-500" />
+                            <BarChart3 className="w-5 h-5 text-green-500" />
                             {analysis.yAxisProp} by {analysis.xAxisProp}
                         </h3>
                         <div className="text-xs text-gray-400">Top 10 aggregate distribution</div>
@@ -204,7 +204,7 @@ export function PowerBIDashboard() {
             <Card className="overflow-hidden bg-white dark:bg-gray-800 shadow-sm border-gray-100 dark:border-gray-700">
                 <div className="p-4 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center bg-gray-50/50 dark:bg-gray-900/50">
                     <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                        <Table className="w-5 h-5 text-blue-500" />
+                        <Table className="w-5 h-5 text-green-500" />
                         Raw Extracted Data
                     </h3>
                     <div className="flex gap-2">

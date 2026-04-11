@@ -88,7 +88,7 @@ export function DashboardIntegrations() {
                 {integrations.map((integration) => (
                     <Card
                         key={integration.id}
-                        className={`relative group h-48 sm:h-56 flex flex-col items-center justify-center p-6 bg-white dark:bg-gray-800 border rounded-2xl shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer overflow-hidden ${integration.id === 'tata-cliq' ? 'bg-[#eef6fa] dark:bg-blue-900/10' : 'border-gray-100 dark:border-gray-700'
+                        className={`relative group h-48 sm:h-56 flex flex-col items-center justify-center p-6 bg-white dark:bg-gray-800 border rounded-2xl shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer overflow-hidden ${integration.id === 'tata-cliq' ? 'bg-[#eef6fa] dark:bg-green-900/10' : 'border-gray-100 dark:border-gray-700'
                             }`}
                         onClick={() => toggleConnection(integration.id)}
                     >
@@ -135,8 +135,8 @@ export function DashboardIntegrations() {
                                     {integration.id === 'inorbit' && (
                                         <div className="flex flex-col items-center">
                                             <div className="bg-[#1f378a] text-white px-3 py-1.5 rounded flex items-center gap-2 mb-1">
-                                                <div className="w-6 h-6 rounded-full border-2 border-yellow-400 flex items-center justify-center relative">
-                                                    <div className="w-3 h-3 rounded-full bg-yellow-400"></div>
+                                                <div className="w-6 h-6 rounded-full border-2 border-green-400 flex items-center justify-center relative">
+                                                    <div className="w-3 h-3 rounded-full bg-green-400"></div>
                                                     <div className="absolute top-0 right-0 w-1 h-1 bg-white rounded-full"></div>
                                                 </div>
                                                 <span className="font-bold text-xl tracking-wider">Inorbit</span>

@@ -39,7 +39,7 @@ export function ChatPanel() {
             {/* Toggle button */}
             <button
                 onClick={() => setOpen(o => !o)}
-                className='fixed bottom-6 right-6 w-12 h-12 bg-blue-600 text-white rounded-full shadow-lg flex items-center justify-center hover:bg-blue-700 z-50 text-lg'
+                className='fixed bottom-6 right-6 w-12 h-12 bg-green-600 text-white rounded-full shadow-lg flex items-center justify-center hover:bg-green-700 z-50 text-lg'
             >
                 {open ? ' ✕ ' : ' 💬 '}
             </button>
@@ -69,7 +69,7 @@ export function ChatPanel() {
                         )}
                         {messages.map((m, i) => (
                             <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                                <div className={`max-w-[85%] rounded-2xl px-3 py-2 text-sm leading-relaxed ${m.role === 'user' ? 'bg-blue-600 text-white rounded-br-sm' : 'bg-gray-800 text-gray-200 rounded-bl-sm'}`}>
+                                <div className={`max-w-[85%] rounded-2xl px-3 py-2 text-sm leading-relaxed ${m.role === 'user' ? 'bg-green-600 text-white rounded-br-sm' : 'bg-gray-800 text-gray-200 rounded-bl-sm'}`}>
                                     {m.content}
                                 </div>
                             </div>
@@ -91,12 +91,12 @@ export function ChatPanel() {
                             onChange={e => setInput(e.target.value)}
                             onKeyDown={e => e.key === 'Enter' && handleSend()}
                             placeholder='Ask about your stock...'
-                            className='flex-1 text-sm bg-gray-800 border border-gray-700/50 text-gray-200 rounded-xl px-3 py-2 placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-blue-500'
+                            className='flex-1 text-sm bg-gray-800 border border-gray-700/50 text-gray-200 rounded-xl px-3 py-2 placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-green-500'
                         />
                         <button
                             onClick={handleSend}
                             disabled={loading || !input.trim()}
-                            className='bg-blue-600 text-white px-3 py-2 rounded-xl text-sm font-medium hover:bg-blue-700 disabled:opacity-40'
+                            className='bg-green-600 text-white px-3 py-2 rounded-xl text-sm font-medium hover:bg-green-700 disabled:opacity-40'
                         >
                             Send
                         </button>

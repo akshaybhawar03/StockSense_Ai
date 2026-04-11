@@ -85,7 +85,7 @@ export function GlobalCharts({ stats }: { stats: any }) {
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="grid md:grid-cols-2 gap-6 mb-8">
             <Card className="p-6 bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl border border-gray-200 dark:border-gray-800 shadow-xl relative">
                 <div className="flex items-center gap-2 mb-6">
-                    <PieChartIcon className="w-5 h-5 text-blue-500" />
+                    <PieChartIcon className="w-5 h-5 text-green-500" />
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Inventory by Category</h3>
                 </div>
                 {/* Center total value for donut (using absolute positioning instead of complex SVG logic if preferred, or rely on Custom SVG above) */}
@@ -130,7 +130,7 @@ export function GlobalCharts({ stats }: { stats: any }) {
 
             <Card className="p-6 bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl border border-gray-200 dark:border-gray-800 shadow-xl">
                 <div className="flex items-center gap-2 mb-6">
-                    <BarChart3 className="w-5 h-5 text-purple-500" />
+                    <BarChart3 className="w-5 h-5 text-green-500" />
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Top 5 Selling Products</h3>
                 </div>
                 <ResponsiveContainer width="100%" height={280}>

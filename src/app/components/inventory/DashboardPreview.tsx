@@ -28,7 +28,7 @@ export function DashboardPreview() {
                     <Link to="/inventory">
                         <Button variant="outline">Manage Inventory</Button>
                     </Link>
-                    <Button className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white hover:from-blue-600 hover:to-indigo-700 shadow-md">Generate Report</Button>
+                    <Button className="bg-gradient-to-r from-green-500 to-green-600 text-white hover:from-green-600 hover:to-green-700 shadow-md">Generate Report</Button>
                 </div>
             </div>
 
@@ -37,9 +37,9 @@ export function DashboardPreview() {
                 {kpisData.map((kpi, idx) => {
                     const Icon = kpi.icon;
                     const bgColors = {
-                        blue: 'bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-400',
+                        blue: 'bg-green-100 text-green-600 dark:bg-green-900/40 dark:text-green-400',
                         green: 'bg-green-100 text-green-600 dark:bg-green-900/40 dark:text-green-400',
-                        orange: 'bg-orange-100 text-orange-600 dark:bg-orange-900/40 dark:text-orange-400',
+                        orange: 'bg-green-100 text-green-600 dark:bg-green-900/40 dark:text-green-400',
                         red: 'bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-400'
                     };
 
@@ -77,7 +77,7 @@ export function DashboardPreview() {
                             {sales.slice(0, 10).map((mov) => (
                                 <div key={mov.id} className="flex justify-between items-center p-3 hover:bg-gray-50 dark:hover:bg-gray-800/50 rounded-lg transition-colors border border-transparent hover:border-gray-100 dark:hover:border-gray-800">
                                     <div className="flex items-center gap-3">
-                                        <div className="p-2 rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30">
+                                        <div className="p-2 rounded-full bg-green-100 text-green-600 dark:bg-green-900/30">
                                             <ArrowUpRight className="w-4 h-4" />
                                         </div>
                                         <div>

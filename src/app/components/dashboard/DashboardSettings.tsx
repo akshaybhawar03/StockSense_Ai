@@ -121,7 +121,7 @@ export function DashboardSettings() {
 
             <div className="flex items-center gap-6 mb-8 bg-gray-50 dark:bg-gray-800/50 p-6 rounded-2xl border border-gray-100 dark:border-gray-800">
                 <div className="relative">
-                    <div className="w-24 h-24 rounded-full bg-gradient-to-br from-[rgb(var(--accent-primary))] to-purple-500 flex items-center justify-center text-3xl font-bold text-white shadow-lg">
+                    <div className="w-24 h-24 rounded-full bg-gradient-to-br from-[rgb(var(--accent-primary))] to-green-500 flex items-center justify-center text-3xl font-bold text-white shadow-lg">
                         <span>{initials}</span>
                     </div>
                     <button className="absolute bottom-0 right-0 w-8 h-8 bg-white dark:bg-gray-700 rounded-full shadow-md border border-gray-200 dark:border-gray-600 flex items-center justify-center hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
@@ -486,7 +486,7 @@ export function DashboardSettings() {
                 <div className="p-6 space-y-4">
                     <div className="flex items-center justify-between pb-4 border-b border-gray-100 dark:border-gray-700">
                         <div className="flex items-center gap-4">
-                            <div className="w-10 h-10 rounded-full bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-blue-500">
+                            <div className="w-10 h-10 rounded-full bg-green-50 dark:bg-green-900/20 flex items-center justify-center text-green-500">
                                 <Smartphone className="w-5 h-5" />
                             </div>
                             <div>
@@ -544,7 +544,7 @@ export function DashboardSettings() {
                     </div>
                     <div className="flex items-center gap-4 p-4 border border-gray-200 dark:border-gray-700 rounded-xl">
                         <div className="w-12 h-8 bg-gray-100 dark:bg-gray-900 rounded flex items-center justify-center">
-                            <span className="font-bold text-blue-800 text-xs italic">VISA</span>
+                            <span className="font-bold text-green-800 text-xs italic">VISA</span>
                         </div>
                         <div>
                             <p className="font-medium text-gray-900 dark:text-white">•••• •••• •••• 4242</p>
@@ -652,10 +652,10 @@ export function DashboardSettings() {
 
     const renderAppearance = () => {
         const accentColors = [
-            { name: 'blue', color: 'bg-blue-500' },
+            { name: 'blue', color: 'bg-green-500' },
             { name: 'green', color: 'bg-green-500' },
-            { name: 'purple', color: 'bg-purple-500' },
-            { name: 'orange', color: 'bg-orange-500' },
+            { name: 'purple', color: 'bg-green-500' },
+            { name: 'orange', color: 'bg-green-500' },
         ];
 
         return (

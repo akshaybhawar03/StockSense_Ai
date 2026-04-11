@@ -57,7 +57,7 @@ export function AiReportPage() {
     return (
         <div className='max-w-3xl mx-auto p-6'>
             <div className='flex items-center gap-3 mb-2'>
-                <div className='w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center'>
+                <div className='w-10 h-10 rounded-xl bg-green-600 flex items-center justify-center'>
                     <span className='text-white text-lg'> ✦ </span>
                 </div>
                 <div>
@@ -72,7 +72,7 @@ export function AiReportPage() {
             <button
                 onClick={handleGenerate}
                 disabled={streaming}
-                className='w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white rounded-xl py-3.5 font-medium text-sm mb-4 flex items-center justify-center gap-2 transition-colors'
+                className='w-full bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white rounded-xl py-3.5 font-medium text-sm mb-4 flex items-center justify-center gap-2 transition-colors'
             >
                 <span> ✦ </span>
                 {streaming ? 'Generating analysis...' : 'Generate Full Data Report'}
@@ -89,13 +89,13 @@ export function AiReportPage() {
             {(report || streaming) && (
                 <div className='bg-gray-800/50 border border-gray-700/50 rounded-xl p-6 mb-4 text-sm leading-relaxed text-gray-200 whitespace-pre-wrap'>
                     {report}
-                    {streaming && <span className='animate-pulse text-blue-400 font-bold'>|</span>}
+                    {streaming && <span className='animate-pulse text-green-400 font-bold'>|</span>}
                 </div>
             )}
 
             {/* Insight buttons */}
             <div className='flex gap-3 mb-4'>
-                <button onClick={() => handleInsight('low')} disabled={insightLoading} className='flex-1 border border-amber-700/50 text-amber-400 bg-amber-900/20 rounded-xl py-2.5 text-sm font-medium hover:bg-amber-900/40 disabled:opacity-50 flex items-center justify-center gap-2'>
+                <button onClick={() => handleInsight('low')} disabled={insightLoading} className='flex-1 border border-green-700/50 text-green-400 bg-green-900/20 rounded-xl py-2.5 text-sm font-medium hover:bg-green-900/40 disabled:opacity-50 flex items-center justify-center gap-2'>
                     <span> ⚠ </span> Low Stock Details
                 </button>
                 <button onClick={() => handleInsight('dead')} disabled={insightLoading} className='flex-1 border border-gray-700/50 text-gray-400 bg-gray-800/30 rounded-xl py-2.5 text-sm font-medium hover:bg-gray-800/60 disabled:opacity-50 flex items-center justify-center gap-2'>

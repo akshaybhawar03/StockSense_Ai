@@ -7,7 +7,7 @@ const rings = [
         size: 'w-[40%] h-[40%]',
         orbitClass: 'animate-orbit-inner',
         reverseOrbitClass: 'animate-reverse-orbit-inner',
-        borderClass: 'border-blue-500/30 dark:border-blue-400/30',
+        borderClass: 'border-green-500/30 dark:border-green-400/30',
         glowClass: 'shadow-[inset_0_0_20px_rgba(59,130,246,0.1)] dark:shadow-[inset_0_0_20px_rgba(59,130,246,0.3),_0_0_15px_rgba(59,130,246,0.2)]',
         items: [
             { src: '/logos/shiprocket.svg', name: 'Shiprocket', position: 'top-0 left-1/2 -translate-x-1/2 -translate-y-1/2' },
@@ -23,7 +23,7 @@ const rings = [
         size: 'w-[65%] h-[65%]',
         orbitClass: 'animate-orbit-middle',
         reverseOrbitClass: 'animate-reverse-orbit-middle',
-        borderClass: 'border-purple-500/30 dark:border-purple-400/30',
+        borderClass: 'border-green-500/30 dark:border-green-400/30',
         glowClass: 'shadow-[inset_0_0_20px_rgba(168,85,247,0.1)] dark:shadow-[inset_0_0_20px_rgba(168,85,247,0.3),_0_0_15px_rgba(168,85,247,0.2)]',
         items: [
             { src: '/logos/sap.svg', name: 'SAP', position: 'top-[5%] right-[15%] translate-x-1/2 -translate-y-1/2' },
@@ -39,7 +39,7 @@ const rings = [
         size: 'w-[95%] h-[95%]',
         orbitClass: 'animate-orbit-outer',
         reverseOrbitClass: 'animate-reverse-orbit-outer',
-        borderClass: 'border-indigo-500/30 dark:border-indigo-400/30',
+        borderClass: 'border-green-500/30 dark:border-green-400/30',
         glowClass: 'shadow-[inset_0_0_20px_rgba(99,102,241,0.1)] dark:shadow-[inset_0_0_20px_rgba(99,102,241,0.3),_0_0_15px_rgba(99,102,241,0.2)]',
         items: [
             { src: '/logos/shopify.svg', name: 'Shopify', position: 'top-[-5%] left-1/2 -translate-x-1/2 -translate-y-1/2' },
@@ -54,10 +54,10 @@ const rings = [
 
 export function Integrations() {
     return (
-        <section className="py-32 px-4 sm:px-6 lg:px-8 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-50/50 via-white to-white dark:from-[#0B1120] dark:via-[#0B1120] dark:to-[#020617] border-t border-gray-100 dark:border-gray-800/50 overflow-hidden relative min-h-[950px] flex flex-col justify-center">
+        <section className="py-32 px-4 sm:px-6 lg:px-8 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-green-50/50 via-white to-white dark:from-[#0B1120] dark:via-[#0B1120] dark:to-[#020617] border-t border-gray-100 dark:border-gray-800/50 overflow-hidden relative min-h-[950px] flex flex-col justify-center">
 
             {/* Soft Ambient Floating Particles/Background Lighting */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-blue-400/5 dark:bg-blue-500/10 blur-[120px] rounded-full pointer-events-none mix-blend-screen"></div>
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-green-400/5 dark:bg-green-500/10 blur-[120px] rounded-full pointer-events-none mix-blend-screen"></div>
 
             <div className="max-w-7xl mx-auto w-full flex flex-col items-center relative z-10">
                 <motion.div
@@ -67,7 +67,7 @@ export function Integrations() {
                     transition={{ duration: 0.8, ease: "easeOut" }}
                     className="text-center mb-16 z-20 relative"
                 >
-                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/60 dark:bg-white/5 backdrop-blur-md border border-gray-200/50 dark:border-white/10 shadow-sm text-blue-600 dark:text-blue-400 font-medium text-sm mb-6">
+                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/60 dark:bg-white/5 backdrop-blur-md border border-gray-200/50 dark:border-white/10 shadow-sm text-green-600 dark:text-green-400 font-medium text-sm mb-6">
                         <Zap className="w-4 h-4 fill-current" />
                         Enterprise Ready
                     </div>
@@ -115,7 +115,7 @@ export function Integrations() {
                                 <div key={iIdx} className={`absolute ${item.position}`} style={{ willChange: 'transform' }}>
                                     {/* Glassmorphism Logo Background - Solid clean white/light-gray to make original colors pop in dark mode without inversion */}
                                     <div className={`${ring.reverseOrbitClass} w-16 h-16 md:w-20 md:h-20 bg-white/95 dark:bg-white/90 backdrop-blur-xl rounded-full shadow-[0_4px_20px_rgba(0,0,0,0.08)] dark:shadow-[0_0_20px_rgba(255,255,255,0.05),_0_0_15px_rgba(59,130,246,0.2)] border border-gray-100 dark:border-white/20 flex flex-col items-center justify-center p-3.5 relative hover:scale-[1.18] transition-all duration-300 cursor-pointer overflow-hidden z-40 group/logo`} style={{ willChange: 'transform' }}>
-                                        <div className="absolute inset-0 bg-gradient-to-tr from-blue-50/50 to-purple-50/50 opacity-0 group-hover/logo:opacity-100 transition-opacity"></div>
+                                        <div className="absolute inset-0 bg-gradient-to-tr from-green-50/50 to-green-50/50 opacity-0 group-hover/logo:opacity-100 transition-opacity"></div>
                                         <img
                                             src={item.src}
                                             alt={item.name}

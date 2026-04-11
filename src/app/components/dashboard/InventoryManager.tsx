@@ -241,7 +241,7 @@ export function InventoryManager() {
                                             <Button
                                                 size="icon"
                                                 variant="ghost"
-                                                className="h-8 w-8 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30"
+                                                className="h-8 w-8 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/30"
                                                 onClick={() => setEditItem(item)}
                                             >
                                                 <Edit2 className="w-4 h-4" />
