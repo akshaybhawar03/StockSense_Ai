@@ -31,9 +31,9 @@ export function AIForecastEngine() {
     if (isLoading) return <ForecastSkeleton />;
 
     const getBadgeStyle = () => {
-        if (state === 'STATE_A') return 'bg-green-900/50 border-green-700/50 text-green-300';
-        if (state === 'STATE_B') return 'bg-green-900/50 border-green-700/50 text-green-300';
-        return 'bg-green-900/50 border-green-700/50 text-green-300';
+        if (state === 'STATE_A') return 'bg-green-50 border-green-200 text-green-300';
+        if (state === 'STATE_B') return 'bg-green-50 border-green-200 text-green-300';
+        return 'bg-green-50 border-green-200 text-green-300';
     };
 
     const getBadgeText = () => {
@@ -45,19 +45,19 @@ export function AIForecastEngine() {
     return (
         <div className='p-6 max-w-6xl mx-auto'>
             <div className='flex items-center gap-3 mb-6'>
-                <div className='w-10 h-10 rounded-xl bg-green-600 flex items-center justify-center shadow-lg shadow-green-900/20'>
-                    <span className='text-white text-lg'> ✦ </span>
+                <div className='w-10 h-10 rounded-xl bg-green-600 flex items-center justify-center shadow-lg shadow-green-500/20'>
+                    <span className='text-gray-900 text-lg'> ✦ </span>
                 </div>
                 <div>
-                    <h1 className='text-2xl font-semibold text-white'>AI Forecasting Engine</h1>
-                    <p className='text-sm text-gray-400'>
+                    <h1 className='text-2xl font-semibold text-gray-900'>AI Forecasting Engine</h1>
+                    <p className='text-sm text-gray-500'>
                         Predictive analytics for demand shaping and dynamic inventory replenishment.
                     </p>
                 </div>
             </div>
 
             {state === 'STATE_A' && (
-                <div className='bg-green-900/20 border border-green-700/50 rounded-xl p-4 mb-6 flex items-center gap-3'>
+                <div className='bg-green-50 border border-green-200 rounded-xl p-4 mb-6 flex items-center gap-3'>
                     <div className='w-2 h-2 rounded-full bg-green-500 animate-pulse'></div>
                     <p className='text-green-400 text-sm'>
                         Forecast based on inventory analysis — add sales data for personalised predictions.
@@ -66,7 +66,7 @@ export function AIForecastEngine() {
             )}
             
             {state === 'STATE_B' && (
-                <div className='bg-green-900/20 border border-green-700/50 rounded-xl p-4 mb-6 flex items-center gap-3'>
+                <div className='bg-green-50 border border-green-200 rounded-xl p-4 mb-6 flex items-center gap-3'>
                     <div className='w-2 h-2 rounded-full bg-green-500 animate-pulse'></div>
                     <p className='text-green-400 text-sm'>
                         Limited sales history — forecast accuracy improves with more data.
@@ -75,13 +75,13 @@ export function AIForecastEngine() {
             )}
 
             {/* Filters */}
-            <div className='flex flex-wrap items-center gap-4 mb-6 bg-gray-800/40 p-4 rounded-xl border border-gray-700/50'>
+            <div className='flex flex-wrap items-center gap-4 mb-6 bg-gray-50/50 p-4 rounded-xl border border-gray-200'>
                 <div className='flex items-center gap-2'>
-                    <span className='text-xs text-gray-400'>Time Range:</span>
-                    <div className='flex bg-gray-900/50 rounded-lg p-1 border border-gray-700/50'>
+                    <span className='text-xs text-gray-500'>Time Range:</span>
+                    <div className='flex bg-gray-100 rounded-lg p-1 border border-gray-200'>
                         {['6 Weeks', '12 Weeks', '6 Months'].map(r => (
                             <button key={r} onClick={() => setTimeRange(r as any)}
-                                className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${timeRange === r ? 'bg-green-600 text-white' : 'text-gray-400 hover:text-white'}`}>
+                                className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${timeRange === r ? 'bg-green-600 text-white' : 'text-gray-500 hover:text-gray-900'}`}>
                                 {r}
                             </button>
                         ))}
@@ -89,11 +89,11 @@ export function AIForecastEngine() {
                 </div>
 
                 <div className='flex items-center gap-2'>
-                    <span className='text-xs text-gray-400'>View:</span>
-                    <div className='flex bg-gray-900/50 rounded-lg p-1 border border-gray-700/50'>
+                    <span className='text-xs text-gray-500'>View:</span>
+                    <div className='flex bg-gray-100 rounded-lg p-1 border border-gray-200'>
                         {['Aggregate', 'Per Category'].map(v => (
                             <button key={v} onClick={() => setViewMode(v as any)}
-                                className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${viewMode === v ? 'bg-green-600 text-white' : 'text-gray-400 hover:text-white'}`}>
+                                className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${viewMode === v ? 'bg-green-600 text-white' : 'text-gray-500 hover:text-gray-900'}`}>
                                 {v}
                             </button>
                         ))}
@@ -101,11 +101,11 @@ export function AIForecastEngine() {
                 </div>
 
                 <div className='flex items-center gap-2 ml-auto'>
-                    <span className='text-xs text-gray-400'>Category:</span>
+                    <span className='text-xs text-gray-500'>Category:</span>
                     <select 
                         value={selectedCategory}
                         onChange={(e) => setSelectedCategory(e.target.value)}
-                        className='bg-gray-900 text-white text-xs border border-gray-700 rounded-lg px-3 py-2 outline-none focus:border-green-500'
+                        className='bg-white text-gray-900 text-xs border border-gray-200 rounded-lg px-3 py-2 outline-none focus:border-green-500'
                     >
                         <option>All Categories</option>
                         {categories.map(c => <option key={c} value={c}>{c}</option>)}
@@ -114,9 +114,9 @@ export function AIForecastEngine() {
             </div>
 
             {/* Chart Area */}
-            <div className='bg-gray-800/50 border border-gray-700/50 rounded-xl p-6 mb-6 shadow-xl'>
+            <div className='bg-gray-50/50 border border-gray-200 rounded-xl p-6 mb-6 shadow-sm'>
                 <div className='flex items-center justify-between mb-6'>
-                    <h2 className='text-sm font-medium text-white'>
+                    <h2 className='text-sm font-medium text-gray-900'>
                         {timeRange} {viewMode} Demand Forecast
                     </h2>
                     <div className='flex items-center gap-2'>
@@ -200,12 +200,12 @@ export function AIForecastEngine() {
 
             <div className='grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6'>
                 {/* Reorder Table */}
-                <div className='lg:col-span-2 bg-gray-800/50 border border-gray-700/50 rounded-xl p-6 shadow-xl overflow-hidden'>
-                    <h2 className='text-sm font-medium text-white mb-4'>Top Items to Reorder</h2>
+                <div className='lg:col-span-2 bg-gray-50/50 border border-gray-200 rounded-xl p-6 shadow-sm overflow-hidden'>
+                    <h2 className='text-sm font-medium text-gray-900 mb-4'>Top Items to Reorder</h2>
                     <div className='overflow-x-auto'>
                         <table className='w-full text-left border-collapse'>
                             <thead>
-                                <tr className='border-b border-gray-700/50 text-xs font-semibold text-gray-400 capitalize'>
+                                <tr className='border-b border-gray-200 bg-gray-50 text-xs font-semibold text-gray-600 capitalize'>
                                     <th className='pb-3 pr-4'>Product</th>
                                     <th className='pb-3 px-4'>Stock</th>
                                     <th className='pb-3 px-4'>Weekly Demand</th>
@@ -223,19 +223,19 @@ export function AIForecastEngine() {
                                         const isCritical = item.daysUntilStockout < 7;
                                         const isWarning = item.daysUntilStockout >= 7 && item.daysUntilStockout < 14;
                                         return (
-                                            <tr key={item.id} className={`border-b border-gray-700/50 hover:bg-white/5 transition-colors
-                                                ${isCritical ? 'bg-red-900/10' : ''} ${isWarning ? 'bg-green-900/10' : ''}`}>
+                                            <tr key={item.id} className={`border-b border-gray-200 hover:bg-gray-50 transition-colors
+                                                ${isCritical ? 'bg-red-50' : ''} ${isWarning ? 'bg-green-50' : ''}`}>
                                                 <td className='py-3 pr-4 flex flex-col justify-center'>
-                                                    <div className='font-medium text-white'>{item.name}</div>
+                                                    <div className='font-medium text-gray-900'>{item.name}</div>
                                                     <div className='text-xs text-gray-500'>{item.sku}</div>
                                                 </td>
-                                                <td className='py-3 px-4 text-gray-300'>{item.currentStock}</td>
-                                                <td className='py-3 px-4 text-gray-300'>{item.weeklyDemand}</td>
+                                                <td className='py-3 px-4 text-gray-600'>{item.currentStock}</td>
+                                                <td className='py-3 px-4 text-gray-600'>{item.weeklyDemand}</td>
                                                 <td className='py-3 px-4'>
                                                     <span className={`px-2 py-1 rounded-md text-xs font-medium border whitespace-nowrap
-                                                        ${isCritical ? 'bg-red-500/20 text-red-400 border-red-500/30' : 
-                                                          isWarning ? 'bg-green-500/20 text-green-400 border-green-500/30' : 
-                                                          'bg-gray-800 text-gray-400 border-gray-700'}`}>
+                                                        ${isCritical ? 'bg-red-100 text-red-600 border-red-200' : 
+                                                          isWarning ? 'bg-green-100 text-green-600 border-green-200' : 
+                                                          'bg-white text-gray-500 border-gray-200'}`}>
                                                         {item.daysUntilStockout} days
                                                     </span>
                                                 </td>
@@ -250,25 +250,25 @@ export function AIForecastEngine() {
                 </div>
 
                 {/* Next Ordering Window Info */}
-                <div className='bg-gradient-to-br from-green-900/40 to-green-900/40 border border-green-700/50 rounded-xl p-6 shadow-xl h-full'>
-                    <h2 className='text-lg font-semibold text-white mb-2'>
+                <div className='bg-green-50 border border-green-200 rounded-xl p-6 shadow-sm h-full'>
+                    <h2 className='text-lg font-semibold text-gray-900 mb-2'>
                         Next Big Ordering Window
                     </h2>
-                    <p className='text-sm text-gray-300 mb-6'>{nextOrderWindow.description}</p>
+                    <p className='text-sm text-gray-600 mb-6'>{nextOrderWindow.description}</p>
                     <div className='space-y-4'>
-                        <div className='bg-gray-900/50 rounded-xl p-4 border border-white/5'>
-                            <p className='text-xs text-gray-400 mb-1'>Recommended Date</p>
-                            <p className='text-2xl font-bold text-white'>
+                        <div className='bg-white rounded-xl p-4 border border-gray-100'>
+                            <p className='text-xs text-gray-500 mb-1'>Recommended Date</p>
+                            <p className='text-2xl font-bold text-gray-900'>
                                 {nextOrderWindow.recommended_date}
                             </p>
                         </div>
-                        <div className='bg-gray-900/50 rounded-xl p-4 border border-white/5'>
-                            <p className='text-xs text-gray-400 mb-1'>Estimated Capital Required</p>
+                        <div className='bg-white rounded-xl p-4 border border-gray-100'>
+                            <p className='text-xs text-gray-500 mb-1'>Estimated Capital Required</p>
                             <p className='text-xl font-bold text-green-400'>
                                 {nextOrderWindow.estimated_capital}
                             </p>
                         </div>
-                        <button className='w-full py-3 mt-4 bg-green-600 hover:bg-green-500 text-white text-sm font-medium rounded-xl transition-colors shadow-lg shadow-green-600/20'>
+                        <button className='w-full py-3 mt-4 bg-green-600 hover:bg-green-500 text-gray-900 text-sm font-medium rounded-xl transition-colors shadow-lg shadow-green-600/20'>
                             Prepare Purchase Orders
                         </button>
                     </div>
