@@ -116,16 +116,11 @@ export function DashboardLayout() {
                 {/* Logo Area */}
                 <div className="flex items-center justify-between h-16 px-6 border-b border-gray-100 dark:border-gray-700">
                     <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-lg bg-[rgb(var(--accent-primary))] flex items-center justify-center text-white">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
-                                <path d="M3 3v18h18" />
-                                <path d="M18 17V9" />
-                                <path d="M13 17V5" />
-                                <path d="M8 17v-3" />
-                            </svg>
+                        <div className="w-8 h-8 rounded-lg bg-white p-1 flex items-center justify-center text-white border border-gray-100 overflow-hidden shadow-sm">
+                            <img src="/logos/main-logo.jpeg" alt="SmartGodown Logo" className="w-full h-full object-contain mix-blend-multiply" />
                         </div>
-                        <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[rgb(var(--accent-primary))] to-green-400">
-                            StockSense
+                        <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[rgb(var(--accent-primary))] to-[rgb(var(--accent-secondary))]">
+                            SmartGodown
                         </span>
                     </div>
                     <button
@@ -197,10 +192,10 @@ export function DashboardLayout() {
                             <Menu className="w-5 h-5" />
                         </button>
                         <div className="hidden sm:flex items-center text-sm text-gray-500 dark:text-gray-400">
-                            <span>StockSense AI</span>
-                            <ChevronRight className="w-4 h-4 mx-2" />
+                            <span className="font-medium">SmartGodown</span>
+                            <ChevronRight className="w-4 h-4 mx-2 text-gray-400" />
                             <span className="font-semibold text-gray-900 dark:text-white capitalize">
-                                {location.pathname.split('/').pop() || 'Dashboard'}
+                                {location.pathname.split('/').pop()?.replace('-', ' ') || 'Dashboard'}
                             </span>
                         </div>
                     </div>
