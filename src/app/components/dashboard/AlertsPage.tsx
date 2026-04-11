@@ -43,7 +43,13 @@ export function AlertsPage() {
                 )}
             </div>
 
-            {total === 0 && (
+            {isLoading && (
+                <div className='text-center py-20'>
+                    <p className='text-gray-500 dark:text-gray-400'>Analyzing stock levels...</p>
+                </div>
+            )}
+
+            {!isLoading && total === 0 && (
                 <div className='text-center py-20'>
                     <p className='text-gray-500 dark:text-gray-400'>All stock levels are healthy. No alerts.</p>
                 </div>
@@ -51,7 +57,7 @@ export function AlertsPage() {
 
             <div className='space-y-3'>
                 {GROUPS.map(({ key, label, header }) => {
-                    const items = data[key] || [];
+                    const items = data?.[key] || [];
                     if (items.length === 0) return null;
                     const isOpen = !!open[key];
                     return (
@@ -70,7 +76,7 @@ export function AlertsPage() {
                                             <div>
                                                 <p className='text-sm font-medium text-gray-900 dark:text-white'>{item.name}</p>
                                                 <p className='text-xs text-gray-500 dark:text-gray-400 mt-0.5 font-mono'>
-                                                    {item.sku} · {item.category}
+                                                    {item.sku} ï¿½ {item.category}
                                                 </p>
                                             </div>
                                             <div className='flex items-center gap-3'>
