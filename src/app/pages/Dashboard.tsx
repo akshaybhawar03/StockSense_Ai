@@ -67,7 +67,7 @@ export function Dashboard() {
     { label: 'Low Stock Items', value: (stats?.low_stock_items || kpis?.lowStock || 0).toLocaleString(), icon: AlertTriangle, accent: 'text-green-500', bg: 'bg-green-50 dark:bg-green-900/20', warning: (stats?.low_stock_items || kpis?.lowStock || 0) > 0 },
     { label: 'Out of Stock', value: (stats?.out_of_stock || kpis?.outOfStock || 0).toLocaleString(), icon: TrendingDown, accent: 'text-red-500', bg: 'bg-red-50 dark:bg-red-900/20', danger: (stats?.out_of_stock || kpis?.outOfStock || 0) > 0 },
     { label: 'Dead Stock Items', value: (deadStockData?.summary?.total_dead_stock ?? kpis?.deadStock ?? 0).toLocaleString(), icon: Clock, accent: 'text-green-500', bg: 'bg-green-50 dark:bg-green-900/20' },
-    { label: 'Total Sales', value: (stats?.total_sales || kpis?.totalSales || 0).toLocaleString(), icon: Activity, accent: 'text-green-500', bg: 'bg-green-50 dark:bg-green-900/20' },
+    { label: 'Total Sales', value: (stats?.total_sales || kpis?.totalSales || 0) === 0 ? 'No sales yet' : (stats?.total_sales || kpis?.totalSales || 0).toLocaleString(), icon: Activity, accent: 'text-green-500', bg: 'bg-green-50 dark:bg-green-900/20' },
     { label: 'Monthly Revenue', value: formatINR(stats?.monthly_revenue || kpis?.monthlyRevenue), icon: TrendingUp, accent: 'text-green-500', bg: 'bg-green-50 dark:bg-green-900/20' },
     { label: 'Turnover Rate', value: `${stats?.turnover_rate || kpis?.turnoverRate || 0}%`, icon: RefreshCw, accent: 'text-green-500', bg: 'bg-green-50 dark:bg-green-900/20' },
   ];
