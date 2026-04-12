@@ -9,7 +9,6 @@ import { CashFlowOptimizer } from '../components/dashboard/CashFlowOptimizer';
 import { DeadStockAnalyzer } from '../components/dashboard/DeadStockAnalyzer';
 import { ReorderPredictor } from '../components/dashboard/ReorderPredictor';
 import { PowerBIDashboard } from '../components/dashboard/PowerBIDashboard';
-import { StockAIChat } from '../components/StockAIChat';
 import { getDashboardStats, getHealthScore, getDeadStockAnalysis } from '../services/dashboard';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { DashboardSkeleton } from '../components/skeletons/DashboardSkeleton';
@@ -212,12 +211,6 @@ export function Dashboard() {
           <CashFlowOptimizer healthData={healthData} />
           <DeadStockAnalyzer deadStockData={deadStockData} isLoading={deadStockLoading} isError={deadStockError} />
           <ReorderPredictor />
-
-          {/* AI Stock Assistant */}
-          <div className="mt-6">
-            <h2 className="text-xl font-bold font-heading text-gray-900 dark:text-white mb-4">AI Stock Assistant</h2>
-            <StockAIChat />
-          </div>
         </>
       )}
 

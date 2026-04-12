@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { Card } from './ui/card';
 import { useAuth } from '../contexts/AuthContext';
 import { askStockQuestion, reindexStock, checkRAGHealth } from '../services/ragService';
@@ -32,7 +34,7 @@ const SUGGESTED_QUESTIONS = [
   "Show low stock items across all categories",
 ];
 
-export function StockAIChat() {
+export function StockAIChat({ className = '' }: { className?: string } = {}) {
   const { user, isLoggedIn } = useAuth();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
@@ -188,7 +190,7 @@ export function StockAIChat() {
   }
 
   return (
-    <Card className="flex flex-col bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
+    <Card className={`flex flex-col bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden ${className}`}>
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-green-500/10 to-green-500/10">
         <div className="flex items-center gap-3">
@@ -253,7 +255,7 @@ export function StockAIChat() {
       )}
 
       {/* Chat Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 min-h-[300px] max-h-[400px]">
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 min-h-[300px]">
         {messages.length === 0 && (
           <div className="flex flex-col items-center justify-center h-full text-gray-400 dark:text-gray-500">
             <MessageSquare className="w-12 h-12 mb-2 opacity-50" />
@@ -292,7 +294,20 @@ export function StockAIChat() {
                       : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-tl-sm'
                     }`}
                 >
-                  <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                  {message.role === 'user' ? (
+                    <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                  ) : (
+                    <div className="text-sm markdown-body prose dark:prose-invert max-w-none 
+                        prose-p:leading-relaxed prose-pre:my-0 prose-ul:my-1 prose-li:my-0 
+                        prose-table:border-collapse prose-table:w-full prose-th:bg-gray-200 
+                        dark:prose-th:bg-gray-600 prose-th:px-3 prose-th:py-2 prose-td:border 
+                        prose-td:border-gray-300 dark:prose-td:border-gray-600 prose-td:px-3 
+                        prose-td:py-1">
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                        {message.content}
+                      </ReactMarkdown>
+                    </div>
+                  )}
                   <p
                     className={`text-xs mt-1 ${message.role === 'user'
                         ? 'text-green-100'

@@ -22,6 +22,7 @@ import { SmartInventory } from './pages/SmartInventory';
 import { SmartDashboard } from './pages/SmartDashboard';
 import { AiReportPage } from './components/dashboard/AiReportPage';
 import { AnalyticsPage } from './components/dashboard/AnalyticsPage';
+import { StockAIChat } from './components/StockAIChat';
 
 export const router = createBrowserRouter([
   {
@@ -52,7 +53,7 @@ export const router = createBrowserRouter([
       { index: true, Component: Dashboard },
       { path: 'inventory', element: <InventoryManager /> },
       { path: 'forecast', element: <AIForecastEngine /> },
-      { path: 'ai-assistant', element: <div className="p-6 space-y-6"><h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">AI Assistant</h1><Dashboard /></div> },
+      { path: 'ai-assistant', element: <div className="p-6 h-[calc(100vh-4rem)] flex flex-col"><h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex-shrink-0">AI Assistant</h1><div className="flex-1 min-h-0 w-full"><StockAIChat className="h-full border-0 rounded-xl w-full" /></div></div> },
       { path: 'alerts', element: <AlertsPage /> },
       { path: 'integrations', Component: DashboardIntegrations },
       { path: 'settings', Component: DashboardSettings },
