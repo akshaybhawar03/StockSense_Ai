@@ -23,7 +23,6 @@ import {
   X
 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../components/ui/dialog';
-import { Integrations } from '../components/Integrations';
 
 export function Home() {
   const { t } = useLanguage();
@@ -95,16 +94,6 @@ export function Home() {
           </div>
         </div>
       </section>
-
-      {/* Integrations Section */}
-      <motion.div
-        initial={{ opacity: 0, scale: 0.9 }}
-        whileInView={{ opacity: 1, scale: 1 }}
-        viewport={{ once: true, amount: 0.2 }}
-        transition={{ duration: 0.6, ease: "easeOut" }}
-      >
-        <Integrations />
-      </motion.div>
 
       {/* Problem Section */}
       <section className="py-20 px-4 sm:px-6 lg:px-8 bg-white dark:bg-gray-900">
