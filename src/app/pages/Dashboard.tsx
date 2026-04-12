@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Card } from '../components/ui/card';
-import { CloudUpload, Package, DollarSign, AlertTriangle, TrendingUp, TrendingDown, Clock, Activity, RefreshCw, X, Maximize, BarChart3 } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../components/ui/tooltip';
+import { CloudUpload, Package, DollarSign, AlertTriangle, TrendingUp, TrendingDown, Clock, Activity, RefreshCw, X, Maximize, BarChart3, HelpCircle } from 'lucide-react';
 import { useData } from '../contexts/DataContext';
 import { CsvUploadModal } from '../components/dashboard/CsvUploadModal';
 import { GlobalCharts } from '../components/dashboard/GlobalCharts';
@@ -67,9 +68,24 @@ export function Dashboard() {
     { label: 'Low Stock Items', value: (stats?.low_stock_items || kpis?.lowStock || 0).toLocaleString('en-IN'), icon: AlertTriangle, accent: 'text-green-500', bg: 'bg-green-50 dark:bg-green-900/20', warning: (stats?.low_stock_items || kpis?.lowStock || 0) > 0 },
     { label: 'Out of Stock', value: (stats?.out_of_stock || kpis?.outOfStock || 0).toLocaleString('en-IN'), icon: TrendingDown, accent: 'text-red-500', bg: 'bg-red-50 dark:bg-red-900/20', danger: (stats?.out_of_stock || kpis?.outOfStock || 0) > 0 },
     { label: 'Dead Stock Items', value: (deadStockData?.summary?.total_dead_stock ?? kpis?.deadStock ?? 0).toLocaleString('en-IN'), icon: Clock, accent: 'text-green-500', bg: 'bg-green-50 dark:bg-green-900/20' },
-    { label: 'Total Sales', value: (parseFloat(stats?.total_sales ?? kpis?.totalSales ?? 0) === 0) ? 'No sales yet' : (stats?.total_sales ?? kpis?.totalSales ?? 0).toLocaleString('en-IN'), icon: Activity, accent: 'text-green-500', bg: 'bg-green-50 dark:bg-green-900/20' },
-    { label: 'Monthly Revenue', value: (parseFloat(stats?.monthly_revenue ?? kpis?.monthlyRevenue ?? 0) === 0) ? 'No revenue this month' : formatINR(stats?.monthly_revenue ?? kpis?.monthlyRevenue), icon: TrendingUp, accent: 'text-green-500', bg: 'bg-green-50 dark:bg-green-900/20' },
-    { label: 'Turnover Rate', value: `${stats?.turnover_rate || kpis?.turnoverRate || 0}%`, icon: RefreshCw, accent: 'text-green-500', bg: 'bg-green-50 dark:bg-green-900/20' },
+    { 
+      label: 'Total Sales', 
+      value: (parseFloat(stats?.total_sales ?? kpis?.totalSales ?? 0) === 0) ? 'No sales yet' : (stats?.total_sales ?? kpis?.totalSales ?? 0).toLocaleString('en-IN'), 
+      icon: Activity, accent: 'text-green-500', bg: 'bg-green-50 dark:bg-green-900/20' 
+    },
+    { 
+      label: 'Monthly Revenue', 
+      value: (parseFloat(stats?.monthly_revenue ?? kpis?.monthlyRevenue ?? 0) === 0) ? 'No revenue this month' : formatINR(stats?.monthly_revenue ?? kpis?.monthlyRevenue), 
+      icon: TrendingUp, accent: 'text-green-500', bg: 'bg-green-50 dark:bg-green-900/20' 
+    },
+    { 
+      label: 'Turnover Rate', 
+      value: (stats?.total_sales ?? kpis?.totalSales ?? 0) === 0 
+        ? 'Start recording sales to see turnover rate' 
+        : `${(parseFloat(stats?.turnover_rate ?? kpis?.turnoverRate ?? 0) * 100).toFixed(1)}%`,
+      icon: RefreshCw, accent: 'text-green-500', bg: 'bg-green-50 dark:bg-green-900/20',
+      tooltip: 'How quickly your inventory is sold and replaced. Higher is better.'
+    },
   ];
 
   const total = stats?.total_products || kpis?.totalProducts || 1;
@@ -153,29 +169,43 @@ export function Dashboard() {
 
           {/* Dynamic KPIs Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {statCards.map((stat: any, idx) => (
-              <motion.div
-                key={stat.label}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: idx * 0.05 }}
-              >
-                <Card
-                  className={`p-5 border-0 shadow-sm bg-white dark:bg-gray-800 hover:shadow-md transition-shadow relative overflow-hidden group`}
-                  style={{ borderLeft: stat.danger ? '3px solid #ef4444' : stat.warning ? '3px solid #f59e0b' : undefined }}
+            <TooltipProvider>
+              {statCards.map((stat: any, idx) => (
+                <motion.div
+                  key={stat.label}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: idx * 0.05 }}
                 >
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{stat.label}</p>
-                      <h3 className="text-2xl font-bold text-gray-900 dark:text-white mt-1">{stat.value}</h3>
+                  <Card
+                    className={`p-5 border-0 shadow-sm bg-white dark:bg-gray-800 hover:shadow-md transition-shadow relative overflow-hidden group h-full`}
+                    style={{ borderLeft: stat.danger ? '3px solid #ef4444' : stat.warning ? '3px solid #f59e0b' : undefined }}
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="pr-4">
+                        <div className="flex items-center gap-1.5">
+                          <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{stat.label}</p>
+                          {stat.tooltip && (
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <HelpCircle className="w-3.5 h-3.5 text-gray-400 hover:text-green-500 cursor-help transition-colors" />
+                              </TooltipTrigger>
+                              <TooltipContent className="bg-gray-900 text-white max-w-[200px] text-xs">
+                                <p>{stat.tooltip}</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          )}
+                        </div>
+                        <h3 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mt-1 break-words leading-tight">{stat.value}</h3>
+                      </div>
+                      <div className={`w-10 h-10 shrink-0 rounded-lg flex items-center justify-center ${stat.bg} ${stat.accent} transition-transform group-hover:scale-110`}>
+                        <stat.icon className="w-5 h-5" />
+                      </div>
                     </div>
-                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${stat.bg} ${stat.accent} transition-transform group-hover:scale-110`}>
-                      <stat.icon className="w-5 h-5" />
-                    </div>
-                  </div>
-                </Card>
-              </motion.div>
-            ))}
+                  </Card>
+                </motion.div>
+              ))}
+            </TooltipProvider>
           </div>
 
 <div className="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm mb-6">
