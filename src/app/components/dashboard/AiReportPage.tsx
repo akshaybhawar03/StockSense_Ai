@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { streamAnalysis, getLowStockInsight, getDeadStockInsight } from '../../services/ai';
 import toast from 'react-hot-toast';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 export function AiReportPage() {
     const [report, setReport] = useState('');
@@ -87,9 +89,10 @@ export function AiReportPage() {
 
             {/* Streamed report */}
             {(report || streaming) && (
-                <div className='bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700/50 rounded-xl p-6 mb-4 text-sm leading-relaxed text-gray-700 dark:text-gray-200 whitespace-pre-wrap shadow-sm'>
-                    {report}
-                    {streaming && <span className='animate-pulse text-green-500 dark:text-green-400 font-bold'>|</span>}
+                <div className='bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700/50 rounded-xl p-6 mb-4 shadow-sm prose prose-sm sm:prose-base dark:prose-invert max-w-none prose-p:leading-relaxed prose-a:text-green-600 hover:prose-a:text-green-500'>
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                        {report + (streaming ? ' ▍' : '')}
+                    </ReactMarkdown>
                 </div>
             )}
 
@@ -112,9 +115,9 @@ export function AiReportPage() {
             {insight && (
                 <div className='bg-gray-800/50 border border-gray-700/50 rounded-xl p-5'>
                     <h3 className='text-sm font-medium text-gray-300 mb-3'>{insightTitle}</h3>
-                    <p className='text-sm leading-relaxed text-gray-200 whitespace-pre-wrap'>
-                        {insight}
-                    </p>
+                    <div className='prose prose-sm dark:prose-invert max-w-none prose-p:leading-relaxed'>
+                        <ReactMarkdown remarkPlugins={[remarkGfm]}>{insight}</ReactMarkdown>
+                    </div>
                 </div>
             )}
         </div>

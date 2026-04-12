@@ -142,10 +142,12 @@ export function Navbar() {
                 ) : (
                   <>
                     <Button variant="outline" className="w-full" onClick={() => { setIsMobileMenuOpen(false); navigate('/login'); }}>
-                      {t('nav.login') || 'Login'}
+                      {/* {t('nav.login') || 'Login'} */}
+                      Login
                     </Button>
                     <Button onClick={() => { setIsMobileMenuOpen(false); navigate('/login'); }} className="w-full bg-[rgb(var(--accent-primary))] hover:bg-[rgb(var(--accent-primary))]/90 text-white">
-                      {t('nav.startTrial')}
+                      {/* {t('nav.startTrial')} */}
+                      Start Free Trial
                     </Button>
                   </>
                 )}
