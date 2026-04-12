@@ -4,7 +4,7 @@ import { Card } from '../ui/card';
 import { Badge } from '../ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip, Legend } from 'recharts';
-import { PackageX, Archive, AlertOctagon, AlertTriangle } from 'lucide-react';
+import { PackageX, Archive, AlertOctagon, AlertTriangle, RefreshCw } from 'lucide-react';
 import type { DeadStockAnalysis, DeadStockItem } from '../../services/dashboard';
 
 // ── Helper functions for days_without_sale rendering ──────────────
@@ -52,18 +52,32 @@ export function DeadStockAnalyzer({ deadStockData, isLoading, isError }: DeadSto
     if (isError) {
         return (
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="mb-8">
-                <Card className="p-6 md:p-8 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border border-gray-200 dark:border-gray-800 shadow-xl">
-                    <div className="text-center py-8 text-red-400">
-                        Failed to load dead stock data. Please refresh.
-                    </div>
+                <Card className="p-6 md:p-10 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border border-gray-200 dark:border-gray-800 shadow-xl flex flex-col items-center justify-center text-center">
+                    <AlertOctagon className="w-16 h-16 text-red-500 mb-4 opacity-90" />
+                    <h3 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white mb-2">Dead Stock Analysis Unavailable</h3>
+                    <p className="text-gray-500 dark:text-gray-400 mb-8 max-w-lg">
+                        We encountered an issue while trying to fetch the dead stock inventory details. The API connection might have timed out or failed.
+                    </p>
+                    <button 
+                        onClick={() => window.location.reload()} 
+                        className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl transition-all font-medium flex items-center justify-center gap-2 shadow-sm hover:shadow-md active:scale-95"
+                    >
+                        <RefreshCw className="w-5 h-5" />
+                        Retry Analysis
+                    </button>
                 </Card>
             </motion.div>
         );
     }
 
     // ── Data is loaded — extract values from API response ────────
-    const summary = deadStockData?.summary;
-    const deadStockItems: DeadStockItem[] = deadStockData?.items || [];
+    const summary = deadStockData?.summary || {
+        total_dead_stock: (deadStockData as any)?.dead_stock_items ?? (deadStockData as any)?.dead_stock ?? 0,
+        total_blocked_value: (deadStockData as any)?.total_blocked_value ?? 0,
+        low_stock: (deadStockData as any)?.low_stock ?? 0,
+        overstocked: (deadStockData as any)?.overstocked ?? 0
+    };
+    const deadStockItems: DeadStockItem[] = deadStockData?.items || (deadStockData as any)?.data || [];
     const displayedItems = showAll ? deadStockItems : deadStockItems.slice(0, 20);
     const hasMore = deadStockItems.length > 20;
 
@@ -131,11 +145,11 @@ export function DeadStockAnalyzer({ deadStockData, isLoading, isError }: DeadSto
                                 <Table>
                                     <TableHeader className="bg-gray-50 dark:bg-gray-800/50">
                                         <TableRow>
-                                            <TableHead>SKU Name</TableHead>
+                                            <TableHead>SKU Name & Category</TableHead>
                                             <TableHead>Days w/o Sale</TableHead>
                                             <TableHead>Qty</TableHead>
-                                            <TableHead>Blocked</TableHead>
-                                            <TableHead>AI Suggestion</TableHead>
+                                            <TableHead>Stock Value</TableHead>
+                                            <TableHead>Action</TableHead>
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
@@ -144,7 +158,7 @@ export function DeadStockAnalyzer({ deadStockData, isLoading, isError }: DeadSto
                                                 <TableCell className="font-semibold">
                                                     <div>
                                                         <div>{item.name}</div>
-                                                        <div className="text-xs text-gray-400">{item.sku}</div>
+                                                        <div className="text-xs text-gray-400">{item.sku} {item.category ? `• ${item.category}` : ''}</div>
                                                     </div>
                                                 </TableCell>
                                                 <TableCell>
@@ -154,17 +168,12 @@ export function DeadStockAnalyzer({ deadStockData, isLoading, isError }: DeadSto
                                                 </TableCell>
                                                 <TableCell>{item.current_stock}</TableCell>
                                                 <TableCell className="text-gray-900 dark:text-gray-100 font-medium">
-                                                    ₹{Number(item.blocked_value || 0).toLocaleString('en-IN')}
+                                                    ₹{Number(item.current_stock * item.unit_price).toLocaleString('en-IN')}
                                                 </TableCell>
-                                                <TableCell className="text-sm">
-                                                    {item.ai_suggestion ? (
-                                                        <span className="flex items-center gap-1">
-                                                            <span>⚡</span>
-                                                            <span className={getSuggestionColor(item.ai_suggestion)}>
-                                                                {item.ai_suggestion}
-                                                            </span>
-                                                        </span>
-                                                    ) : '—'}
+                                                <TableCell>
+                                                    <button className="px-3 py-1 bg-red-100 text-red-600 hover:bg-red-200 dark:bg-red-900/30 dark:text-red-400 dark:hover:bg-red-900/50 rounded-md text-xs font-semibold transition-colors">
+                                                        Liquidate
+                                                    </button>
                                                 </TableCell>
                                             </TableRow>
                                         )) : (

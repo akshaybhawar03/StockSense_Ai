@@ -5,6 +5,7 @@ export interface DeadStockItem {
     product_id: string;
     name: string;
     sku: string;
+    category?: string;
     current_stock: number;
     unit_price: number;
     blocked_value: number;

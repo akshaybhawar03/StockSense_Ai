@@ -65,9 +65,9 @@ export function Dashboard() {
   const statCards = [
     { label: 'Total Products', value: (stats?.total_products || kpis?.totalProducts || 0).toLocaleString('en-IN'), icon: Package, accent: 'text-green-500', bg: 'bg-green-50 dark:bg-green-900/20' },
     { label: 'Inventory Value', value: parseFloat(stats?.inventory_value ?? kpis?.inventoryValue ?? 0) === 0 ? '₹0.00' : formatINR(stats?.inventory_value ?? kpis?.inventoryValue), icon: DollarSign, accent: 'text-green-500', bg: 'bg-green-50 dark:bg-green-900/20' },
-    { label: 'Low Stock Items', value: (stats?.low_stock_items || kpis?.lowStock || 0).toLocaleString('en-IN'), icon: AlertTriangle, accent: 'text-green-500', bg: 'bg-green-50 dark:bg-green-900/20', warning: (stats?.low_stock_items || kpis?.lowStock || 0) > 0 },
-    { label: 'Out of Stock', value: (stats?.out_of_stock || kpis?.outOfStock || 0).toLocaleString('en-IN'), icon: TrendingDown, accent: 'text-red-500', bg: 'bg-red-50 dark:bg-red-900/20', danger: (stats?.out_of_stock || kpis?.outOfStock || 0) > 0 },
-    { label: 'Dead Stock Items', value: (deadStockData?.summary?.total_dead_stock ?? kpis?.deadStock ?? 0).toLocaleString('en-IN'), icon: Clock, accent: 'text-green-500', bg: 'bg-green-50 dark:bg-green-900/20' },
+    { label: 'Low Stock Items', value: (stats?.low_stock_items ?? kpis?.lowStock ?? 0).toLocaleString('en-IN'), icon: AlertTriangle, accent: 'text-green-500', bg: 'bg-green-50 dark:bg-green-900/20', warning: (stats?.low_stock_items || kpis?.lowStock || 0) > 0 },
+    { label: 'Out of Stock', value: (stats?.out_of_stock ?? kpis?.outOfStock ?? 0).toLocaleString('en-IN'), icon: TrendingDown, accent: 'text-red-500', bg: 'bg-red-50 dark:bg-red-900/20', danger: (stats?.out_of_stock || kpis?.outOfStock || 0) > 0 },
+    { label: 'Dead Stock Items', value: ((stats as any)?.dead_stock_items ?? (stats as any)?.deadStock ?? (stats as any)?.dead_stock ?? deadStockData?.summary?.total_dead_stock ?? (deadStockData as any)?.dead_stock_items ?? kpis?.deadStock ?? 0).toLocaleString('en-IN'), icon: Clock, accent: 'text-green-500', bg: 'bg-green-50 dark:bg-green-900/20' },
     { 
       label: 'Total Sales', 
       value: (parseFloat(stats?.total_sales ?? kpis?.totalSales ?? 0) === 0) ? 'No sales yet' : (stats?.total_sales ?? kpis?.totalSales ?? 0).toLocaleString('en-IN'), 
@@ -89,12 +89,12 @@ export function Dashboard() {
   ];
 
   const total = stats?.total_products || kpis?.totalProducts || 1;
-  const healthy = total - (stats?.out_of_stock || kpis?.outOfStock || 0) - (stats?.low_stock_items || kpis?.lowStock || 0);
+  const healthy = total - (stats?.out_of_stock ?? kpis?.outOfStock ?? 0) - (stats?.low_stock_items ?? kpis?.lowStock ?? 0);
   const segments = [
     { label: 'Healthy', value: healthy, color: '#10b981' },
-    { label: 'Low Stock', value: stats?.low_stock_items || kpis?.lowStock || 0, color: '#f59e0b' },
-    { label: 'Out of Stock', value: stats?.out_of_stock || kpis?.outOfStock || 0, color: '#ef4444' },
-    { label: 'Dead Stock', value: deadStockData?.summary?.total_dead_stock ?? kpis?.deadStock ?? 0, color: '#6b7280' },
+    { label: 'Low Stock', value: stats?.low_stock_items ?? kpis?.lowStock ?? 0, color: '#f59e0b' },
+    { label: 'Out of Stock', value: stats?.out_of_stock ?? kpis?.outOfStock ?? 0, color: '#ef4444' },
+    { label: 'Dead Stock', value: (stats as any)?.dead_stock_items ?? (stats as any)?.deadStock ?? (stats as any)?.dead_stock ?? deadStockData?.summary?.total_dead_stock ?? (deadStockData as any)?.dead_stock_items ?? kpis?.deadStock ?? 0, color: '#6b7280' },
   ];
 
   // Show skeleton UI only if completely empty and no local KPI data
