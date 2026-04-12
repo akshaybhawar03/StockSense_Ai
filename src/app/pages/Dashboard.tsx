@@ -29,9 +29,17 @@ export function Dashboard() {
   };
 
   // React Query: Fetch all 3 dashboard endpoints
-  const { data: statsRes, isLoading: statsLoading } = useQuery({
+  const { data: statsRes, isLoading: statsLoading, isError: statsError } = useQuery({
     queryKey: ['dashboard', 'stats'],
-    queryFn: ({ signal }) => getDashboardStats(signal).then(r => r.data),
+    queryFn: async ({ signal }) => {
+      try {
+        const r = await getDashboardStats(signal);
+        return r.data;
+      } catch (err) {
+        toast.error('Failed to load dashboard statistics.');
+        throw err;
+      }
+    },
     staleTime: 60_000,
   });
 

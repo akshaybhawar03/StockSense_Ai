@@ -59,8 +59,11 @@ export function GlobalCharts({ stats }: { stats: any }) {
 
     const categoryData = stats?.category_breakdown || [];
 
-    const top5Data = stats?.top_5_selling || [];
-    const BAR_COLORS = ['#3b82f6','#8b5cf6','#10b981','#f59e0b','#ef4444'];
+    const top5Data = Array.isArray(stats?.top_5_selling) 
+        ? stats?.top_5_selling 
+        : stats?.top_5_selling?.data || stats?.top_5_selling?.items || [];
+        
+    const isFallback = stats?.top_5_selling?.is_fallback || stats?.is_fallback || false;
 
     const BarTooltip = ({ active, payload }: any) => {
         if (active && payload?.length) {
@@ -73,7 +76,7 @@ export function GlobalCharts({ stats }: { stats: any }) {
                         {payload[0].payload.name}
                     </p>
                     <p style={{color:'white',fontSize:13,fontWeight:600,margin:0}}>
-                        {payload[0].value} units
+                        {payload[0].value} {payload[0].dataKey === 'totalValue' ? 'value' : 'units'}
                     </p>
                 </div>
             );
@@ -128,39 +131,54 @@ export function GlobalCharts({ stats }: { stats: any }) {
                 </ResponsiveContainer>
             </Card>
 
-            <Card className="p-6 bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl border border-gray-200 dark:border-gray-800 shadow-xl">
-                <div className="flex items-center gap-2 mb-6">
-                    <BarChart3 className="w-5 h-5 text-green-500" />
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Top 5 Selling Products</h3>
+            <Card className="p-6 bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl border border-gray-200 dark:border-gray-800 shadow-xl flex flex-col">
+                <div className="flex items-center justify-between mb-6">
+                    <div className="flex items-center gap-2">
+                        <BarChart3 className="w-5 h-5 text-green-500" />
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Top 5 Selling Products</h3>
+                    </div>
+                    {isFallback && (
+                        <span className="text-xs font-medium text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 px-2.5 py-1 rounded-full">
+                            Showing by Inventory Value — No sales recorded yet
+                        </span>
+                    )}
                 </div>
-                <ResponsiveContainer width="100%" height={280}>
-                    <BarChart
-                        data={top5Data}
-                        margin={{ top: 10, right: 10, left: 0, bottom: 40 }}
-                    >
-                        <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-                        <XAxis
-                            dataKey="name"
-                            tick={{ fill: '#64748b', fontSize: 10 }}
-                            angle={-30}
-                            textAnchor="end"
-                            tickLine={false}
-                            axisLine={{ stroke: '#1e293b' }}
-                            tickFormatter={(v) => v?.length > 12 ? v.slice(0,12)+'...' : v}
-                        />
-                        <YAxis
-                            tick={{ fill: '#64748b', fontSize: 11 }}
-                            tickLine={false}
-                            axisLine={false}
-                        />
-                        <Tooltip content={<BarTooltip />} cursor={{ fill: 'rgba(255,255,255,0.04)' }} />
-                        <Bar dataKey="quantity" radius={[6, 6, 0, 0]}>
-                            {top5Data.map((entry: any, index: number) => (
-                                <Cell key={index} fill={BAR_COLORS[index % BAR_COLORS.length]} />
-                            ))}
-                        </Bar>
-                    </BarChart>
-                </ResponsiveContainer>
+
+                {!top5Data || top5Data.length === 0 ? (
+                    <div className="flex-1 flex flex-col items-center justify-center text-center py-10 min-h-[280px]">
+                        <BarChart3 className="w-12 h-12 text-gray-300 dark:text-gray-600 mb-3" />
+                        <p className="text-gray-500 dark:text-gray-400 font-medium">No sales data available yet</p>
+                        <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Record sales to see your top products</p>
+                    </div>
+                ) : (
+                    <ResponsiveContainer width="100%" height={280}>
+                        <BarChart
+                            data={top5Data}
+                            layout="vertical"
+                            margin={{ top: 10, right: 10, left: 10, bottom: 10 }}
+                        >
+                            <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" horizontal={true} vertical={false} />
+                            <XAxis
+                                type="number"
+                                tick={{ fill: '#64748b', fontSize: 11 }}
+                                tickLine={false}
+                                axisLine={false}
+                                tickFormatter={(v) => isFallback ? '₹' + (v / 1000).toFixed(0) + 'k' : v}
+                            />
+                            <YAxis
+                                type="category"
+                                dataKey="name"
+                                tick={{ fill: '#64748b', fontSize: 10 }}
+                                tickLine={false}
+                                axisLine={false}
+                                width={100}
+                                tickFormatter={(v) => v?.length > 14 ? v.slice(0,14) + '...' : v}
+                            />
+                            <Tooltip content={<BarTooltip />} cursor={{ fill: 'rgba(16, 185, 129, 0.05)' }} />
+                            <Bar dataKey={isFallback ? "totalValue" : "quantity"} fill="#10b981" radius={[0, 6, 6, 0]} />
+                        </BarChart>
+                    </ResponsiveContainer>
+                )}
             </Card>
         </motion.div>
     );
