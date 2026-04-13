@@ -28,9 +28,8 @@ export function ReorderPredictor() {
 
         try {
             // STEP 1: Attempt to fetch AI predictions
-            // Using /forecast/predictions assumption; 
-            // mapping common mismatch fields safely
-            const res = await api.get('/forecast/predictions');
+            // Using the precise /forecast endpoint based on the backend forecast.py @router.get("")
+            const res = await api.get('/forecast');
             
             // Debug the raw response
             console.log('[ReorderPredictor] Raw API Response:', res.data);
@@ -81,8 +80,18 @@ export function ReorderPredictor() {
             }
         } catch (err: any) {
             console.error('[ReorderPredictor] API Error:', err);
-            // Catch and SHOW the error instead of swallowing it silently
-            setError(err.response?.data?.message || err.message || 'Failed to connect to forecast engine.');
+            
+            const status = err.response?.status;
+            let errorMessage = 'Cannot reach server';
+
+            if (status === 401) errorMessage = 'Session expired, please login again';
+            else if (status === 403) errorMessage = 'Access denied';
+            else if (status === 404) errorMessage = 'Prediction endpoint not found';
+            else if (status === 405) errorMessage = 'Wrong API method — check configuration';
+            else if (status >= 500) errorMessage = 'Server error — try again later';
+            else if (err.response?.data?.message) errorMessage = err.response.data.message;
+
+            setError(errorMessage);
         } finally {
             setIsLoading(false);
         }
