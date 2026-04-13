@@ -59,11 +59,27 @@ export function GlobalCharts({ stats }: { stats: any }) {
 
     const categoryData = stats?.category_breakdown || [];
 
-    const top5Data = Array.isArray(stats?.top_5_selling) 
+    const top5DataRaw = Array.isArray(stats?.top_5_selling) 
         ? stats?.top_5_selling 
         : stats?.top_5_selling?.data || stats?.top_5_selling?.items || [];
         
     const isFallback = stats?.top_5_selling?.is_fallback || stats?.is_fallback || false;
+
+    // Normalizing the array safely to handle empty elements or missing keys that silently crashed Recharts
+    const top5Data = top5DataRaw
+        .filter((d: any) => d && typeof d === 'object')
+        .map((d: any) => {
+             const val = d.totalValue !== undefined ? d.totalValue 
+                       : d.value !== undefined ? d.value 
+                       : d.quantity !== undefined ? d.quantity 
+                       : d.total_sales !== undefined ? d.total_sales : 0;
+             return {
+                 ...d,
+                 name: d.name || d.product_name || 'Unknown',
+                 value: Number(val)
+             };
+        })
+        .filter((d: any) => d.value > 0);
 
     const BarTooltip = ({ active, payload }: any) => {
         if (active && payload?.length) {
@@ -76,7 +92,7 @@ export function GlobalCharts({ stats }: { stats: any }) {
                         {payload[0].payload.name}
                     </p>
                     <p style={{color:'white',fontSize:13,fontWeight:600,margin:0}}>
-                        {payload[0].value} {payload[0].dataKey === 'totalValue' ? 'value' : 'units'}
+                        {isFallback ? '₹' + payload[0].value.toLocaleString('en-IN') : payload[0].value.toLocaleString('en-IN')} {isFallback ? 'Value' : 'Units'}
                     </p>
                 </div>
             );
@@ -147,8 +163,10 @@ export function GlobalCharts({ stats }: { stats: any }) {
                 {!top5Data || top5Data.length === 0 ? (
                     <div className="flex-1 flex flex-col items-center justify-center text-center py-10 min-h-[280px]">
                         <BarChart3 className="w-12 h-12 text-gray-300 dark:text-gray-600 mb-3" />
-                        <p className="text-gray-500 dark:text-gray-400 font-medium">No sales data available yet</p>
-                        <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Record sales to see your top products</p>
+                        <p className="text-gray-500 dark:text-gray-400 font-medium">No top products available</p>
+                        <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                            {isFallback ? "Add inventory value to see it here" : "Record sales to see your top products"}
+                        </p>
                     </div>
                 ) : (
                     <ResponsiveContainer width="100%" height={280}>
@@ -157,13 +175,13 @@ export function GlobalCharts({ stats }: { stats: any }) {
                             layout="vertical"
                             margin={{ top: 10, right: 10, left: 10, bottom: 10 }}
                         >
-                            <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" horizontal={true} vertical={false} />
+                            <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" horizontal={true} vertical={false} opacity={0.5} />
                             <XAxis
                                 type="number"
                                 tick={{ fill: '#64748b', fontSize: 11 }}
                                 tickLine={false}
                                 axisLine={false}
-                                tickFormatter={(v) => isFallback ? '₹' + (v / 1000).toFixed(0) + 'k' : v}
+                                tickFormatter={(v) => isFallback ? '₹' + (v / 1000).toFixed(0) + 'k' : v.toLocaleString('en-IN')}
                             />
                             <YAxis
                                 type="category"
@@ -175,7 +193,7 @@ export function GlobalCharts({ stats }: { stats: any }) {
                                 tickFormatter={(v) => v?.length > 14 ? v.slice(0,14) + '...' : v}
                             />
                             <Tooltip content={<BarTooltip />} cursor={{ fill: 'rgba(16, 185, 129, 0.05)' }} />
-                            <Bar dataKey={isFallback ? "totalValue" : "quantity"} fill="#10b981" radius={[0, 6, 6, 0]} />
+                            <Bar dataKey="value" fill="#16a34a" radius={[0, 6, 6, 0]} />
                         </BarChart>
                     </ResponsiveContainer>
                 )}

@@ -140,7 +140,23 @@ export function Dashboard() {
         )}
       </AnimatePresence>
 
-      {!stats || stats.total_products === 0 ? (
+      {statsError ? (
+        <Card className="p-8 border border-red-200 dark:border-red-800 shadow-sm bg-red-50 dark:bg-red-900/10 flex flex-col items-center justify-center text-center">
+          <div className="w-16 h-16 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center text-red-600 dark:text-red-400 mb-4">
+            <AlertTriangle className="w-8 h-8" />
+          </div>
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Failed to load dashboard</h2>
+          <p className="text-gray-500 dark:text-gray-400 max-w-md mb-6">
+            There was an error communicating with the server. Your data couldn't be loaded at this time.
+          </p>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-colors shadow-sm cursor-pointer"
+          >
+            Retry Connection
+          </button>
+        </Card>
+      ) : !stats || stats.total_products === 0 ? (
         datasets && datasets.length > 0 ? (
           <PowerBIDashboard />
         ) : (
