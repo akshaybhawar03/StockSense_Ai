@@ -123,17 +123,18 @@ export function Home() {
                 whileInView={{ opacity: 1, scale: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.2 }}
                 transition={{ delay: index * 0.1, duration: 0.5, type: "spring", stiffness: 100 }}
+                className="h-full flex"
               >
-                <Card className="p-6 hover:shadow-lg transition-shadow border-2 dark:border-gray-800 group">
-                  <div className="w-16 h-16 mb-4 group-hover:scale-110 group-hover:-translate-y-2 transition-transform duration-300">
+                <Card className="p-8 w-full flex flex-col items-center text-center bg-white dark:bg-gray-800 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-100 dark:border-gray-800 group">
+                  <div className="w-20 h-20 mb-6 group-hover:scale-110 group-hover:-translate-y-2 transition-transform duration-300">
                     <img
                       src={problem.img}
                       alt={problem.title}
-                      className={`w-full h-full drop-shadow-xl ${problem.extraClass || ''}`}
+                      className={`w-full h-full object-contain drop-shadow-xl ${problem.extraClass || ''}`}
                       loading="lazy"
                     />
                   </div>
-                  <h3 className="font-semibold text-gray-900 dark:text-white">{problem.title}</h3>
+                  <h3 className="text-lg font-bold text-gray-900 dark:text-white leading-snug">{problem.title}</h3>
                 </Card>
               </motion.div>
             ))}
@@ -203,6 +204,8 @@ export function Home() {
               { img: 'https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Brain/3D/brain_3d.png', title: t('features.aiForecasting'), desc: 'Predict future demand with 95% accuracy' },
               { img: 'https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Bell.png', title: t('features.reorder'), desc: 'Never run out of bestsellers' },
               { img: 'https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Package.png', title: t('features.blockedCapital'), desc: 'See exactly where your money is stuck' },
+              { img: 'https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Mobile%20Phone%20with%20Arrow.png', title: t('features.whatsappAlerts'), desc: 'Get notified right before you stock out' },
+              { img: 'https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Chart%20Increasing.png', title: t('features.trendAnalysis'), desc: 'Discover seasonal sales spikes early' },
             ].map((feature, index) => (
               <motion.div
                 key={index}

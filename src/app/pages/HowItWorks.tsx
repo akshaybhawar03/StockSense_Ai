@@ -165,19 +165,20 @@ export function HowItWorks() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
+                className="h-full flex"
               >
-                <Card className="p-8 h-full hover:shadow-xl transition-shadow">
-                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">
+                <Card className="p-8 w-full flex flex-col shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-800 rounded-2xl">
+                  <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">
                     {tech.title}
                   </h3>
-                  <p className="text-gray-600 dark:text-gray-400 mb-6">
+                  <p className="text-gray-600 dark:text-gray-400 mb-8 flex-grow leading-relaxed">
                     {tech.description}
                   </p>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-wrap gap-2 mt-auto">
                     {tech.tech.map((item, i) => (
                       <span
                         key={i}
-                        className="px-3 py-1 bg-[rgb(var(--accent-primary))]/10 text-[rgb(var(--accent-primary))] rounded-full text-sm"
+                        className="px-3 py-1.5 bg-[rgb(var(--accent-primary))]/10 text-[rgb(var(--accent-primary))] rounded-full text-sm font-medium"
                       >
                         {item}
                       </span>
@@ -205,10 +206,10 @@ export function HowItWorks() {
               Join 2,500+ sellers who trust SmartGodown
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" variant="secondary" className="bg-white text-[rgb(var(--accent-primary))] hover:bg-gray-100">
+              <Button size="lg" className="bg-white text-[rgb(var(--accent-primary))] hover:bg-gray-100">
                 Start Free Trial
               </Button>
-              <Button size="lg" variant="outline" className="border-2 border-white text-white hover:bg-white/10">
+              <Button size="lg" className="bg-transparent border-2 border-white text-white hover:bg-white/10">
                 Book a Demo
               </Button>
             </div>

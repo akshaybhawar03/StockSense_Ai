@@ -68,7 +68,9 @@ const translations: Translations = {
   'features.aiForecasting': { en: 'AI Demand Forecasting', hi: 'AI डिमांड पूर्वानुमान', mr: 'AI मागणी अंदाज' },
   'features.reorder': { en: 'Smart Reorder Suggestions', hi: 'स्मार्ट रीऑर्डर सुझाव', mr: 'स्मार्ट रीऑर्डर सूचना' },
   'features.blockedCapital': { en: 'Blocked Capital Tracker', hi: 'ब्लॉक कैपिटल ट्रैकर', mr: 'ब्लॉक भांडवल ट्रॅकर' },
-  
+  'features.whatsappAlerts': { en: 'WhatsApp Alerts', hi: 'व्हाट्सएप अलर्ट', mr: 'व्हॉट्सॲप अलर्ट' },
+  'features.trendAnalysis': { en: 'Market Trend Analysis', hi: 'मार्केट ट्रेंड एनालिसिस', mr: 'बाजार कल विश्लेषण' },
+
   // Dashboard
   'dashboard.totalValue': { en: 'Total Inventory Value', hi: 'कुल इन्वेंटरी मूल्य', mr: 'एकूण इन्व्हेंटरी मूल्य' },
   'dashboard.blockedCapital': { en: 'Blocked Capital', hi: 'ब्लॉक कैपिटल', mr: 'ब्लॉक भांडवल' },
