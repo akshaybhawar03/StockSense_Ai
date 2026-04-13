@@ -47,7 +47,7 @@ export function AIForecastEngine() {
         <div className='p-6 max-w-6xl mx-auto'>
             <div className='flex items-center gap-3 mb-6'>
                 <div className='w-10 h-10 rounded-xl bg-green-600 flex items-center justify-center shadow-lg shadow-green-500/20'>
-                    <span className='text-gray-900 text-lg'> âœ¦ </span>
+                    <span className='text-gray-900 text-lg'> ✨ </span>
                 </div>
                 <div>
                     <h1 className='text-2xl font-semibold text-gray-900'>AI Forecasting Engine</h1>
@@ -60,8 +60,8 @@ export function AIForecastEngine() {
             {state === 'STATE_A' && (
                 <div className='bg-green-50 border border-green-200 rounded-xl p-4 mb-6 flex items-center gap-3'>
                     <div className='w-2 h-2 rounded-full bg-green-500 animate-pulse'></div>
-                    <p className='text-green-400 text-sm'>
-                        Forecast based on inventory analysis â€” add sales data for personalised predictions.
+                    <p className='text-green-800 text-sm'>
+                        Forecast based on inventory analysis — add sales data for personalised predictions.
                     </p>
                 </div>
             )}
@@ -69,8 +69,8 @@ export function AIForecastEngine() {
             {state === 'STATE_B' && (
                 <div className='bg-green-50 border border-green-200 rounded-xl p-4 mb-6 flex items-center gap-3'>
                     <div className='w-2 h-2 rounded-full bg-green-500 animate-pulse'></div>
-                    <p className='text-green-400 text-sm'>
-                        Limited sales history â€” forecast accuracy improves with more data.
+                    <p className='text-green-800 text-sm'>
+                        Limited sales history — forecast accuracy improves with more data.
                     </p>
                 </div>
             )}
