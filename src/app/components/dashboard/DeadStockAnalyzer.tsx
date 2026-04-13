@@ -3,7 +3,7 @@ import { motion } from 'motion/react';
 import { Card } from '../ui/card';
 import { Badge } from '../ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip, Legend } from 'recharts';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip, Legend, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
 import { PackageX, Archive, AlertOctagon, AlertTriangle, RefreshCw } from 'lucide-react';
 import type { DeadStockAnalysis, DeadStockItem } from '../../services/dashboard';
 
@@ -94,6 +94,16 @@ export function DeadStockAnalyzer({ deadStockData, isLoading, isError }: DeadSto
         { name: 'Overstocked', value: summary.overstocked, color: '#f97316' },
         { name: 'Low Stock', value: summary.low_stock, color: '#eab308' },
     ].filter(d => d.value > 0) : [];
+
+    // Top 5 Blocked Capital Items
+    const topBlockersData = [...deadStockItems]
+        .sort((a, b) => b.blocked_value - a.blocked_value)
+        .slice(0, 5)
+        .map(item => ({
+            name: item.name.length > 20 ? item.name.substring(0, 20) + '...' : item.name,
+            value: item.blocked_value || (item.current_stock * item.unit_price) || 0,
+            fullName: item.name
+        }));
 
     return (
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="mb-8">
@@ -199,37 +209,70 @@ export function DeadStockAnalyzer({ deadStockData, isLoading, isError }: DeadSto
                         </div>
                     </div>
 
-                    <div className="bg-gray-50 dark:bg-gray-800/30 rounded-2xl p-6 border border-gray-100 dark:border-gray-800">
-                        <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 text-center">
-                            Inventory Health Distribution
-                        </h3>
-                        <div className="h-64">
-                            <ResponsiveContainer width="100%" height={220}>
-                                <PieChart>
-                                    <Pie
-                                        data={distributionData}
-                                        cx="50%" cy="50%"
-                                        innerRadius={60} outerRadius={90}
-                                        paddingAngle={2} dataKey="value"
-                                    >
-                                        {(distributionData || []).map((entry: any, i: number) => (
-                                            <Cell key={i} fill={entry.color} />
-                                        ))}
-                                    </Pie>
-                                    <RechartsTooltip
-                                        formatter={(v: any, n: any) => [v + ' items', n]}
-                                        contentStyle={{
-                                            background:'#1e293b', border:'1px solid #334155', borderRadius:8, padding: '8px 12px'
-                                        }} 
-                                        itemStyle={{ color: '#e2e8f0', fontWeight: 500 }}
-                                        labelStyle={{ color: '#94a3b8', paddingBottom: '4px' }}
-                                    />
-                                    <Legend
-                                        formatter={(v: any) => <span style={{color:'#94a3b8',fontSize:11}}>{v}</span>}
-                                        iconType="circle" iconSize={8}
-                                    />
-                                </PieChart>
-                            </ResponsiveContainer>
+                    <div className="flex flex-col gap-6">
+                        <div className="bg-gray-50 dark:bg-gray-800/30 rounded-2xl p-6 border border-gray-100 dark:border-gray-800">
+                            <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 text-center">
+                                Inventory Health Distribution
+                            </h3>
+                            <div className="h-64">
+                                <ResponsiveContainer width="100%" height={220}>
+                                    <PieChart>
+                                        <Pie
+                                            data={distributionData}
+                                            cx="50%" cy="50%"
+                                            innerRadius={60} outerRadius={90}
+                                            paddingAngle={2} dataKey="value"
+                                        >
+                                            {(distributionData || []).map((entry: any, i: number) => (
+                                                <Cell key={i} fill={entry.color} />
+                                            ))}
+                                        </Pie>
+                                        <RechartsTooltip
+                                            formatter={(v: any, n: any) => [v + ' items', n]}
+                                            contentStyle={{
+                                                background:'#1e293b', border:'1px solid #334155', borderRadius:8, padding: '8px 12px'
+                                            }} 
+                                            itemStyle={{ color: '#e2e8f0', fontWeight: 500 }}
+                                            labelStyle={{ color: '#94a3b8', paddingBottom: '4px' }}
+                                        />
+                                        <Legend
+                                            formatter={(v: any) => <span style={{color:'#94a3b8',fontSize:11}}>{v}</span>}
+                                            iconType="circle" iconSize={8}
+                                        />
+                                    </PieChart>
+                                </ResponsiveContainer>
+                            </div>
+                        </div>
+
+                        <div className="bg-gray-50 dark:bg-gray-800/30 rounded-2xl p-6 border border-gray-100 dark:border-gray-800 flex-grow">
+                            <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 text-center">
+                                Top Capital Blockers
+                            </h3>
+                            <p className="text-xs text-gray-500 mb-4 text-center">Products locking up the most cash</p>
+                            <div className="h-64">
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <BarChart data={topBlockersData} layout="vertical" margin={{ top: 0, right: 10, left: 10, bottom: 0 }}>
+                                        <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke="#e2e8f0" opacity={0.5} />
+                                        <XAxis type="number" 
+                                            tickFormatter={(val) => `₹${val>=100000 ? (val/100000).toFixed(1)+'L' : val>=1000 ? (val/1000).toFixed(1)+'k' : val}`} 
+                                            tick={{ fill: '#94a3b8', fontSize: 10 }} axisLine={false} tickLine={false} 
+                                        />
+                                        <YAxis type="category" dataKey="name" 
+                                            tick={{ fill: '#64748b', fontSize: 11, fontWeight: 500 }} width={100} axisLine={false} tickLine={false} 
+                                        />
+                                        <RechartsTooltip
+                                            formatter={(value: any) => [`₹${Number(value).toLocaleString('en-IN')}`, 'Blocked Cash']}
+                                            labelFormatter={(label, payload) => payload?.[0]?.payload?.fullName || label}
+                                            contentStyle={{
+                                                background:'#1e293b', border:'1px solid #334155', borderRadius:8, padding: '8px 12px'
+                                            }} 
+                                            itemStyle={{ color: '#ef4444', fontWeight: 600 }}
+                                            labelStyle={{ color: '#e2e8f0', paddingBottom: '4px', fontWeight: 500 }}
+                                        />
+                                        <Bar dataKey="value" fill="#ef4444" radius={[0, 4, 4, 0]} barSize={20} />
+                                    </BarChart>
+                                </ResponsiveContainer>
+                            </div>
                         </div>
                     </div>
                 </div>
