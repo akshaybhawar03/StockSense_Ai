@@ -20,7 +20,11 @@ const renderCustomLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent
 
 export default function StockHealthDonut({ data: stockHealthData }: { data: any[] }) {
     if (!stockHealthData || stockHealthData.length === 0) {
-        return <ChartSkeleton height={220} />;
+        return (
+            <div style={{ height: 220 }} className='flex items-center justify-center text-sm font-medium text-gray-500'>
+                No stock data
+            </div>
+        );
     }
 
     return (
@@ -42,20 +46,20 @@ export default function StockHealthDonut({ data: stockHealthData }: { data: any[
                 <Tooltip
                     formatter={(value: any, name: any) => [value + ' products', name]}
                     contentStyle={{
-                        background: '#1e2433',
-                        border: '1px solid #334155',
+                        background: '#ffffff',
+                        border: '1px solid #e5e7eb',
                         borderRadius: 8,
                         fontSize: 13,
-                        color: '#f8fafc',
+                        color: '#111827',
                         padding: '8px 12px'
                     }}
-                    itemStyle={{ color: '#e2e8f0', fontWeight: 500 }}
-                    labelStyle={{ color: '#94a3b8', paddingBottom: '4px' }}
+                    itemStyle={{ color: '#111827', fontWeight: 500 }}
+                    labelStyle={{ color: '#6b7280', paddingBottom: '4px' }}
                 />
                 <Legend
-                    wrapperStyle={{ fontSize: '12px', color: '#9ca3af' }}
+                    wrapperStyle={{ fontSize: '12px', color: '#6b7280' }}
                     formatter={(value: any, entry: any) => (
-                        <span style={{ color: '#9ca3af' }}>
+                        <span style={{ color: '#6b7280' }}>
                             {value}: {entry.payload.value}
                         </span>
                     )}
