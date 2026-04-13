@@ -1,25 +1,38 @@
 import React, { useState, useMemo } from 'react';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import { Card } from '../ui/card';
 import { Badge } from '../ui/badge';
 import { Switch } from '../ui/switch';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer } from 'recharts';
-import { BrainCircuit, AlertTriangle, ShieldCheck, Clock, Settings2 } from 'lucide-react';
+import { BrainCircuit, AlertTriangle, ShieldCheck, Clock, Settings2, CheckCircle2 } from 'lucide-react';
 import { useData } from '../../contexts/DataContext';
 
 export function ReorderPredictor() {
     const { inventory } = useData();
     const [autoReorderEnabled, setAutoReorderEnabled] = useState(false);
+    const [showConfirmModal, setShowConfirmModal] = useState(false);
+
+    const handleToggleAutoReorder = (checked: boolean) => {
+        if (checked) {
+            setShowConfirmModal(true);
+        } else {
+            setAutoReorderEnabled(false);
+        }
+    };
+
+    const confirmAutoReorder = () => {
+        setAutoReorderEnabled(true);
+        setShowConfirmModal(false);
+    };
 
     const { skus, demandData } = useMemo(() => {
-        // Generate AI predictions based on inventory
-        const lowStockItems = inventory.filter(item => item.stock <= 20); // Arbitrary threshold for safety stock warning
-
-        const predictedSkus = lowStockItems.map(item => {
+        // Remove the hard filter: analyze everything instead of filtering by stock <= 20
+        const predictedSkus = inventory.map(item => {
             const dailySales = item.sales > 0 ? Number((item.sales / 30).toFixed(1)) : 0.5; // Simulate daily sales
             const leadTime = Math.floor(Math.random() * 10) + 3; // Mock lead time 3-13 days
             const safetyStock = Math.floor(dailySales * leadTime * 1.5);
+            const reorderPoint = safetyStock;
 
             let outOfStockDays = 0;
             if (dailySales > 0) {
@@ -28,17 +41,18 @@ export function ReorderPredictor() {
                 outOfStockDays = 999;
             }
 
-            let urgency = 'Safe';
-            if (outOfStockDays <= leadTime) urgency = 'Critical';
-            else if (outOfStockDays <= leadTime + 5) urgency = 'Urgent';
-            else if (outOfStockDays <= leadTime + 15) urgency = 'Moderate';
+            let urgency = 'SAFE';
+            if (outOfStockDays <= leadTime) urgency = 'CRITICAL';
+            else if (outOfStockDays <= leadTime + 5) urgency = 'HIGH';
+            else if (outOfStockDays <= leadTime + 15) urgency = 'MEDIUM';
 
-            const recommendation = Math.max(safetyStock * 2 - item.stock, 0) || 50; // Simple reorder formula
+            const recommendation = Math.max(safetyStock * 2 - item.stock, 0) || 50; 
 
             return {
                 id: item.id,
                 name: item.name || item.sku,
                 stock: item.stock,
+                reorderPoint,
                 dailySales,
                 leadTime,
                 safetyStock,
@@ -48,9 +62,12 @@ export function ReorderPredictor() {
             };
         });
 
-        // Sort by urgency
-        const urgencyWeight: Record<string, number> = { 'Critical': 4, 'Urgent': 3, 'Moderate': 2, 'Safe': 1 };
-        predictedSkus.sort((a, b) => urgencyWeight[b.urgency] - urgencyWeight[a.urgency]);
+        // Further filter items out that are completely safe if we only want to show actionable ones
+        const actionableSkus = predictedSkus.filter(sku => sku.urgency !== 'SAFE');
+
+        // Sort by urgency matching the requested labels
+        const urgencyWeight: Record<string, number> = { 'CRITICAL': 4, 'HIGH': 3, 'MEDIUM': 2, 'SAFE': 1 };
+        actionableSkus.sort((a, b) => urgencyWeight[b.urgency] - urgencyWeight[a.urgency]);
 
         // Mock aggregate demand data overall for the chart
         const totalSalesVolume = inventory.reduce((sum, item) => sum + item.sales, 0);
@@ -66,22 +83,54 @@ export function ReorderPredictor() {
             { day: '+30', actual: null, predicted: Math.floor(baseDemand * 1.35) },
         ];
 
-        return { skus: predictedSkus.slice(0, 5), demandData: dData };
+        return { skus: actionableSkus.slice(0, 5), demandData: dData };
     }, [inventory]);
 
     const getUrgencyColor = (urgency: string) => {
         switch (urgency) {
-            case 'Critical': return 'bg-red-500 shadow-red-500/30';
-            case 'Urgent': return 'bg-green-500 shadow-green-500/30';
-            case 'Moderate': return 'bg-green-500 shadow-green-500/30';
-            case 'Safe': return 'bg-green-500 shadow-green-500/30';
-            default: return 'bg-gray-500';
+            case 'CRITICAL': return 'bg-[#dc2626] text-white';
+            case 'HIGH': return 'bg-[#ea580c] text-white';
+            case 'MEDIUM': return 'bg-[#ca8a04] text-white';
+            default: return 'bg-gray-500 text-white';
         }
     };
 
     return (
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="mb-8">
-            <Card className="p-6 md:p-8 bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl border-t-4 border-t-[rgb(var(--accent-primary))] shadow-xl overflow-hidden">
+            <Card className="p-6 md:p-8 bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl border-t-4 border-t-[rgb(var(--accent-primary))] shadow-xl overflow-hidden relative">
+                <AnimatePresence>
+                    {showConfirmModal && (
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="absolute inset-0 z-50 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md flex flex-col items-center justify-center p-6 text-center"
+                        >
+                            <div className="w-16 h-16 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center text-orange-600 dark:text-orange-400 mb-4">
+                                <AlertTriangle className="w-8 h-8" />
+                            </div>
+                            <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Enable Auto-Reorder?</h3>
+                            <p className="text-gray-600 dark:text-gray-400 max-w-md mb-8">
+                                This will allow the AI engine to automatically place orders with your suppliers when stock reaches critical levels. You will be billed for automated purchases.
+                            </p>
+                            <div className="flex gap-4">
+                                <button
+                                    onClick={() => setShowConfirmModal(false)}
+                                    className="px-6 py-2.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 font-medium rounded-lg transition-colors"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={confirmAutoReorder}
+                                    className="px-6 py-2.5 bg-[rgb(var(--accent-primary))] hover:bg-[#059669] text-white font-medium rounded-lg transition-colors shadow-lg shadow-[rgb(var(--accent-primary))]/20"
+                                >
+                                    Yes, Enable AI Auto-Ordering
+                                </button>
+                            </div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
                     <div>
                         <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
@@ -96,7 +145,7 @@ export function ReorderPredictor() {
                     <div className="flex items-center gap-3 bg-gray-50 dark:bg-gray-800 px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700">
                         <Settings2 className="w-4 h-4 text-gray-500" />
                         <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">Auto-Reorder</span>
-                        <Switch checked={autoReorderEnabled} onCheckedChange={setAutoReorderEnabled} />
+                        <Switch checked={autoReorderEnabled} onCheckedChange={handleToggleAutoReorder} />
                     </div>
                 </div>
 
@@ -106,8 +155,8 @@ export function ReorderPredictor() {
                             <Table>
                                 <TableHeader className="bg-gray-50 dark:bg-gray-800/50">
                                     <TableRow>
-                                        <TableHead className="w-[200px]">Product</TableHead>
-                                        <TableHead>Metrics (Cur / Avg / Lead / Safe)</TableHead>
+                                        <TableHead className="w-[200px]">Product Name</TableHead>
+                                        <TableHead>Stock / R.Point / R.Qty</TableHead>
                                         <TableHead>Urgency</TableHead>
                                         <TableHead className="text-right">Recommendation</TableHead>
                                     </TableRow>
@@ -117,36 +166,37 @@ export function ReorderPredictor() {
                                         <TableRow key={sku.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-800/30">
                                             <TableCell className="font-semibold align-top">
                                                 <div className="block">{sku.name}</div>
-                                                <div className="flex items-center mt-1 text-xs text-red-600 dark:text-red-400 font-medium">
-                                                    <AlertTriangle className="w-3 h-3 mr-1" />
-                                                    Stock-out in {sku.outOfStockDays} days
+                                                <div className="flex items-center mt-1 text-xs text-gray-500 dark:text-gray-400 font-medium">
+                                                    <Clock className="w-3 h-3 mr-1" />
+                                                    {sku.outOfStockDays} days to stock-out
                                                 </div>
                                             </TableCell>
                                             <TableCell className="align-top">
-                                                <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-gray-500 dark:text-gray-400">
-                                                    <div>Stock: <strong className="text-gray-900 dark:text-gray-100">{sku.stock}</strong></div>
-                                                    <div>Sales/d: <strong className="text-gray-900 dark:text-gray-100">{sku.dailySales}</strong></div>
-                                                    <div>Lead: <strong className="text-gray-900 dark:text-gray-100">{sku.leadTime}d</strong></div>
-                                                    <div>Safe: <strong className="text-gray-900 dark:text-gray-100">{sku.safetyStock}</strong></div>
+                                                <div className="flex flex-col gap-1 text-sm text-gray-700 dark:text-gray-300">
+                                                    <div>Curr: <strong className="text-gray-900 dark:text-white">{sku.stock}</strong></div>
+                                                    <div className="text-xs text-gray-500">PT: {sku.reorderPoint} &nbsp;|&nbsp; QTY: {sku.recommendation}</div>
                                                 </div>
                                             </TableCell>
                                             <TableCell className="align-top pt-4">
-                                                <div className="flex items-center gap-2">
-                                                    <div className={`w-3 h-3 rounded-full shadow-lg ${getUrgencyColor(sku.urgency)}`} />
-                                                    <span className="text-sm font-medium">{sku.urgency}</span>
-                                                </div>
+                                                <Badge variant="default" className={`${getUrgencyColor(sku.urgency)} border-0 shadow-sm text-xs font-bold leading-none py-1`}>
+                                                    {sku.urgency}
+                                                </Badge>
                                             </TableCell>
-                                            <TableCell className="text-right align-top">
-                                                <div className="inline-flex flex-col items-end">
-                                                    <Badge variant="secondary" className="bg-[rgb(var(--accent-primary))]/10 text-[rgb(var(--accent-primary))] hover:bg-[rgb(var(--accent-primary))]/20 px-3 py-1 text-sm font-bold">
-                                                        Order {sku.recommendation} units
-                                                    </Badge>
+                                            <TableCell className="text-right align-top pt-4">
+                                                <div className="inline-flex flex-col text-sm font-medium text-gray-700 dark:text-gray-300">
+                                                    Order {sku.recommendation} units
                                                 </div>
                                             </TableCell>
                                         </TableRow>
                                     )) : (
                                         <TableRow>
-                                            <TableCell colSpan={4} className="text-center text-gray-500 py-6">All stock levels are perfectly healthy!</TableCell>
+                                            <TableCell colSpan={4} className="h-48 text-center">
+                                                <div className="flex flex-col items-center justify-center text-green-600 dark:text-green-500">
+                                                    <CheckCircle2 className="w-10 h-10 mb-3" />
+                                                    <p className="font-medium text-lg">✅ All stock levels are healthy</p>
+                                                    <p className="text-sm text-gray-500 mt-1">No items require immediate reordering.</p>
+                                                </div>
+                                            </TableCell>
                                         </TableRow>
                                     )}
                                 </TableBody>
