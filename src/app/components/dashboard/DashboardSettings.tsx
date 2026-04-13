@@ -97,7 +97,6 @@ export function DashboardSettings() {
             title: "App Settings",
             items: [
                 { id: 'notifications', label: 'Notifications', icon: Bell },
-                { id: 'appearance', label: 'Appearance', icon: Palette },
                 { id: 'data', label: 'Data & Backup', icon: Database },
             ]
         }
@@ -843,7 +842,6 @@ export function DashboardSettings() {
                             {activeSection === 'security' && renderSecurity()}
                             {activeSection === 'billing' && renderBilling()}
                             {activeSection === 'data' && renderData()}
-                            {activeSection === 'appearance' && renderAppearance()}
                         </motion.div>
                     </AnimatePresence>
                 </div>
