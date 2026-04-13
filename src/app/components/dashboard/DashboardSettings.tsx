@@ -75,32 +75,47 @@ export function DashboardSettings() {
         }
     };
 
-    const sections = [
-        { id: 'profile', label: 'Profile Settings', icon: User, desc: 'Manage your personal details and role' },
-        { id: 'business', label: 'Business Settings', icon: Building2, desc: 'Update business information and tax details' },
-        { id: 'inventory', label: 'Inventory Preferences', icon: Package, desc: 'Configure stock thresholds and tracking' },
-        { id: 'ai', label: 'AI Prediction Settings', icon: BrainCircuit, desc: 'Tune AI forecasting and alerts' },
-        { id: 'notifications', label: 'Notification Settings', icon: Bell, desc: 'Manage email, SMS, and WhatsApp alerts' },
-        { id: 'integration', label: 'Integration Settings', icon: Plug, desc: 'Connect to external sales channels' },
-        { id: 'security', label: 'Security Settings', icon: ShieldCheck, desc: 'Protect your account and login activity' },
-        { id: 'billing', label: 'Billing & Subscription', icon: CreditCard, desc: 'Manage invoices and plans' },
-        { id: 'data', label: 'Data & Backup', icon: Database, desc: 'Export, import, and backup your data' },
-        { id: 'appearance', label: 'Appearance Settings', icon: Palette, desc: 'Customize themes and language' }
+    const sectionGroups = [
+        {
+            title: "Account & Billing",
+            items: [
+                { id: 'profile', label: 'Profile Settings', icon: User },
+                { id: 'business', label: 'Business Settings', icon: Building2 },
+                { id: 'security', label: 'Security Settings', icon: ShieldCheck },
+                { id: 'billing', label: 'Billing & Plan', icon: CreditCard },
+            ]
+        },
+        {
+            title: "Workspace Preferences",
+            items: [
+                { id: 'inventory', label: 'Inventory Rules', icon: Package },
+                { id: 'ai', label: 'AI Forecasting', icon: BrainCircuit },
+                { id: 'integration', label: 'Integrations', icon: Plug },
+            ]
+        },
+        {
+            title: "App Settings",
+            items: [
+                { id: 'notifications', label: 'Notifications', icon: Bell },
+                { id: 'appearance', label: 'Appearance', icon: Palette },
+                { id: 'data', label: 'Data & Backup', icon: Database },
+            ]
+        }
     ];
 
     const SectionHeader = ({ title, description }: { title: string, description: string }) => (
-        <div className="mb-8 border-b border-gray-100 dark:border-gray-800 pb-4">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{title}</h2>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{description}</p>
+        <div className="mb-8 border-b border-gray-100 dark:border-gray-800 pb-5">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">{title}</h2>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1.5">{description}</p>
         </div>
     );
 
     const SaveButton = ({ label = "Save Changes", onClick, disabled }: { label?: string, onClick?: () => void, disabled?: boolean }) => (
-        <div className="mt-8 flex justify-end">
+        <div className="mt-10 pt-6 border-t border-gray-100 dark:border-gray-800 flex justify-end">
             <Button 
                 onClick={onClick}
                 disabled={disabled}
-                className="bg-[rgb(var(--accent-primary))] text-white hover:bg-[rgb(var(--accent-primary))]/90 px-8 disabled:opacity-50"
+                className="bg-[rgb(var(--accent-primary))] text-white hover:bg-[rgb(var(--accent-primary))]/90 px-8 py-2.5 h-auto text-sm font-semibold shadow-md active:scale-95 transition-transform disabled:opacity-50 disabled:cursor-not-allowed"
             >
                 {label}
             </Button>
@@ -396,41 +411,50 @@ export function DashboardSettings() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {platforms.map((platform, idx) => (
-                        <Card key={idx} className="p-6 bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow">
-                            <div className="flex items-start justify-between mb-6">
-                                <div className="flex items-center gap-4">
-                                    <div className="w-14 h-14 bg-gray-50 dark:bg-gray-900 rounded-xl flex items-center justify-center p-2 border border-gray-100 dark:border-gray-800">
-                                        <img src={platform.logo} alt={platform.name} className="max-w-full max-h-full object-contain" />
-                                    </div>
-                                    <div>
-                                        <h3 className="font-bold text-gray-900 dark:text-white text-lg">{platform.name}</h3>
-                                        <div className="flex items-center gap-1.5 mt-1">
-                                            <div className={`w-2 h-2 rounded-full ${platform.status === 'connected' ? 'bg-green-500' : 'bg-red-500'}`}></div>
-                                            <span className="text-xs font-medium text-gray-500 dark:text-gray-400 capitalize">{platform.status}</span>
+                        <div key={idx} className="group relative bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all p-6 overflow-hidden">
+                            {platform.status === 'connected' && (
+                                <div className="absolute top-0 right-0 w-24 h-24 bg-green-50 dark:bg-green-900/10 rounded-bl-full -z-0 opacity-50"></div>
+                            )}
+                            <div className="relative z-10 flex flex-col h-full">
+                                <div className="flex items-start justify-between mb-4">
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-14 h-14 bg-gray-50 dark:bg-gray-900 rounded-xl flex items-center justify-center p-2.5 border border-gray-100 dark:border-gray-800 shadow-sm group-hover:scale-105 transition-transform">
+                                            <img src={platform.logo} alt={platform.name} className="max-w-full max-h-full object-contain drop-shadow-sm" />
+                                        </div>
+                                        <div>
+                                            <h3 className="font-bold text-gray-900 dark:text-white text-lg">{platform.name}</h3>
+                                            <div className="flex items-center gap-1.5 mt-0.5">
+                                                <div className={`w-2 h-2 rounded-full ${platform.status === 'connected' ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]' : 'bg-red-400'}`}></div>
+                                                <span className="text-xs font-medium text-gray-500 dark:text-gray-400 capitalize">{platform.status}</span>
+                                            </div>
                                         </div>
                                     </div>
+                                    {platform.status === 'connected' ? (
+                                        <Button variant="outline" size="sm" className="text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700 hover:border-red-300 dark:border-red-900/50 dark:hover:bg-red-900/20 shadow-sm">
+                                            <Unlink2 className="w-3.5 h-3.5 mr-1" /> Disconnect
+                                        </Button>
+                                    ) : (
+                                        <Button size="sm" className="bg-gray-900 text-white hover:bg-gray-800 dark:bg-gray-100 dark:text-gray-900 shadow-sm">
+                                            <Link2 className="w-3.5 h-3.5 mr-1" /> Connect
+                                        </Button>
+                                    )}
                                 </div>
+
                                 {platform.status === 'connected' ? (
-                                    <Button variant="outline" size="sm" className="text-red-600 hover:bg-red-50 hover:text-red-700 dark:border-gray-700 dark:hover:bg-red-900/20">
-                                        <Unlink2 className="w-3.5 h-3.5 mr-1" /> Disconnect
-                                    </Button>
+                                    <div className="mt-auto pt-4 flex items-center justify-between border-t border-gray-100 dark:border-gray-700">
+                                        <div className="flex items-center gap-2">
+                                            <RefreshCw className="w-3.5 h-3.5 text-gray-400" />
+                                            <span className="text-xs text-gray-500 dark:text-gray-400">Synced 10m ago</span>
+                                        </div>
+                                        <Button variant="ghost" size="sm" className="h-8 text-[rgb(var(--accent-primary))] hover:bg-[rgb(var(--accent-primary))]/10">Sync Now</Button>
+                                    </div>
                                 ) : (
-                                    <Button size="sm" className="bg-[rgb(var(--accent-primary))] hover:bg-[rgb(var(--accent-primary))]/90 text-white">
-                                        <Link2 className="w-3.5 h-3.5 mr-1" /> Connect
-                                    </Button>
+                                    <div className="mt-auto pt-4 text-xs text-gray-500 dark:text-gray-500 border-t border-gray-100 dark:border-gray-700">
+                                        Connect {platform.name} to sync products and orders
+                                    </div>
                                 )}
                             </div>
-
-                            {platform.status === 'connected' && (
-                                <div className="flex items-center justify-between border-t border-gray-100 dark:border-gray-700 pt-4 mt-4">
-                                    <div className="flex items-center gap-2">
-                                        <RefreshCw className="w-4 h-4 text-gray-400" />
-                                        <span className="text-sm text-gray-600 dark:text-gray-400">Sync: 10 mins ago</span>
-                                    </div>
-                                    <Button variant="secondary" size="sm">Sync Now</Button>
-                                </div>
-                            )}
-                        </Card>
+                        </div>
                     ))}
                 </div>
             </motion.div>
@@ -592,59 +616,80 @@ export function DashboardSettings() {
 
     const renderData = () => (
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-6">
-            <SectionHeader title="Data & Backup" description="Safeguard your inventory records and export data for reporting." />
+            <SectionHeader title="Data & Backup" description="Safeguard your inventory records and manage external data operations." />
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                <Card className="p-6 bg-white dark:bg-gray-800 shadow-sm border border-gray-100 dark:border-gray-700">
-                    <div className="w-12 h-12 bg-[rgb(var(--accent-primary))]/10 rounded-xl flex items-center justify-center text-[rgb(var(--accent-primary))] mb-4">
-                        <HardDrive className="w-6 h-6" />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Backup Card */}
+                <div className="relative group overflow-hidden bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all p-6">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-[rgb(var(--accent-primary))]/5 rounded-bl-full -z-0"></div>
+                    <div className="relative z-10 flex flex-col h-full">
+                        <div className="w-12 h-12 bg-gray-100 dark:bg-gray-700 rounded-2xl flex items-center justify-center text-[rgb(var(--accent-primary))] mb-5 shadow-sm">
+                            <HardDrive className="w-6 h-6" />
+                        </div>
+                        <h3 className="font-bold text-lg text-gray-900 dark:text-white mb-2">Create Backup</h3>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 flex-1 mb-6">Create a secure snapshot of your current inventory state and configuration.</p>
+                        
+                        <div className="flex flex-col gap-3">
+                            <span className="text-xs font-medium text-gray-400 bg-gray-50 dark:bg-gray-900 px-3 py-1 rounded-md self-start">Last backup: Today, 10:30 AM</span>
+                            <Button className="w-full bg-[rgb(var(--accent-primary))] text-white hover:bg-[rgb(var(--accent-primary))]/90 shadow-md">
+                                Backup Now
+                            </Button>
+                        </div>
                     </div>
-                    <h3 className="font-bold text-xl text-gray-900 dark:text-white mb-2">Create Backup</h3>
-                    <p className="text-sm text-gray-500 mb-6">Manually backup your complete inventory, supplier details, and settings.</p>
-                    <div className="flex items-center justify-between">
-                        <span className="text-xs text-gray-400">Last backup: 2 hours ago</span>
-                        <Button className="bg-[rgb(var(--accent-primary))] text-white hover:bg-[rgb(var(--accent-primary))]/90">
-                            Backup Now
-                        </Button>
-                    </div>
-                </Card>
+                </div>
 
-                <Card className="p-6 bg-white dark:bg-gray-800 shadow-sm border border-gray-100 dark:border-gray-700">
-                    <div className="w-12 h-12 bg-green-100 dark:bg-green-900/20 rounded-xl flex items-center justify-center text-green-600 dark:text-green-400 mb-4">
-                        <Upload className="w-6 h-6" />
+                {/* Import Card */}
+                <div className="relative group overflow-hidden bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all p-6">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-green-50 dark:bg-green-900/10 rounded-bl-full -z-0"></div>
+                    <div className="relative z-10 flex flex-col h-full">
+                        <div className="w-12 h-12 bg-gray-100 dark:bg-gray-700 rounded-2xl flex items-center justify-center text-green-600 dark:text-green-400 mb-5 shadow-sm">
+                            <Upload className="w-6 h-6" />
+                        </div>
+                        <h3 className="font-bold text-lg text-gray-900 dark:text-white mb-2">Import Data</h3>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 flex-1 mb-6">Bulk upload tools for suppliers, inventory items, and multi-location data.</p>
+                        
+                        <div className="flex flex-col sm:flex-row items-center gap-3">
+                            <Button variant="outline" className="w-full sm:flex-1 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-600">Template</Button>
+                            <Button variant="default" className="w-full sm:flex-1 bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900 hover:bg-gray-800">
+                                <Upload className="w-4 h-4 mr-2" /> Upload CSV
+                            </Button>
+                        </div>
                     </div>
-                    <h3 className="font-bold text-xl text-gray-900 dark:text-white mb-2">Import Data</h3>
-                    <p className="text-sm text-gray-500 mb-6">Bulk upload items using a CSV or Excel template file.</p>
-                    <div className="flex items-center gap-3">
-                        <Button variant="outline" className="w-full">Download Template</Button>
-                        <Button variant="default" className="w-full bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900">Upload CSV</Button>
-                    </div>
-                </Card>
+                </div>
             </div>
 
-            <div className="space-y-4 bg-gray-50 dark:bg-gray-800/50 p-6 rounded-2xl border border-gray-100 dark:border-gray-800">
-                <div className="flex items-center justify-between">
-                    <div>
-                        <Label className="text-base">Auto Daily Backup</Label>
-                        <p className="text-sm text-gray-500">System securely creates an encrypted backup every 24hrs</p>
-                    </div>
-                    <Switch defaultChecked />
+            <div className="mt-8 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
+                <div className="px-6 py-4 bg-gray-50/80 dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                    <h3 className="font-bold text-gray-900 dark:text-white text-base">Advanced Data Tools</h3>
                 </div>
-                <div className="w-full border-t border-gray-200 dark:border-gray-700"></div>
-                <div className="flex items-center justify-between">
-                    <div>
-                        <Label className="text-base text-gray-900 dark:text-white">Export Inventory (CSV)</Label>
-                        <p className="text-sm text-gray-500">Download your current stock list for offline viewing</p>
+                <div className="divide-y divide-gray-100 dark:divide-gray-800 p-2">
+                    <div className="flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-800/80 rounded-xl transition-colors">
+                        <div>
+                            <Label className="text-base font-semibold text-gray-900 dark:text-white cursor-pointer">Auto Daily Backup</Label>
+                            <p className="text-sm text-gray-500 mt-1">Automatically save encrypted backups every 24 hours</p>
+                        </div>
+                        <Switch defaultChecked />
                     </div>
-                    <Button variant="outline" size="sm"><Download className="w-4 h-4 mr-2" /> Export</Button>
-                </div>
-                <div className="w-full border-t border-gray-200 dark:border-gray-700"></div>
-                <div className="flex items-center justify-between">
-                    <div>
-                        <Label className="text-base text-red-600 dark:text-red-400">Restore Previous Backup</Label>
-                        <p className="text-sm text-gray-500">Rollback your inventory state to an older point in time</p>
+                    
+                    <div className="flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-800/80 rounded-xl transition-colors">
+                        <div>
+                            <Label className="text-base font-semibold text-gray-900 dark:text-white">Export Inventory (CSV)</Label>
+                            <p className="text-sm text-gray-500 mt-1">Download complete stock list for reporting</p>
+                        </div>
+                        <Button variant="outline" size="sm" className="shadow-sm">
+                            <Download className="w-4 h-4 mr-2" /> Export
+                        </Button>
                     </div>
-                    <Button variant="outline" size="sm" className="border-red-200 text-red-600 hover:bg-red-50 dark:border-red-900 dark:hover:bg-red-900/20">Restore</Button>
+
+                    <div className="flex items-center justify-between p-4 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-xl transition-colors group">
+                        <div>
+                            <Label className="text-base font-semibold text-red-600 dark:text-red-400">Restore Point</Label>
+                            <p className="text-sm text-red-400 dark:text-red-500/80 mt-1">Rollback inventory to a historical state</p>
+                        </div>
+                        <Button variant="outline" size="sm" className="border-red-200 text-red-600 hover:bg-red-600 hover:text-white dark:border-red-900/50 transition-all opacity-80 group-hover:opacity-100 shadow-sm">
+                            Restore System
+                        </Button>
+                    </div>
                 </div>
             </div>
         </motion.div>
@@ -744,54 +789,63 @@ export function DashboardSettings() {
     );
 
     return (
-        <div className="max-w-6xl mx-auto py-6">
+        <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
             <div className="mb-8">
-                <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white mb-2">Settings</h1>
-                <p className="text-gray-500">Manage your account settings, preferences, and subscriptions.</p>
+                <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white mb-2">Settings & Preferences</h1>
+                <p className="text-gray-500">Manage your account settings, business preferences, and platform integrations.</p>
             </div>
 
-            <div className="flex flex-col lg:flex-row gap-8">
+            <div className="flex flex-col md:flex-row bg-white dark:bg-gray-900/50 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden min-h-[700px]">
                 {/* Left Sidebar Menu */}
-                <Card className="w-full lg:w-72 flex-shrink-0 p-3 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-gray-100 dark:border-gray-800 shadow-sm h-fit lg:sticky lg:top-24">
-                    <nav className="space-y-1">
-                        {sections.map((section) => {
-                            const isActive = activeSection === section.id;
-                            const Icon = section.icon;
-                            return (
-                                <button
-                                    key={section.id}
-                                    onClick={() => setActiveSection(section.id)}
-                                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${isActive
-                                            ? 'bg-[rgb(var(--accent-primary))]/10 text-[rgb(var(--accent-primary))] dark:bg-[rgb(var(--accent-primary))]/20'
-                                            : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white'
-                                        }`}
-                                >
-                                    <Icon className={`w-5 h-5 ${isActive ? '' : 'text-gray-400'}`} />
-                                    {section.label}
-                                </button>
-                            );
-                        })}
+                <div className="w-full md:w-72 flex-shrink-0 bg-gray-50/50 dark:bg-gray-800/30 border-r border-gray-200 dark:border-gray-800 p-6 overflow-y-auto">
+                    <nav className="space-y-8">
+                        {sectionGroups.map((group, gIdx) => (
+                            <div key={gIdx}>
+                                <h3 className="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
+                                    {group.title}
+                               </h3>
+                                <ul className="space-y-1">
+                                    {group.items.map((section) => {
+                                        const isActive = activeSection === section.id;
+                                        const Icon = section.icon;
+                                        return (
+                                            <li key={section.id}>
+                                                <button
+                                                    onClick={() => setActiveSection(section.id)}
+                                                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
+                                                        isActive
+                                                            ? 'bg-[rgb(var(--accent-primary))] text-white shadow-md shadow-[rgb(var(--accent-primary))]/20'
+                                                            : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white'
+                                                    }`}
+                                                >
+                                                    <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-gray-400 dark:text-gray-500'}`} />
+                                                    {section.label}
+                                                </button>
+                                            </li>
+                                        );
+                                    })}
+                                </ul>
+                            </div>
+                        ))}
                     </nav>
-                </Card>
+                </div>
 
                 {/* Main Content Area */}
-                <div className="flex-1 min-w-0">
-                    <Card className="p-6 sm:p-8 bg-white dark:bg-gray-900/50 border-gray-100 dark:border-gray-800 shadow-lg min-h-[600px]">
-                        <AnimatePresence mode="wait">
-                            <motion.div key={activeSection} className="h-full">
-                                {activeSection === 'profile' && renderProfileSettings()}
-                                {activeSection === 'business' && renderBusinessSettings()}
-                                {activeSection === 'inventory' && renderInventoryPreferences()}
-                                {activeSection === 'ai' && renderAI()}
-                                {activeSection === 'notifications' && renderNotifications()}
-                                {activeSection === 'integration' && renderIntegrations()}
-                                {activeSection === 'security' && renderSecurity()}
-                                {activeSection === 'billing' && renderBilling()}
-                                {activeSection === 'data' && renderData()}
-                                {activeSection === 'appearance' && renderAppearance()}
-                            </motion.div>
-                        </AnimatePresence>
-                    </Card>
+                <div className="flex-1 min-w-0 p-6 sm:p-10">
+                    <AnimatePresence mode="wait">
+                        <motion.div key={activeSection} className="h-full w-full max-w-3xl mx-auto">
+                            {activeSection === 'profile' && renderProfileSettings()}
+                            {activeSection === 'business' && renderBusinessSettings()}
+                            {activeSection === 'inventory' && renderInventoryPreferences()}
+                            {activeSection === 'ai' && renderAI()}
+                            {activeSection === 'notifications' && renderNotifications()}
+                            {activeSection === 'integration' && renderIntegrations()}
+                            {activeSection === 'security' && renderSecurity()}
+                            {activeSection === 'billing' && renderBilling()}
+                            {activeSection === 'data' && renderData()}
+                            {activeSection === 'appearance' && renderAppearance()}
+                        </motion.div>
+                    </AnimatePresence>
                 </div>
             </div>
         </div>
