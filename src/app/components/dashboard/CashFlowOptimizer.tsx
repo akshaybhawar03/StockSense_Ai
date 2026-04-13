@@ -56,9 +56,9 @@ export function CashFlowOptimizer({ healthData }: CashFlowOptimizerProps) {
                                         strokeLinecap="round"
                                         transform="rotate(-90 60 60)" />
                                     <text x="60" y="55" textAnchor="middle"
-                                        fill="white" fontSize="20" fontWeight="700">{score}</text>
+                                        className="fill-gray-900 dark:fill-white" fontSize="20" fontWeight="700">{score}</text>
                                     <text x="60" y="72" textAnchor="middle"
-                                        fill="#64748b" fontSize="10">
+                                        className="fill-gray-500 dark:fill-gray-400" fontSize="10">
                                         {healthData?.score_label || 'No Data'}
                                     </text>
                                 </svg>
@@ -119,8 +119,8 @@ export function CashFlowOptimizer({ healthData }: CashFlowOptimizerProps) {
                         </div>
 
                         <div className="relative overflow-hidden rounded-2xl p-6 border border-[rgb(var(--accent-primary))]/30 bg-gradient-to-br from-[rgb(var(--accent-primary))]/10 to-transparent">
-                            <div className="absolute top-0 right-0 p-4 opacity-20">
-                                <RefreshCw className="w-24 h-24" />
+                            <div className="absolute top-4 right-4 opacity-20">
+                                <RefreshCw className="w-10 h-10" />
                             </div>
                             <div className="relative z-10 h-full flex flex-col justify-center">
                                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[rgb(var(--accent-primary))]/20 text-[rgb(var(--accent-primary))] font-medium text-xs mb-4 w-fit">
