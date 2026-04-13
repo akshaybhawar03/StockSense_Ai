@@ -11,7 +11,12 @@ export default function TopProductsBar({ data }: { data: any[] }) {
             <BarChart data={data} layout='vertical' margin={{ left:10 }}>
                 <XAxis type='number' tickFormatter={v => '₹'+(v/1000).toFixed(0)+'k'} tick={{ fontSize:11, fill:'#9ca3af' }} axisLine={false} />
                 <YAxis type='category' dataKey='name' tickFormatter={n => n.length > 16 ? n.slice(0,16)+'...' : n} tick={{ fontSize:10, fill:'#9ca3af' }} width={110} axisLine={false} />
-                <Tooltip contentStyle={{ backgroundColor:'#1f2937', border:'1px solid #374151', borderRadius:'8px' }} formatter={(v: any) => ['₹'+v.toLocaleString('en-IN'), 'Value']} />
+                <Tooltip 
+                    contentStyle={{ backgroundColor:'#1f2937', border:'1px solid #374151', borderRadius:'8px', color: '#f8fafc' }} 
+                    itemStyle={{ color: '#e2e8f0', fontWeight: 500 }}
+                    labelStyle={{ color: '#94a3b8', paddingBottom: '4px' }}
+                    formatter={(v: any) => ['₹'+v.toLocaleString('en-IN'), 'Value']} 
+                />
                 <Bar dataKey='totalValue' fill='#10b981' radius={[0,4,4,0]} />
             </BarChart>
         </ResponsiveContainer>

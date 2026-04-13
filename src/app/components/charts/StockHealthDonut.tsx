@@ -46,7 +46,11 @@ export default function StockHealthDonut({ data: stockHealthData }: { data: any[
                         border: '1px solid #334155',
                         borderRadius: 8,
                         fontSize: 13,
+                        color: '#f8fafc',
+                        padding: '8px 12px'
                     }}
+                    itemStyle={{ color: '#e2e8f0', fontWeight: 500 }}
+                    labelStyle={{ color: '#94a3b8', paddingBottom: '4px' }}
                 />
                 <Legend
                     wrapperStyle={{ fontSize: '12px', color: '#9ca3af' }}

@@ -219,8 +219,11 @@ export function DeadStockAnalyzer({ deadStockData, isLoading, isError }: DeadSto
                                     <RechartsTooltip
                                         formatter={(v: any, n: any) => [v + ' items', n]}
                                         contentStyle={{
-                                            background:'#1e293b', border:'1px solid #334155', borderRadius:8
-                                        }} />
+                                            background:'#1e293b', border:'1px solid #334155', borderRadius:8, padding: '8px 12px'
+                                        }} 
+                                        itemStyle={{ color: '#e2e8f0', fontWeight: 500 }}
+                                        labelStyle={{ color: '#94a3b8', paddingBottom: '4px' }}
+                                    />
                                     <Legend
                                         formatter={(v: any) => <span style={{color:'#94a3b8',fontSize:11}}>{v}</span>}
                                         iconType="circle" iconSize={8}

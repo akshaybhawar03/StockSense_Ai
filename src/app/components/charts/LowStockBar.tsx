@@ -11,7 +11,12 @@ export default function LowStockBar({ data }: { data: any[] }) {
             <BarChart data={data} layout='vertical' margin={{ left:10 }}>
                 <XAxis type='number' tick={{ fontSize:11, fill:'#9ca3af' }} axisLine={false} />
                 <YAxis type='category' dataKey='name' tickFormatter={n => n.length > 10 ? n.slice(0,10)+'...' : n} tick={{ fontSize:10, fill:'#9ca3af' }} width={110} axisLine={false} />
-                <Tooltip contentStyle={{ backgroundColor:'#1f2937', border:'1px solid #374151', borderRadius:'8px' }} formatter={(v: any, name: any, props: any) => [`${v} / ${props.payload.threshold}`, 'Stock vs Threshold']} />
+                <Tooltip 
+                    contentStyle={{ backgroundColor:'#1f2937', border:'1px solid #374151', borderRadius:'8px', color: '#f8fafc' }} 
+                    itemStyle={{ color: '#e2e8f0', fontWeight: 500 }}
+                    labelStyle={{ color: '#94a3b8', paddingBottom: '4px' }}
+                    formatter={(v: any, name: any, props: any) => [`${v} / ${props.payload.threshold}`, 'Stock vs Threshold']} 
+                />
                 
                 {data.some((p: any) => p.threshold > 0) && (
                     <ReferenceLine x={data[0]?.threshold || 10} stroke='#ef4444' strokeDasharray='4 4' label={{ value:'Reorder', position:'insideBottomRight', fontSize:10, fill:'#ef4444' }} />

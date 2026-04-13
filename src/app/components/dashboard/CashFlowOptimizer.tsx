@@ -104,8 +104,11 @@ export function CashFlowOptimizer({ healthData }: CashFlowOptimizerProps) {
                                     <Tooltip
                                         formatter={(v: any) => ['₹'+Number(v).toLocaleString('en-IN'), 'Value']}
                                         contentStyle={{
-                                            background:'#1e293b', border:'1px solid #334155', borderRadius:8
-                                        }} />
+                                            background:'#1e293b', border:'1px solid #334155', borderRadius:8, color: '#f8fafc'
+                                        }} 
+                                        itemStyle={{ color: '#e2e8f0', fontWeight: 500 }}
+                                        labelStyle={{ color: '#94a3b8', marginBottom: '4px' }}
+                                    />
                                     <Bar dataKey="value" radius={[0,6,6,0]}>
                                         {(healthData?.capital_distribution || []).map((entry: any, i: number) => (
                                             <Cell key={i} fill={entry.color} />

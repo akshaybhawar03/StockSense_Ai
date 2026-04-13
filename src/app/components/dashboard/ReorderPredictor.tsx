@@ -166,7 +166,11 @@ export function ReorderPredictor() {
                                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#374151" opacity={0.1} />
                                     <XAxis dataKey="day" tick={{ fontSize: 10 }} stroke="#9ca3af" />
                                     <YAxis tick={{ fontSize: 10 }} stroke="#9ca3af" />
-                                    <RechartsTooltip contentStyle={{ borderRadius: '8px', fontSize: '12px' }} labelStyle={{ color: '#6b7280', marginBottom: '4px' }} />
+                                    <RechartsTooltip 
+                                        contentStyle={{ borderRadius: '8px', fontSize: '12px', background: '#1e293b', border: '1px solid #334155' }} 
+                                        itemStyle={{ color: '#e2e8f0', fontWeight: 500 }}
+                                        labelStyle={{ color: '#94a3b8', marginBottom: '4px' }} 
+                                    />
                                     <Legend wrapperStyle={{ fontSize: '11px', marginTop: '10px' }} />
                                     <Line type="monotone" dataKey="actual" name="Actual Sales" stroke="#10b981" strokeWidth={2} dot={{ r: 3 }} activeDot={{ r: 5 }} />
                                     <Line type="monotone" dataKey="predicted" name="AI Predicted" stroke="rgb(var(--accent-primary))" strokeWidth={2} strokeDasharray="4 4" dot={{ r: 3 }} activeDot={{ r: 5 }} />

@@ -181,7 +181,9 @@ export function PowerBIDashboard() {
                                 />
                                 <RechartsTooltip 
                                     cursor={{ fill: 'rgba(99, 102, 241, 0.1)' }}
-                                    contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}
+                                    contentStyle={{ borderRadius: '8px', border: '1px solid #334155', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)', background: '#1e293b' }}
+                                    itemStyle={{ color: '#e2e8f0', fontWeight: 500 }}
+                                    labelStyle={{ color: '#94a3b8', marginBottom: '4px' }}
                                 />
                                 <Bar 
                                     dataKey={analysis.yAxisProp} 

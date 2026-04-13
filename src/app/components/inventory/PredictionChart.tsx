@@ -67,7 +67,9 @@ export function PredictionChart({ productId }: { productId?: number }) {
                         <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: '#6b7280', fontSize: 12 }} dy={10} />
                         <YAxis axisLine={false} tickLine={false} tick={{ fill: '#6b7280', fontSize: 12 }} dx={-10} />
                         <Tooltip
-                            contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)' }}
+                            contentStyle={{ borderRadius: '12px', border: '1px solid #334155', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)', background: '#1e293b' }}
+                            itemStyle={{ color: '#e2e8f0', fontWeight: 500 }}
+                            labelStyle={{ color: '#94a3b8', paddingBottom: '4px' }}
                             itemStyle={{ color: '#111827', fontWeight: 500 }}
                             labelStyle={{ color: '#6b7280', marginBottom: '4px' }}
                         />
