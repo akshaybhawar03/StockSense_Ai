@@ -124,6 +124,7 @@ export function GlobalCharts({ stats }: { stats: any }) {
                             outerRadius={115}
                             paddingAngle={2}
                             dataKey="value"
+                            nameKey="category"
                             labelLine={false}
                             label={renderCustomLabel}
                         >
