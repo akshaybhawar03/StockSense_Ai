@@ -11,7 +11,7 @@ interface AuthContextType {
     isLoggedIn: boolean;
     user: User | null;
     login: (username: string, password: string, name?: string) => Promise<void>;
-    register: (name: string, email: string, password: string) => Promise<void>;
+    register: (name: string, email: string, password: string, confirmPassword?: string, inviteCode?: string) => Promise<void>;
     logout: () => void;
     isLoading: boolean;
 }
@@ -66,14 +66,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
 
     // ---------------- REGISTER ----------------
-    const register = async (name: string, email: string, password: string) => {
+    const register = async (name: string, email: string, password: string, confirmPassword?: string, inviteCode?: string) => {
         setIsLoading(true);
 
         try {
             await api.post("/auth/register", {
-                name,
+                full_name: name,
                 email,
                 password,
+                confirm_password: confirmPassword || password,
+                invite_code: inviteCode,
             });
 
             // After register redirect to login
