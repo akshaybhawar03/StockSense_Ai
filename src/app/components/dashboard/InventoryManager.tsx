@@ -200,13 +200,12 @@ export function InventoryManager() {
                                     </Button>
                                 </TableHead>
                                 <TableHead className="text-center w-[120px]">Status</TableHead>
-                                <TableHead className="text-right w-[100px]">Actions</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {!loading && items.length === 0 ? (
                                 <TableRow>
-                                    <TableCell colSpan={6}>
+                                    <TableCell colSpan={5}>
                                         <div className="flex flex-col items-center justify-center h-64 gap-3">
                                             <p className="text-gray-400 text-sm">No inventory items found.</p>
                                             <p className="text-gray-500 text-xs">Upload a CSV to get started.</p>
@@ -233,26 +232,6 @@ export function InventoryManager() {
                                     </TableCell>
                                     <TableCell className="text-center">
                                         <StatusBadge item={item} />
-                                    </TableCell>
-                                    <TableCell className="text-right">
-                                        <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <Button
-                                                size="icon"
-                                                variant="ghost"
-                                                className="h-8 w-8 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/30"
-                                                onClick={() => setEditItem(item)}
-                                            >
-                                                <Edit2 className="w-4 h-4" />
-                                            </Button>
-                                            <Button
-                                                size="icon"
-                                                variant="ghost"
-                                                className="h-8 w-8 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30"
-                                                onClick={() => handleDelete(item.id, item.name)}
-                                            >
-                                                <Trash2 className="w-4 h-4" />
-                                            </Button>
-                                        </div>
                                     </TableCell>
                                 </TableRow>
                             ))}
