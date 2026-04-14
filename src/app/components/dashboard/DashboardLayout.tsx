@@ -14,7 +14,10 @@ import {
     X,
     UploadCloud,
     Sparkles,
-    BarChart3
+    BarChart3,
+    ShoppingCart,
+    ShoppingBag,
+    FileText,
 } from 'lucide-react';
 import { NotificationBell } from './NotificationBell';
 import { triggerScan } from '../../services/notificationService';
@@ -29,6 +32,7 @@ import { getInventory } from '../../services/inventory';
 import { getForecast } from '../../services/forecast';
 import { getAnalytics } from '../../services/analytics';
 import { getAlerts } from '../../services/ai';
+import { getSales, getPurchases, getInvoices } from '../../services/sales';
 
 // Map nav paths to their prefetch configs
 const prefetchMap: Record<string, { queryKey: any[]; queryFn: () => Promise<any> }[]> = {
@@ -57,6 +61,24 @@ const prefetchMap: Record<string, { queryKey: any[]; queryFn: () => Promise<any>
     '/dashboard/alerts': [
         { queryKey: ['alerts', 'active'], queryFn: () => getAlerts().then(r => r.data) },
     ],
+    '/dashboard/sales': [
+        { queryKey: ['sales', 'list'], queryFn: () => getSales().then(r => {
+            const d = r.data;
+            return Array.isArray(d) ? d : (d.items ?? d.data ?? d.sales ?? []);
+        }) },
+    ],
+    '/dashboard/purchases': [
+        { queryKey: ['purchases', 'list'], queryFn: () => getPurchases().then(r => {
+            const d = r.data;
+            return Array.isArray(d) ? d : (d.items ?? d.data ?? d.purchases ?? []);
+        }) },
+    ],
+    '/dashboard/invoices': [
+        { queryKey: ['invoices', 'list'], queryFn: () => getInvoices().then(r => {
+            const d = r.data;
+            return Array.isArray(d) ? d : (d.items ?? d.data ?? d.invoices ?? []);
+        }) },
+    ],
 };
 
 export function DashboardLayout() {
@@ -80,15 +102,18 @@ export function DashboardLayout() {
     }, [location.pathname]);
 
     const navItems = [
-        { name: 'Dashboard', icon: LayoutDashboard, path: '/dashboard' },
-        { name: 'Inventory', icon: Package, path: '/dashboard/inventory' },
-        { name: 'Forecast', icon: TrendingUp, path: '/dashboard/forecast' },
-        { name: 'AI Assistant', icon: Bot, path: '/dashboard/ai-assistant', badge: 'AI' },
-        { name: 'Alerts', icon: Bell, path: '/dashboard/alerts' },
-        { name: 'Integrations', icon: Plug, path: '/dashboard/integrations' },
-        { name: 'Settings', icon: Settings, path: '/dashboard/settings' },
-        { name: 'AI Report', icon: Sparkles, path: '/dashboard/ai-report', badge: 'New' },
-        { name: 'Analytics', icon: BarChart3, path: '/dashboard/analytics' },
+        { name: 'Dashboard',   icon: LayoutDashboard, path: '/dashboard' },
+        { name: 'Inventory',   icon: Package,         path: '/dashboard/inventory' },
+        { name: 'Sales',       icon: ShoppingCart,    path: '/dashboard/sales' },
+        { name: 'Purchases',   icon: ShoppingBag,     path: '/dashboard/purchases' },
+        { name: 'Invoices',    icon: FileText,        path: '/dashboard/invoices' },
+        { name: 'Forecast',    icon: TrendingUp,      path: '/dashboard/forecast' },
+        { name: 'AI Assistant',icon: Bot,             path: '/dashboard/ai-assistant', badge: 'AI' },
+        { name: 'Alerts',      icon: Bell,            path: '/dashboard/alerts' },
+        { name: 'Integrations',icon: Plug,            path: '/dashboard/integrations' },
+        { name: 'Settings',    icon: Settings,        path: '/dashboard/settings' },
+        { name: 'AI Report',   icon: Sparkles,        path: '/dashboard/ai-report', badge: 'New' },
+        { name: 'Analytics',   icon: BarChart3,       path: '/dashboard/analytics' },
     ];
 
     // Prefetch data on nav hover

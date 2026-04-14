@@ -23,6 +23,9 @@ import { SmartDashboard } from './pages/SmartDashboard';
 import { AiReportPage } from './components/dashboard/AiReportPage';
 import { AnalyticsPage } from './components/dashboard/AnalyticsPage';
 import { StockAIChat } from './components/StockAIChat';
+import { SalesPage } from './components/dashboard/SalesPage';
+import { PurchasesPage } from './components/dashboard/PurchasesPage';
+import { InvoicesPage } from './components/dashboard/InvoicesPage';
 
 export const router = createBrowserRouter([
   {
@@ -61,6 +64,9 @@ export const router = createBrowserRouter([
       { path: 'smart-dashboard', Component: SmartDashboard },
       { path: 'ai-report', Component: AiReportPage },
       { path: 'analytics', Component: AnalyticsPage },
+      { path: 'sales', Component: SalesPage },
+      { path: 'purchases', Component: PurchasesPage },
+      { path: 'invoices', Component: InvoicesPage },
     ],
   },
 ]);

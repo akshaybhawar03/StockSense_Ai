@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Card } from '../components/ui/card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../components/ui/tooltip';
-import { CloudUpload, Package, DollarSign, AlertTriangle, TrendingUp, TrendingDown, Clock, Activity, RefreshCw, X, Maximize, BarChart3, HelpCircle } from 'lucide-react';
+import { CloudUpload, Package, DollarSign, AlertTriangle, TrendingUp, TrendingDown, Clock, Activity, RefreshCw, X, Maximize, BarChart3, HelpCircle, ShoppingCart, ShoppingBag, ArrowRightLeft, Star, Plus } from 'lucide-react';
 import { useData } from '../contexts/DataContext';
 import { CsvUploadModal } from '../components/dashboard/CsvUploadModal';
 import { GlobalCharts } from '../components/dashboard/GlobalCharts';
@@ -10,6 +10,9 @@ import { CashFlowOptimizer } from '../components/dashboard/CashFlowOptimizer';
 import { DeadStockAnalyzer } from '../components/dashboard/DeadStockAnalyzer';
 import { ReorderPredictor } from '../components/dashboard/ReorderPredictor';
 import { PowerBIDashboard } from '../components/dashboard/PowerBIDashboard';
+import { SalesPurchaseChart } from '../components/dashboard/SalesPurchaseChart';
+import { SaleModal } from '../components/dashboard/SaleModal';
+import { PurchaseModal } from '../components/dashboard/PurchaseModal';
 import { getDashboardStats, getHealthScore, getDeadStockAnalysis } from '../services/dashboard';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { DashboardSkeleton } from '../components/skeletons/DashboardSkeleton';
@@ -35,8 +38,10 @@ function resolveDeadStock(
 
 export function Dashboard() {
   const { datasets, kpis } = useData();
-  const [isUploadOpen, setIsUploadOpen] = useState(false);
+  const [isUploadOpen, setIsUploadOpen]     = useState(false);
   const [isFullscreenPowerBI, setIsFullscreenPowerBI] = useState(false);
+  const [isSaleOpen, setIsSaleOpen]         = useState(false);
+  const [isPurchaseOpen, setIsPurchaseOpen] = useState(false);
   const queryClient = useQueryClient();
 
   const formatINR = (val: any) => {
@@ -120,7 +125,7 @@ export function Dashboard() {
     { label: 'Healthy', value: healthy, color: '#10b981' },
     { label: 'Low Stock', value: stats?.low_stock_items ?? kpis?.lowStock ?? 0, color: '#f59e0b' },
     { label: 'Out of Stock', value: stats?.out_of_stock ?? kpis?.outOfStock ?? 0, color: '#ef4444' },
-    { label: 'Dead Stock', value: (stats as any)?.dead_stock_items ?? (stats as any)?.deadStock ?? (stats as any)?.dead_stock ?? deadStockData?.summary?.total_dead_stock ?? (deadStockData as any)?.dead_stock_items ?? kpis?.deadStock ?? 0, color: '#6b7280' },
+    { label: 'Dead Stock', value: resolveDeadStock(stats, deadStockData ?? null, kpis?.deadStock ?? 0), color: '#6b7280' },
   ];
 
   // Show skeleton UI only if completely empty and no local KPI data
@@ -196,17 +201,31 @@ export function Dashboard() {
         )
       ) : (
         <>
-          <div className="flex justify-between items-center">
+          <div className="flex flex-wrap justify-between items-center gap-3">
             <h2 className="text-xl font-bold font-heading text-gray-900 dark:text-white">{stats?.warehouse_name || 'Overview'}</h2>
-            {datasets && datasets.length > 0 && (
+            <div className="flex flex-wrap items-center gap-2">
               <button
-                onClick={() => setIsFullscreenPowerBI(true)}
-                className="px-4 py-2 bg-gradient-to-r from-green-500 to-green-600 text-white font-medium rounded-lg text-sm flex items-center gap-2 shadow-sm hover:shadow-md transition-all active:scale-95"
+                onClick={() => setIsSaleOpen(true)}
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg text-sm flex items-center gap-2 shadow-sm hover:shadow-md transition-all active:scale-95"
               >
-                <BarChart3 className="w-4 h-4" />
-                View Raw Data Dashboard
+                <Plus className="w-4 h-4" /> New Sale
               </button>
-            )}
+              <button
+                onClick={() => setIsPurchaseOpen(true)}
+                className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg text-sm flex items-center gap-2 shadow-sm hover:shadow-md transition-all active:scale-95"
+              >
+                <Plus className="w-4 h-4" /> Purchase
+              </button>
+              {datasets && datasets.length > 0 && (
+                <button
+                  onClick={() => setIsFullscreenPowerBI(true)}
+                  className="px-4 py-2 bg-gradient-to-r from-green-500 to-green-600 text-white font-medium rounded-lg text-sm flex items-center gap-2 shadow-sm hover:shadow-md transition-all active:scale-95"
+                >
+                  <BarChart3 className="w-4 h-4" />
+                  View Raw Data Dashboard
+                </button>
+              )}
+            </div>
           </div>
 
           {/* Dynamic KPIs Grid */}
@@ -276,6 +295,101 @@ export function Dashboard() {
             </div>
           </div>
 
+          {/* Today's Sales & Purchases cards */}
+          {(() => {
+            const todaySales     = stats?.today_sales     ?? 0;
+            const todayPurchases = stats?.today_purchases ?? 0;
+            const netFlow        = stats?.net_flow        ?? (todaySales - todayPurchases);
+            const netPositive    = netFlow >= 0;
+            const topProduct     = stats?.top_selling_product ?? null;
+
+            const salesCards = [
+              {
+                label: "Today's Sales",
+                value: formatINR(todaySales),
+                icon: ShoppingCart,
+                accent: 'text-blue-500',
+                bg: 'bg-blue-50 dark:bg-blue-900/20',
+              },
+              {
+                label: "Today's Purchases",
+                value: formatINR(todayPurchases),
+                icon: ShoppingBag,
+                accent: 'text-green-500',
+                bg: 'bg-green-50 dark:bg-green-900/20',
+              },
+              {
+                label: 'Net Flow (Today)',
+                value: formatINR(Math.abs(netFlow)),
+                icon: ArrowRightLeft,
+                accent: netPositive ? 'text-green-500' : 'text-red-500',
+                bg: netPositive ? 'bg-green-50 dark:bg-green-900/20' : 'bg-red-50 dark:bg-red-900/20',
+                prefix: netPositive ? '+' : '-',
+                tooltip: 'Today: Sales minus Purchases. Positive = net inflow.',
+              },
+              {
+                label: 'Top Selling Product',
+                value: topProduct || 'No data yet',
+                icon: Star,
+                accent: 'text-yellow-500',
+                bg: 'bg-yellow-50 dark:bg-yellow-900/20',
+              },
+            ];
+
+            return (
+              <>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <TooltipProvider>
+                    {salesCards.map((card: any, idx) => (
+                      <motion.div
+                        key={card.label}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: idx * 0.05 }}
+                      >
+                        <Card className="p-5 border-0 shadow-sm bg-white dark:bg-gray-800 hover:shadow-md transition-shadow relative overflow-hidden group h-full">
+                          <div className="flex items-start justify-between">
+                            <div className="pr-4">
+                              <div className="flex items-center gap-1.5">
+                                <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{card.label}</p>
+                                {card.tooltip && (
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <HelpCircle className="w-3.5 h-3.5 text-gray-400 hover:text-green-500 cursor-help transition-colors" />
+                                    </TooltipTrigger>
+                                    <TooltipContent className="bg-gray-900 text-white max-w-[200px] text-xs">
+                                      <p>{card.tooltip}</p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                )}
+                              </div>
+                              <h3 className={`text-xl sm:text-2xl font-bold mt-1 break-words leading-tight ${card.accent}`}>
+                                {card.prefix ?? ''}{card.value}
+                              </h3>
+                            </div>
+                            <div className={`w-10 h-10 shrink-0 rounded-lg flex items-center justify-center ${card.bg} ${card.accent} transition-transform group-hover:scale-110`}>
+                              <card.icon className="w-5 h-5" />
+                            </div>
+                          </div>
+                        </Card>
+                      </motion.div>
+                    ))}
+                  </TooltipProvider>
+                </div>
+
+                {/* Sales vs Purchases — Last 7 Days */}
+                {stats?.sales_vs_purchases_chart && (
+                  <div className="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm">
+                    <p className="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-4">
+                      Sales vs Purchases — Last 7 Days
+                    </p>
+                    <SalesPurchaseChart data={stats.sales_vs_purchases_chart} />
+                  </div>
+                )}
+              </>
+            );
+          })()}
+
           {/* Global Overview Charts */}
           <GlobalCharts stats={stats} />
 
@@ -287,6 +401,23 @@ export function Dashboard() {
       )}
 
       <CsvUploadModal isOpen={isUploadOpen} onClose={() => setIsUploadOpen(false)} />
+
+      <SaleModal
+        isOpen={isSaleOpen}
+        onClose={() => setIsSaleOpen(false)}
+        onSuccess={() => {
+          setIsSaleOpen(false);
+          queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+        }}
+      />
+      <PurchaseModal
+        isOpen={isPurchaseOpen}
+        onClose={() => setIsPurchaseOpen(false)}
+        onSuccess={() => {
+          setIsPurchaseOpen(false);
+          queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+        }}
+      />
     </div>
   );
 }
