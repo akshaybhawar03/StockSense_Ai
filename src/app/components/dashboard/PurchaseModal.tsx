@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { X, Loader2, CheckCircle } from 'lucide-react';
+import { X, Loader2, CheckCircle, Search, ChevronDown } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { Button } from '../ui/button';
 import { getInventory } from '../../services/inventory';
@@ -31,6 +31,11 @@ export function PurchaseModal({ isOpen, onClose, onSuccess }: Props) {
     const [errors, setErrors]             = useState<Record<string, string>>({});
     const [done, setDone]                 = useState(false);
 
+    // Dropdown state
+    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
+    const dropdownRef = useRef<HTMLDivElement>(null);
+
     const { data: productsRes } = useQuery({
         queryKey: ['inventory', 'list', { page: 1, pageSize: 1000 }],
         queryFn: ({ signal }) =>
@@ -43,18 +48,45 @@ export function PurchaseModal({ isOpen, onClose, onSuccess }: Props) {
     });
     const products: any[] = productsRes ?? [];
 
-    // Escape key
+    const selectedProduct = products.find(p => p.id === productId);
+
+    const filteredProducts = products.filter(p =>
+        p.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        p.sku?.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
+    // Escape key handling & Click outside
     useEffect(() => {
-        if (!isOpen) return;
-        const handleKey = (e: KeyboardEvent) => { if (e.key === 'Escape') handleClose(); };
-        document.addEventListener('keydown', handleKey);
-        return () => document.removeEventListener('keydown', handleKey);
-    }, [isOpen]);
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') {
+                if (isDropdownOpen) {
+                    setIsDropdownOpen(false);
+                } else if (isOpen) {
+                    handleClose();
+                }
+            }
+        };
+        const handleClickOutside = (e: MouseEvent) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+                setIsDropdownOpen(false);
+            }
+        };
+
+        if (isOpen) document.addEventListener('keydown', handleKeyDown);
+        if (isDropdownOpen) document.addEventListener('mousedown', handleClickOutside);
+        
+        return () => {
+            document.removeEventListener('keydown', handleKeyDown);
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [isOpen, isDropdownOpen]);
 
     function handleClose() {
         setProductId(''); setQuantity(''); setPurchasePrice('');
         setSupplierName(''); setDate(today());
         setErrors({}); setDone(false);
+        setIsDropdownOpen(false);
+        setSearchQuery('');
         onClose();
     }
 
@@ -127,22 +159,71 @@ export function PurchaseModal({ isOpen, onClose, onSuccess }: Props) {
                     <div className="p-6 space-y-4">
 
                         {/* Product */}
-                        <div>
+                        <div ref={dropdownRef} className="relative">
                             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                 Product <span className="text-red-500">*</span>
                             </label>
-                            <select
-                                value={productId}
-                                onChange={e => setProductId(e.target.value)}
-                                className="w-full h-10 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 rounded-lg px-3 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+                            
+                            {/* Combobox Trigger */}
+                            <div
+                                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                                className={`w-full h-10 border ${errors.product ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'} bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 rounded-lg px-3 flex items-center justify-between cursor-pointer focus-within:ring-2 focus-within:ring-blue-500 transition-shadow`}
                             >
-                                <option value="">Select a product…</option>
-                                {products.map((p: any) => (
-                                    <option key={p.id} value={p.id}>
-                                        {p.name} ({p.sku}) — Stock: {p.quantity ?? p.stock ?? p.current_stock ?? 0}
-                                    </option>
-                                ))}
-                            </select>
+                                <span className={selectedProduct ? 'text-gray-900 dark:text-gray-100' : 'text-gray-500 dark:text-gray-400'}>
+                                    {selectedProduct 
+                                        ? `${selectedProduct.name} (${selectedProduct.sku})` 
+                                        : 'Select a product…'}
+                                </span>
+                                <ChevronDown className="w-4 h-4 text-gray-500" />
+                            </div>
+
+                            {/* Dropdown Menu */}
+                            {isDropdownOpen && (
+                                <div className="absolute z-10 top-full left-0 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg overflow-hidden animate-in fade-in slide-in-from-top-2 duration-100">
+                                    <div className="p-2 border-b border-gray-100 dark:border-gray-700 sticky top-0 bg-white dark:bg-gray-800 z-10">
+                                        <div className="relative">
+                                            <Search className="w-4 h-4 absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                                            <input
+                                                type="text"
+                                                autoFocus
+                                                placeholder="Search by name or SKU..."
+                                                value={searchQuery}
+                                                onChange={e => setSearchQuery(e.target.value)}
+                                                className="w-full pl-8 pr-3 py-1.5 text-sm border border-gray-200 dark:border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100"
+                                            />
+                                        </div>
+                                    </div>
+                                    
+                                    <ul className="max-h-60 overflow-y-auto p-1">
+                                        {filteredProducts.length === 0 ? (
+                                            <li className="p-3 text-sm text-center text-gray-500">No products found</li>
+                                        ) : (
+                                            filteredProducts.map((p: any) => (
+                                                <li
+                                                    key={p.id}
+                                                    onClick={() => {
+                                                        setProductId(p.id);
+                                                        setIsDropdownOpen(false);
+                                                        setSearchQuery('');
+                                                        if (errors.product) setErrors(prev => ({ ...prev, product: '' }));
+                                                    }}
+                                                    className={`px-3 py-2 text-sm rounded-md cursor-pointer transition-colors flex justify-between items-center ${
+                                                        p.id === productId
+                                                            ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300 font-medium'
+                                                            : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
+                                                    }`}
+                                                >
+                                                    <span className="truncate pr-4">{p.name} <span className="text-gray-500 dark:text-gray-400 text-xs ml-1">({p.sku})</span></span>
+                                                    <span className="text-xs bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded-full shrink-0 whitespace-nowrap text-gray-600 dark:text-gray-300">
+                                                        Stock: {p.quantity ?? p.stock ?? p.current_stock ?? 0}
+                                                    </span>
+                                                </li>
+                                            ))
+                                        )}
+                                    </ul>
+                                </div>
+                            )}
+
                             {errors.product && <p className="text-xs text-red-500 mt-1">{errors.product}</p>}
                         </div>
 
