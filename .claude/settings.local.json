@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep -r \"export.*{$\" /c/Users/bhava/Desktop/StockSense_Ai-StockSense_Frontend/src/app/components --include=\"*.tsx\")",
+      "Bash(python3 -c ':*)",
+      "Bash(node -e ':*)"
+    ]
+  }
+}

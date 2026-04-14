@@ -15,6 +15,24 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { DashboardSkeleton } from '../components/skeletons/DashboardSkeleton';
 import toast from 'react-hot-toast';
 
+// Resolves dead stock count from whichever field the backend currently returns.
+// Centralised here so the fallback chain is maintained in one place only.
+function resolveDeadStock(
+    stats: { dead_stock_items?: number; deadStock?: number; dead_stock?: number } | null,
+    deadStockData: import('../services/dashboard').DeadStockAnalysis | null,
+    kpisDeadStock: number
+): number {
+    if (stats) {
+        if (typeof stats.dead_stock_items === 'number') return stats.dead_stock_items;
+        if (typeof stats.deadStock        === 'number') return stats.deadStock;
+        if (typeof stats.dead_stock       === 'number') return stats.dead_stock;
+    }
+    if (typeof deadStockData?.summary?.total_dead_stock === 'number') {
+        return deadStockData.summary.total_dead_stock;
+    }
+    return kpisDeadStock;
+}
+
 export function Dashboard() {
   const { datasets, kpis } = useData();
   const [isUploadOpen, setIsUploadOpen] = useState(false);
@@ -75,7 +93,7 @@ export function Dashboard() {
     { label: 'Inventory Value', value: parseFloat(stats?.inventory_value ?? kpis?.inventoryValue ?? 0) === 0 ? '₹0.00' : formatINR(stats?.inventory_value ?? kpis?.inventoryValue), icon: DollarSign, accent: 'text-green-500', bg: 'bg-green-50 dark:bg-green-900/20' },
     { label: 'Low Stock Items', value: (stats?.low_stock_items ?? kpis?.lowStock ?? 0).toLocaleString('en-IN'), icon: AlertTriangle, accent: 'text-green-500', bg: 'bg-green-50 dark:bg-green-900/20', warning: (stats?.low_stock_items || kpis?.lowStock || 0) > 0 },
     { label: 'Out of Stock', value: (stats?.out_of_stock ?? kpis?.outOfStock ?? 0).toLocaleString('en-IN'), icon: TrendingDown, accent: 'text-red-500', bg: 'bg-red-50 dark:bg-red-900/20', danger: (stats?.out_of_stock || kpis?.outOfStock || 0) > 0 },
-    { label: 'Dead Stock Items', value: ((stats as any)?.dead_stock_items ?? (stats as any)?.deadStock ?? (stats as any)?.dead_stock ?? deadStockData?.summary?.total_dead_stock ?? (deadStockData as any)?.dead_stock_items ?? kpis?.deadStock ?? 0).toLocaleString('en-IN'), icon: Clock, accent: 'text-green-500', bg: 'bg-green-50 dark:bg-green-900/20' },
+    { label: 'Dead Stock Items', value: resolveDeadStock(stats, deadStockData ?? null, kpis?.deadStock ?? 0).toLocaleString('en-IN'), icon: Clock, accent: 'text-green-500', bg: 'bg-green-50 dark:bg-green-900/20' },
     { 
       label: 'Total Sales', 
       value: (parseFloat(stats?.total_sales ?? kpis?.totalSales ?? 0) === 0) ? 'No sales yet' : (stats?.total_sales ?? kpis?.totalSales ?? 0).toLocaleString('en-IN'), 

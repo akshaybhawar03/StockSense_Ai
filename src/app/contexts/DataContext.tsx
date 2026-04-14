@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { db, InventoryItem, SalesRecord, ForecastRecord, DatasetRecord } from '../lib/db';
 import { useAuth } from './AuthContext';
 
@@ -115,8 +115,13 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         }
     }, [user, refreshData]);
 
+    const contextValue = useMemo(
+        () => ({ inventory, sales, forecasts, datasets, kpis, refreshData, isLoadingData }),
+        [inventory, sales, forecasts, datasets, kpis, refreshData, isLoadingData]
+    );
+
     return (
-        <DataContext.Provider value={{ inventory, sales, forecasts, datasets, kpis, refreshData, isLoadingData }}>
+        <DataContext.Provider value={contextValue}>
             {children}
         </DataContext.Provider>
     );

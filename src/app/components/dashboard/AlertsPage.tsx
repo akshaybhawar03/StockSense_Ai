@@ -76,11 +76,11 @@ export function AlertsPage() {
                                             <div>
                                                 <p className='text-sm font-medium text-gray-900 dark:text-white'>{item.name}</p>
                                                 <p className='text-xs text-gray-500 dark:text-gray-400 mt-0.5 font-mono'>
-                                                    {item.sku} � {item.category}
+                                                    {item.sku} · {item.category}
                                                 </p>
                                             </div>
                                             <div className='flex items-center gap-3'>
-                                                <span className='text-sm text-gray-600 dark:text-gray-300'>Qty: {item.quantity}</span>
+                                                <span className='text-sm text-gray-600 dark:text-gray-300'>Qty: {item.quantity ?? item.current_stock ?? item.stock ?? item.qty ?? 0}</span>
                                             </div>
                                         </div>
                                     ))}
