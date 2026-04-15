@@ -26,6 +26,7 @@ import { StockAIChat } from './components/StockAIChat';
 import { SalesPage } from './components/dashboard/SalesPage';
 import { PurchasesPage } from './components/dashboard/PurchasesPage';
 import { InvoicesPage } from './components/dashboard/InvoicesPage';
+import { GstReportPage } from './pages/GstReportPage';
 
 export const router = createBrowserRouter([
   {
@@ -67,6 +68,7 @@ export const router = createBrowserRouter([
       { path: 'sales', Component: SalesPage },
       { path: 'purchases', Component: PurchasesPage },
       { path: 'invoices', Component: InvoicesPage },
+      { path: 'gst', Component: GstReportPage },
     ],
   },
 ]);

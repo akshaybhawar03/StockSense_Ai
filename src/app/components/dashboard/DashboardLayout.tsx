@@ -18,6 +18,7 @@ import {
     ShoppingCart,
     ShoppingBag,
     FileText,
+    Receipt,
 } from 'lucide-react';
 import { NotificationBell } from './NotificationBell';
 import { triggerScan } from '../../services/notificationService';
@@ -107,6 +108,7 @@ export function DashboardLayout() {
         { name: 'Sales',       icon: ShoppingCart,    path: '/dashboard/sales' },
         { name: 'Purchases',   icon: ShoppingBag,     path: '/dashboard/purchases' },
         { name: 'Invoices',    icon: FileText,        path: '/dashboard/invoices' },
+        { name: 'GST Reports', icon: Receipt,         path: '/dashboard/gst' },
         { name: 'Forecast',    icon: TrendingUp,      path: '/dashboard/forecast' },
         { name: 'AI Assistant',icon: Bot,             path: '/dashboard/ai-assistant', badge: 'AI' },
         { name: 'Alerts',      icon: Bell,            path: '/dashboard/alerts' },

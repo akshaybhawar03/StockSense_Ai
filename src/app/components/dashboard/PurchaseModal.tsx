@@ -22,7 +22,7 @@ function formatINR(val: number) {
 function stockBadge(qty: number) {
     if (qty === 0) return { cls: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', label: 'Out' };
     if (qty <= 10) return { cls: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400', label: `${qty}` };
-    return { cls: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400', label: `${qty}` };
+    return { cls: 'bg-[#00d26a]/20 text-[#00b85c] dark:bg-[#00d26a]/20 dark:text-[#00d26a]', label: `${qty}` };
 }
 
 export function PurchaseModal({ isOpen, onClose, onSuccess }: Props) {
@@ -130,8 +130,8 @@ export function PurchaseModal({ isOpen, onClose, onSuccess }: Props) {
     if (done) return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
             <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-sm p-8 flex flex-col items-center text-center gap-5 animate-in fade-in zoom-in duration-200">
-                <div className="w-16 h-16 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
-                    <CheckCircle className="w-9 h-9 text-emerald-500" />
+                <div className="w-16 h-16 rounded-full bg-[#00d26a]/20 dark:bg-[#00d26a]/20 flex items-center justify-center">
+                    <CheckCircle className="w-9 h-9 text-[#00d26a]" />
                 </div>
                 <div>
                     <p className="text-lg font-bold text-gray-900 dark:text-white">Purchase Recorded!</p>
@@ -139,7 +139,7 @@ export function PurchaseModal({ isOpen, onClose, onSuccess }: Props) {
                 </div>
                 <button
                     onClick={() => { onSuccess(); handleClose(); }}
-                    className="w-full h-11 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold transition-colors shadow-sm"
+                    className="w-full h-11 rounded-xl bg-[#00d26a] hover:bg-[#00b85c] text-white text-sm font-semibold transition-colors shadow-sm"
                 >
                     Done
                 </button>
@@ -156,7 +156,7 @@ export function PurchaseModal({ isOpen, onClose, onSuccess }: Props) {
             <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200">
 
                 {/* ── Green header ────────────────────────────────────── */}
-                <div className="bg-gradient-to-r from-emerald-600 to-emerald-500 px-6 py-5">
+                <div className="bg-gradient-to-r bg-[#4be277] px-6 py-5">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                             <div className="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center">
@@ -164,7 +164,7 @@ export function PurchaseModal({ isOpen, onClose, onSuccess }: Props) {
                             </div>
                             <div>
                                 <h2 className="text-base font-bold text-white leading-tight">Record New Purchase</h2>
-                                <p className="text-xs text-emerald-100 mt-0.5">Update stock by recording a purchase</p>
+                                <p className="text-xs text-white/80 mt-0.5">Update stock by recording a purchase</p>
                             </div>
                         </div>
                         <button onClick={handleClose}
@@ -186,8 +186,8 @@ export function PurchaseModal({ isOpen, onClose, onSuccess }: Props) {
                             type="button"
                             onClick={() => setIsDropdownOpen(v => !v)}
                             className={`w-full h-11 px-3.5 flex items-center justify-between rounded-xl border text-sm transition-all
-                                ${errors.product ? 'border-red-400 bg-red-50 dark:bg-red-900/10' : 'border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 hover:border-emerald-400'}
-                                ${isDropdownOpen ? 'border-emerald-500 ring-2 ring-emerald-500/20' : ''}
+                                ${errors.product ? 'border-red-400 bg-red-50 dark:bg-red-900/10' : 'border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 hover:border-[#00d26a]'}
+                                ${isDropdownOpen ? 'border-[#00d26a] ring-2 ring-[#00d26a]/20' : ''}
                                 text-gray-700 dark:text-gray-200`}
                         >
                             <span className={selectedProduct ? 'font-medium text-gray-900 dark:text-white' : 'text-gray-400 dark:text-gray-500'}>
@@ -216,7 +216,7 @@ export function PurchaseModal({ isOpen, onClose, onSuccess }: Props) {
                                             placeholder="Search by name or SKU…"
                                             value={searchQuery}
                                             onChange={e => setSearchQuery(e.target.value)}
-                                            className="w-full h-8 pl-7 pr-3 text-sm rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
+                                            className="w-full h-8 pl-7 pr-3 text-sm rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-[#00d26a]/30"
                                         />
                                     </div>
                                 </div>
@@ -236,10 +236,10 @@ export function PurchaseModal({ isOpen, onClose, onSuccess }: Props) {
                                                     if (errors.product) setErrors(prev => ({ ...prev, product: '' }));
                                                 }}
                                                 className={`flex items-center justify-between px-3.5 py-2.5 cursor-pointer transition-colors
-                                                    ${productId === p.id ? 'bg-emerald-50 dark:bg-emerald-900/20' : 'hover:bg-gray-50 dark:hover:bg-gray-800'}`}
+                                                    ${productId === p.id ? 'bg-[#00d26a]/10 dark:bg-[#00d26a]/10' : 'hover:bg-gray-50 dark:hover:bg-gray-800'}`}
                                             >
                                                 <div className="min-w-0">
-                                                    <p className={`text-sm font-medium truncate ${productId === p.id ? 'text-emerald-700 dark:text-emerald-400' : 'text-gray-900 dark:text-gray-100'}`}>
+                                                    <p className={`text-sm font-medium truncate ${productId === p.id ? 'text-[#00b85c] dark:text-[#00d26a]' : 'text-gray-900 dark:text-gray-100'}`}>
                                                         {p.name}
                                                     </p>
                                                     <p className="text-xs text-gray-400 font-mono truncate">{p.sku}</p>
@@ -266,8 +266,8 @@ export function PurchaseModal({ isOpen, onClose, onSuccess }: Props) {
                                 value={quantity}
                                 onChange={e => { setQuantity(e.target.value); if (errors.quantity) setErrors(p => ({ ...p, quantity: '' })); }}
                                 placeholder="e.g. 50"
-                                className={`w-full h-11 px-3.5 rounded-xl border text-sm bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/30 transition-all
-                                    ${errors.quantity ? 'border-red-400' : 'border-gray-200 dark:border-gray-700 focus:border-emerald-500'}`}
+                                className={`w-full h-11 px-3.5 rounded-xl border text-sm bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#00d26a]/30 transition-all
+                                    ${errors.quantity ? 'border-red-400' : 'border-gray-200 dark:border-gray-700 focus:border-[#00d26a]'}`}
                             />
                             {errors.quantity && <p className="text-xs text-red-500 mt-1">{errors.quantity}</p>}
                         </div>
@@ -282,8 +282,8 @@ export function PurchaseModal({ isOpen, onClose, onSuccess }: Props) {
                                     value={purchasePrice}
                                     onChange={e => { setPurchasePrice(e.target.value); if (errors.purchasePrice) setErrors(p => ({ ...p, purchasePrice: '' })); }}
                                     placeholder="0.00"
-                                    className={`w-full h-11 pl-7 pr-3 rounded-xl border text-sm bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/30 transition-all
-                                        ${errors.purchasePrice ? 'border-red-400' : 'border-gray-200 dark:border-gray-700 focus:border-emerald-500'}`}
+                                    className={`w-full h-11 pl-7 pr-3 rounded-xl border text-sm bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#00d26a]/30 transition-all
+                                        ${errors.purchasePrice ? 'border-red-400' : 'border-gray-200 dark:border-gray-700 focus:border-[#00d26a]'}`}
                                 />
                             </div>
                             {errors.purchasePrice && <p className="text-xs text-red-500 mt-1">{errors.purchasePrice}</p>}
@@ -292,12 +292,12 @@ export function PurchaseModal({ isOpen, onClose, onSuccess }: Props) {
 
                     {/* Total pill */}
                     {totalAmt > 0 && (
-                        <div className="flex items-center justify-between bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800/50 rounded-xl px-4 py-3">
+                        <div className="flex items-center justify-between bg-[#00d26a]/10 dark:bg-[#00d26a]/10 border border-[#00d26a]/30 dark:border-[#00d26a]/20 rounded-xl px-4 py-3">
                             <div className="flex items-center gap-2">
-                                <Package className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                                <span className="text-sm font-medium text-emerald-700 dark:text-emerald-300">Total Cost</span>
+                                <Package className="w-4 h-4 text-[#00d26a] dark:text-[#00d26a]" />
+                                <span className="text-sm font-medium text-[#00b85c] dark:text-[#00d26a]">Total Cost</span>
                             </div>
-                            <span className="text-lg font-bold text-emerald-700 dark:text-emerald-300">{formatINR(totalAmt)}</span>
+                            <span className="text-lg font-bold text-[#00b85c] dark:text-[#00d26a]">{formatINR(totalAmt)}</span>
                         </div>
                     )}
 
@@ -312,7 +312,7 @@ export function PurchaseModal({ isOpen, onClose, onSuccess }: Props) {
                                 value={supplierName}
                                 onChange={e => setSupplierName(e.target.value)}
                                 placeholder="e.g. ABC Distributors"
-                                className="w-full h-11 px-3.5 rounded-xl border border-gray-200 dark:border-gray-700 text-sm bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition-all"
+                                className="w-full h-11 px-3.5 rounded-xl border border-gray-200 dark:border-gray-700 text-sm bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00d26a]/30 focus:border-[#00d26a] transition-all"
                             />
                         </div>
                         <div>
@@ -323,8 +323,8 @@ export function PurchaseModal({ isOpen, onClose, onSuccess }: Props) {
                                 type="date"
                                 value={date} max={today()}
                                 onChange={e => setDate(e.target.value)}
-                                className={`w-full h-11 px-3.5 rounded-xl border text-sm bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/30 transition-all
-                                    ${errors.date ? 'border-red-400' : 'border-gray-200 dark:border-gray-700 focus:border-emerald-500'}`}
+                                className={`w-full h-11 px-3.5 rounded-xl border text-sm bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#00d26a]/30 transition-all
+                                    ${errors.date ? 'border-red-400' : 'border-gray-200 dark:border-gray-700 focus:border-[#00d26a]'}`}
                             />
                             {errors.date && <p className="text-xs text-red-500 mt-1">{errors.date}</p>}
                         </div>
@@ -340,7 +340,7 @@ export function PurchaseModal({ isOpen, onClose, onSuccess }: Props) {
                     <button
                         onClick={() => { if (validate()) mutation.mutate(); }}
                         disabled={mutation.isPending}
-                        className="flex-2 min-w-[160px] h-11 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-60 text-white text-sm font-semibold flex items-center justify-center gap-2 transition-colors shadow-sm shadow-emerald-200 dark:shadow-none"
+                        className="flex-2 min-w-[160px] h-11 rounded-xl bg-[#00d26a] hover:bg-[#00b85c] disabled:opacity-60 text-white text-sm font-semibold flex items-center justify-center gap-2 transition-colors shadow-sm shadow-[rgba(0,210,106,0.4)] dark:shadow-none"
                     >
                         {mutation.isPending
                             ? <><Loader2 className="w-4 h-4 animate-spin" /> Recording…</>
