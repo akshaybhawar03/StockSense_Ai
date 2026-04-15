@@ -1,10 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'motion/react';
-import { Search, ArrowUp, ArrowDown, ChevronsUpDown, Package, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Search, ArrowUp, ArrowDown, ChevronsUpDown, Package, ChevronLeft, ChevronRight, ScanBarcode, Loader2, Pencil } from 'lucide-react';
 import { getInventory, deleteItem, getCategories } from '../../services/inventory';
+import { bulkGenerateBarcodes } from '../../services/barcode';
 import { useDebounce } from 'use-debounce';
 import toast from 'react-hot-toast';
 import { EditItemModal } from '../inventory/EditItemModal';
+import { BarcodeModal } from '../inventory/BarcodeModal';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 // ─── Status helpers ──────────────────────────────────────────────────────────
@@ -44,6 +46,8 @@ export function InventoryManager() {
     const [status, setStatus]   = useState('');
     const [page, setPage]       = useState(1);
     const [editItem, setEditItem] = useState<any>(null);
+    const [barcodeItem, setBarcodeItem] = useState<any>(null);
+    const [bulkGenerating, setBulkGenerating] = useState(false);
     const PAGE_SIZE = 50;
     const [debouncedSearch] = useDebounce(search, 300);
 
@@ -118,6 +122,21 @@ export function InventoryManager() {
     const handleDelete = (id: string, name: string) => {
         if (!window.confirm(`Delete '${name}'? This cannot be undone.`)) return;
         deleteMutation.mutate(id);
+    };
+
+    const handleBulkGenerate = async () => {
+        setBulkGenerating(true);
+        try {
+            const res = await bulkGenerateBarcodes();
+            const raw = res.data;
+            const count = raw?.count ?? raw?.generated ?? raw?.total ?? '?';
+            toast.success(`Generated barcodes for ${count} products`);
+            queryClient.invalidateQueries({ queryKey: ['inventory'] });
+        } catch (err: any) {
+            toast.error(err?.response?.data?.detail ?? 'Failed to generate barcodes');
+        } finally {
+            setBulkGenerating(false);
+        }
     };
 
     const totalPages  = Math.ceil(total / PAGE_SIZE);
@@ -202,6 +221,18 @@ export function InventoryManager() {
                         <option value="dead">Dead Stock</option>
                     </select>
 
+                    {/* Generate All Barcodes */}
+                    <button
+                        onClick={handleBulkGenerate}
+                        disabled={bulkGenerating}
+                        className="h-7 flex items-center gap-1.5 px-3 text-xs font-medium rounded-md bg-[rgb(var(--accent-primary))] text-white hover:opacity-90 disabled:opacity-50 transition-opacity whitespace-nowrap"
+                    >
+                        {bulkGenerating
+                            ? <Loader2 className="w-3 h-3 animate-spin" />
+                            : <ScanBarcode className="w-3 h-3" />}
+                        Generate All Barcodes
+                    </button>
+
                     {/* Row count badge */}
                     <span className="ml-auto text-[11px] text-gray-400 dark:text-gray-500 font-medium">
                         {total.toLocaleString('en-IN')} rows
@@ -220,6 +251,7 @@ export function InventoryManager() {
                             <col style={{ width: 80 }} />   {/* Stock */}
                             <col style={{ width: 100 }} />  {/* Unit Price */}
                             <col style={{ width: 110 }} />  {/* Status */}
+                            <col style={{ width: 70 }} />   {/* Actions */}
                         </colgroup>
 
                         {/* Header */}
@@ -233,6 +265,9 @@ export function InventoryManager() {
                                 <Col field="price"    label="Unit Price" className="text-right" />
                                 <th className="px-2 py-2 text-left text-[11px] font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide border-r border-gray-200 dark:border-gray-700 select-none">
                                     Status
+                                </th>
+                                <th className="px-2 py-2 text-center text-[11px] font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide select-none">
+                                    Actions
                                 </th>
                             </tr>
                         </thead>
@@ -320,6 +355,30 @@ export function InventoryManager() {
                                                 </span>
                                             </td>
 
+                                            {/* Actions */}
+                                            <td className="px-2 py-1 text-center">
+                                                <div className="flex items-center justify-center gap-1">
+                                                    <button
+                                                        onClick={() => setEditItem(item)}
+                                                        title="Edit"
+                                                        className="p-1 rounded text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors opacity-0 group-hover:opacity-100"
+                                                    >
+                                                        <Pencil className="w-3 h-3" />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => setBarcodeItem(item)}
+                                                        title={item.barcode ? `Barcode: ${item.barcode}` : 'No barcode — click to assign'}
+                                                        className={`p-1 rounded transition-colors ${
+                                                            item.barcode
+                                                                ? 'text-[rgb(var(--accent-primary))] hover:bg-[rgb(var(--accent-primary))]/10'
+                                                                : 'text-gray-300 dark:text-gray-600 hover:text-gray-500 dark:hover:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 opacity-0 group-hover:opacity-100'
+                                                        }`}
+                                                    >
+                                                        <ScanBarcode className="w-3 h-3" />
+                                                    </button>
+                                                </div>
+                                            </td>
+
                                         </tr>
                                     );
                                 })
@@ -360,12 +419,20 @@ export function InventoryManager() {
                 </div>
             </div>
 
-            {/* Edit modal — unchanged */}
+            {/* Edit modal */}
             {editItem && (
                 <EditItemModal
                     item={editItem}
                     onClose={() => setEditItem(null)}
                     onSaved={() => queryClient.invalidateQueries({ queryKey: ['inventory', 'list'] })}
+                />
+            )}
+
+            {/* Barcode modal */}
+            {barcodeItem && (
+                <BarcodeModal
+                    item={barcodeItem}
+                    onClose={() => setBarcodeItem(null)}
                 />
             )}
         </motion.div>
