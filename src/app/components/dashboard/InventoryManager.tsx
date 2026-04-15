@@ -168,14 +168,14 @@ export function InventoryManager() {
                 {/* Toolbar */}
                 <div className="flex flex-wrap items-center gap-2 px-3 py-2 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/60">
                     {/* Search */}
-                    <div className="relative">
+                    <div className="relative flex-1 sm:flex-none sm:w-48 lg:w-64 min-w-0">
                         <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none" />
                         <input
                             type="text"
                             placeholder="Search name or SKU…"
                             value={search}
                             onChange={e => { setSearch(e.target.value); setPage(1); }}
-                            className="h-7 pl-7 pr-3 text-xs rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-1 focus:ring-[rgb(var(--accent-primary))] w-48 sm:w-64"
+                            className="w-full h-7 pl-7 pr-3 text-xs rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-1 focus:ring-[rgb(var(--accent-primary))]"
                         />
                     </div>
 

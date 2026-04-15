@@ -38,7 +38,7 @@ export function Home() {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="pt-24 pb-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-[#e9edf1] via-[#f1f5f9] to-[#ffffff] relative overflow-hidden">
+      <section className="pt-16 sm:pt-24 pb-12 sm:pb-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-[#e9edf1] via-[#f1f5f9] to-[#ffffff] relative overflow-hidden">
         {/* Adds soft lighting effect like in the image */}
         <div className="absolute top-0 left-[-10%] w-[50%] h-[50%] bg-[#ffffff] blur-[120px] rounded-full pointer-events-none"></div>
         <div className="absolute bottom-0 right-[-10%] w-[50%] h-[50%] bg-[#ffffff] blur-[120px] rounded-full pointer-events-none"></div>
@@ -58,12 +58,12 @@ export function Home() {
               transition={{ duration: 0.6 }}
               className="w-full lg:max-w-[650px] xl:max-w-[700px] flex-shrink-0"
             >
-              <h1 className="text-[44px] sm:text-[52px] lg:text-[64px] xl:text-[70px] font-extrabold text-[#0F172A] leading-[1.1] mb-6 tracking-tight">
-                <span className="whitespace-nowrap">Stop Losing <span className="text-[#22C55E]">₹Lakhs</span></span><br />
+              <h1 className="text-[30px] sm:text-[44px] lg:text-[56px] xl:text-[64px] font-extrabold text-[#0F172A] leading-[1.1] mb-6 tracking-tight">
+                <span className="sm:whitespace-nowrap">Stop Losing <span className="text-[#22C55E]">₹Lakhs</span></span><br />
                 on Dead Stock<br />
                 Every Month
               </h1>
-              <p className="text-[18px] sm:text-[20px] text-[#475569] mb-10 leading-[1.6] font-medium">
+              <p className="text-[15px] sm:text-[18px] lg:text-[20px] text-[#475569] mb-8 sm:mb-10 leading-[1.6] font-medium">
                 India's #1 AI-powered inventory management platform. Predict demand with 95% accuracy, get WhatsApp alerts for low stock, and recover trapped working capital in weeks.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 mb-8">

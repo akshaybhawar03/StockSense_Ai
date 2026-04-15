@@ -67,7 +67,7 @@ export function PurchasesPage() {
                         <ShoppingBag className="w-5 h-5 text-green-600 dark:text-green-400" />
                     </div>
                     <div>
-                        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Purchase History</h1>
+                        <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">Purchase History</h1>
                         <p className="text-sm text-gray-500 dark:text-gray-400">
                             {purchases.length > 0 ? `${purchases.length} transactions` : 'All recorded purchases'}
                         </p>
@@ -95,7 +95,7 @@ export function PurchasesPage() {
                         <thead className="bg-gray-50 dark:bg-gray-800/80">
                             <tr>
                                 {['Date', 'Supplier', 'Product', 'Qty', 'Unit Price', 'Total'].map(h => (
-                                    <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                    <th key={h} className="px-3 py-2.5 sm:px-4 sm:py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                                         {h}
                                     </th>
                                 ))}
@@ -131,13 +131,13 @@ export function PurchasesPage() {
                                             key={purchase.id ?? i}
                                             className="hover:bg-gray-50/50 dark:hover:bg-gray-700/20 transition-colors"
                                         >
-                                            <td className="px-4 py-3 text-gray-600 dark:text-gray-400 whitespace-nowrap">
+                                            <td className="px-3 py-2.5 sm:px-4 sm:py-3 text-gray-600 dark:text-gray-400 whitespace-nowrap">
                                                 {formatDate(purchase.date ?? purchase.created_at)}
                                             </td>
-                                            <td className="px-4 py-3 text-gray-900 dark:text-white font-medium">
+                                            <td className="px-3 py-2.5 sm:px-4 sm:py-3 text-gray-900 dark:text-white font-medium">
                                                 {purchase.supplier_name || <span className="text-gray-400 dark:text-gray-500">—</span>}
                                             </td>
-                                            <td className="px-4 py-3">
+                                            <td className="px-3 py-2.5 sm:px-4 sm:py-3">
                                                 <p className="text-gray-900 dark:text-white font-medium">
                                                     {purchase.product_name ?? purchase.product?.name ?? '—'}
                                                 </p>
@@ -147,13 +147,13 @@ export function PurchasesPage() {
                                                     </p>
                                                 )}
                                             </td>
-                                            <td className="px-4 py-3 text-gray-700 dark:text-gray-300 font-medium">
+                                            <td className="px-3 py-2.5 sm:px-4 sm:py-3 text-gray-700 dark:text-gray-300 font-medium">
                                                 {Number(qty).toLocaleString('en-IN')}
                                             </td>
-                                            <td className="px-4 py-3 text-gray-700 dark:text-gray-300">
+                                            <td className="px-3 py-2.5 sm:px-4 sm:py-3 text-gray-700 dark:text-gray-300">
                                                 {formatINR(unitPrice)}
                                             </td>
-                                            <td className="px-4 py-3 font-semibold text-green-700 dark:text-green-400">
+                                            <td className="px-3 py-2.5 sm:px-4 sm:py-3 font-semibold text-green-700 dark:text-green-400">
                                                 {formatINR(total)}
                                             </td>
                                         </tr>

@@ -112,38 +112,38 @@ export function AnalyticsPage() {
     }, [products]);
 
     if (error) return (
-        <div className='p-6'>
-            <div className='bg-red-900/20 border border-red-700/50 rounded-xl p-4'>
-                <p className='text-red-400 text-sm'>Failed to load analytics. Check backend connection.</p>
+        <div>
+            <div className='bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700/50 rounded-xl p-4'>
+                <p className='text-red-700 dark:text-red-400 text-sm'>Failed to load analytics. Check backend connection.</p>
             </div>
         </div>
     );
 
     return (
-        <div className='p-6 max-w-7xl mx-auto'>
-            <h1 className='text-2xl font-semibold text-gray-900 mb-6'>Analytics</h1>
+        <div className='max-w-7xl mx-auto'>
+            <h1 className='text-xl sm:text-2xl font-semibold text-gray-900 dark:text-white mb-6'>Analytics</h1>
 
-            <div className='grid grid-cols-1 md:grid-cols-4 gap-4 mb-6'>
-                <div className='bg-white border border-gray-200 shadow-sm rounded-xl p-4'>
-                    <h3 className='text-xs font-medium text-gray-500 mb-1'>Total Inventory Value</h3>
-                    <p className='text-xl font-bold text-gray-900'>
+            <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-6'>
+                <div className='bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm rounded-xl p-4'>
+                    <h3 className='text-xs font-medium text-gray-500 dark:text-gray-400 mb-1'>Total Inventory Value</h3>
+                    <p className='text-xl font-bold text-gray-900 dark:text-white'>
                         ₹{summaryCards.totalValue.toLocaleString('en-IN')}
                     </p>
                 </div>
-                <div className='bg-white border border-gray-200 shadow-sm rounded-xl p-4'>
-                    <h3 className='text-xs font-medium text-gray-500 mb-1'>Capital in Dead Stock</h3>
-                    <p className='text-xl font-bold text-gray-900'>
+                <div className='bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm rounded-xl p-4'>
+                    <h3 className='text-xs font-medium text-gray-500 dark:text-gray-400 mb-1'>Capital in Dead Stock</h3>
+                    <p className='text-xl font-bold text-gray-900 dark:text-white'>
                         ₹{summaryCards.deadStockValue.toLocaleString('en-IN')}
                     </p>
                 </div>
-                <div className='bg-white border border-gray-200 shadow-sm rounded-xl p-4'>
-                    <h3 className='text-xs font-medium text-gray-500 mb-1'>Stock Health Score</h3>
+                <div className='bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm rounded-xl p-4'>
+                    <h3 className='text-xs font-medium text-gray-500 dark:text-gray-400 mb-1'>Stock Health Score</h3>
                     <p className={`text-xl font-bold ${summaryCards.scoreColor}`}>
                         {summaryCards.stockHealthScore}%
                     </p>
                 </div>
-                <div className='bg-white border border-gray-200 shadow-sm rounded-xl p-4'>
-                    <h3 className='text-xs font-medium text-gray-500 mb-1'>Items Needing Attention</h3>
+                <div className='bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm rounded-xl p-4'>
+                    <h3 className='text-xs font-medium text-gray-500 dark:text-gray-400 mb-1'>Items Needing Attention</h3>
                     <p className='text-xl font-bold text-green-500'>
                         {summaryCards.attentionItems} items
                     </p>
@@ -151,20 +151,20 @@ export function AnalyticsPage() {
             </div>
 
             <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-                <div className='bg-white border border-gray-200 shadow-sm rounded-xl p-5'>
-                    <h2 className='text-sm font-medium text-gray-700 mb-4'>Stock health</h2>
+                <div className='bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm rounded-xl p-5'>
+                    <h2 className='text-sm font-medium text-gray-700 dark:text-gray-300 mb-4'>Stock health</h2>
                     <StockHealthDonut data={stockHealthData} />
                 </div>
-                <div className='bg-white border border-gray-200 shadow-sm rounded-xl p-5'>
-                    <h2 className='text-sm font-medium text-gray-700 mb-4'>Value by category</h2>
+                <div className='bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm rounded-xl p-5'>
+                    <h2 className='text-sm font-medium text-gray-700 dark:text-gray-300 mb-4'>Value by category</h2>
                     <CategoryBarChart data={categoryData} />
                 </div>
-                <div className='bg-white border border-gray-200 shadow-sm rounded-xl p-5'>
-                    <h2 className='text-sm font-medium text-gray-700 mb-4'>Top 10 by value</h2>
+                <div className='bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm rounded-xl p-5'>
+                    <h2 className='text-sm font-medium text-gray-700 dark:text-gray-300 mb-4'>Top 10 by value</h2>
                     <TopProductsBar data={top10Data} />
                 </div>
-                <div className='bg-white border border-gray-200 shadow-sm rounded-xl p-5'>
-                    <h2 className='text-sm font-medium text-gray-700 mb-4'>Low stock levels</h2>
+                <div className='bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm rounded-xl p-5'>
+                    <h2 className='text-sm font-medium text-gray-700 dark:text-gray-300 mb-4'>Low stock levels</h2>
                     <LowStockBar data={lowStockData} />
                 </div>
             </div>

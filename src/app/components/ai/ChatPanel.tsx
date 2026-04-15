@@ -39,13 +39,13 @@ export function ChatPanel() {
             {/* Toggle button */}
             <button
                 onClick={() => setOpen(o => !o)}
-                className='fixed bottom-6 right-6 w-12 h-12 bg-green-600 text-white rounded-full shadow-lg flex items-center justify-center hover:bg-green-700 z-50 text-lg'
+                className='fixed bottom-4 sm:bottom-6 right-3 sm:right-6 w-12 h-12 bg-green-600 text-white rounded-full shadow-lg flex items-center justify-center hover:bg-green-700 z-50 text-lg'
             >
                 {open ? ' ✕ ' : ' 💬 '}
             </button>
 
             {open && (
-                <div className='fixed bottom-24 right-6 w-80 h-[480px] bg-gray-900 border border-gray-700/50 rounded-2xl shadow-2xl flex flex-col z-50'>
+                <div className='fixed bottom-24 right-3 sm:right-6 w-[min(320px,calc(100vw-1.5rem))] h-[min(480px,calc(100vh-8rem))] bg-gray-900 border border-gray-700/50 rounded-2xl shadow-2xl flex flex-col z-50'>
                     {/* Header */}
                     <div className='flex items-center justify-between px-4 py-3 border-b border-gray-700/50'>
                         <div>

@@ -71,12 +71,12 @@ export function InvoicesPage() {
     return (
         <div className="space-y-6">
             {/* Header */}
-            <div className="flex items-center gap-3">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
                     <FileText className="w-5 h-5 text-purple-600 dark:text-purple-400" />
                 </div>
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Invoice History</h1>
+                    <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">Invoice History</h1>
                     <p className="text-sm text-gray-500 dark:text-gray-400">
                         {invoices.length > 0 ? `${invoices.length} invoices` : 'All generated invoices'}
                     </p>
@@ -97,7 +97,7 @@ export function InvoicesPage() {
                         <thead className="bg-gray-50 dark:bg-gray-800/80">
                             <tr>
                                 {['Invoice #', 'Date', 'Customer', 'Subtotal', 'GST', 'Total', 'Download'].map(h => (
-                                    <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                    <th key={h} className="px-3 py-2.5 sm:px-4 sm:py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                                         {h}
                                     </th>
                                 ))}
@@ -127,25 +127,25 @@ export function InvoicesPage() {
                                             key={inv.id ?? i}
                                             className="hover:bg-gray-50/50 dark:hover:bg-gray-700/20 transition-colors"
                                         >
-                                            <td className="px-4 py-3 font-mono text-gray-700 dark:text-gray-300 font-medium">
+                                            <td className="px-3 py-2.5 sm:px-4 sm:py-3 font-mono text-gray-700 dark:text-gray-300 font-medium">
                                                 {inv.invoice_number ?? inv.number ?? `#${String(i + 1).padStart(4, '0')}`}
                                             </td>
-                                            <td className="px-4 py-3 text-gray-600 dark:text-gray-400 whitespace-nowrap">
+                                            <td className="px-3 py-2.5 sm:px-4 sm:py-3 text-gray-600 dark:text-gray-400 whitespace-nowrap">
                                                 {formatDate(inv.date ?? inv.created_at)}
                                             </td>
-                                            <td className="px-4 py-3 text-gray-900 dark:text-white font-medium">
+                                            <td className="px-3 py-2.5 sm:px-4 sm:py-3 text-gray-900 dark:text-white font-medium">
                                                 {inv.customer_name || <span className="text-gray-400 dark:text-gray-500">—</span>}
                                             </td>
-                                            <td className="px-4 py-3 text-gray-700 dark:text-gray-300">
+                                            <td className="px-3 py-2.5 sm:px-4 sm:py-3 text-gray-700 dark:text-gray-300">
                                                 {formatINR(subtotal)}
                                             </td>
-                                            <td className="px-4 py-3 text-gray-600 dark:text-gray-400">
+                                            <td className="px-3 py-2.5 sm:px-4 sm:py-3 text-gray-600 dark:text-gray-400">
                                                 {gst > 0 ? formatINR(gst) : <span className="text-gray-400 dark:text-gray-500">—</span>}
                                             </td>
-                                            <td className="px-4 py-3 font-semibold text-purple-700 dark:text-purple-400">
+                                            <td className="px-3 py-2.5 sm:px-4 sm:py-3 font-semibold text-purple-700 dark:text-purple-400">
                                                 {formatINR(total)}
                                             </td>
-                                            <td className="px-4 py-3">
+                                            <td className="px-3 py-2.5 sm:px-4 sm:py-3">
                                                 <button
                                                     onClick={() => handleDownload(inv.id, inv.invoice_number ?? inv.number)}
                                                     className="flex items-center gap-1.5 text-xs font-medium text-purple-600 hover:text-purple-800 dark:text-purple-400 dark:hover:text-purple-300 transition-colors"
