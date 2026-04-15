@@ -98,7 +98,7 @@ export function GstReportPage() {
     }
 
     // ── GSTR-1 summary cards ──────────────────────────────────────────────────
-    const gstr1Cards = gstr1Data ? [
+    const gstr1Cards = gstr1Data?.summary ? [
         { label: 'Total Invoices', value: String(gstr1Data.summary.total_invoices ?? 0) },
         { label: 'Total Taxable Value', value: formatINR(gstr1Data.summary.total_taxable_value) },
         { label: 'Total GST', value: formatINR(gstr1Data.summary.total_gst) },
@@ -106,7 +106,7 @@ export function GstReportPage() {
     ] : [];
 
     // ── GSTR-3B summary cards ─────────────────────────────────────────────────
-    const gstr3bCards = gstr3bData ? [
+    const gstr3bCards = gstr3bData?.summary ? [
         { label: 'Total Sales', value: formatINR(gstr3bData.summary.total_sales) },
         { label: 'Taxable Value', value: formatINR(gstr3bData.summary.taxable_value) },
         { label: 'CGST', value: formatINR(gstr3bData.summary.cgst) },
