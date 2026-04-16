@@ -3,8 +3,7 @@ import { FileText, AlertTriangle } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { getGstr1, getGstr3b, downloadGstReport, Gstr1Data, Gstr3bData } from '../services/gst';
 import { SummaryCards } from '../components/gst/SummaryCards';
-import { InvoiceTable } from '../components/gst/InvoiceTable';
-import { HsnTable } from '../components/gst/HsnTable';
+import { Gstr1ReportView } from '../components/gst/Gstr1ReportView';
 import { Gstr3bChart } from '../components/gst/Gstr3bChart';
 import { FilterBar } from '../components/gst/FilterBar';
 
@@ -183,17 +182,11 @@ export function GstReportPage() {
             {!loading && activeTab === 'gstr1' && gstr1Data && (
                 <div className="flex flex-col gap-5">
                     <SummaryCards cards={gstr1Cards} />
-                    <InvoiceTable
-                        type="b2b"
-                        title="B2B Invoices (Business Customers)"
-                        data={gstr1Data.b2b_invoices ?? []}
+                    <Gstr1ReportView
+                        data={gstr1Data}
+                        startDate={startDate}
+                        endDate={endDate}
                     />
-                    <InvoiceTable
-                        type="b2c"
-                        title="B2C Invoices (Retail Customers)"
-                        data={gstr1Data.b2c_invoices ?? []}
-                    />
-                    <HsnTable data={gstr1Data.hsn_summary ?? []} />
                 </div>
             )}
 
