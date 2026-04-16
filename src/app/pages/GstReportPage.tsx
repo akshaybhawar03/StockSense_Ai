@@ -1,10 +1,10 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { FileText, AlertTriangle } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { getGstr1, getGstr3b, downloadGstReport, Gstr1Data, Gstr3bData } from '../services/gst';
+import { getGstr1, getGstr3b, Gstr1Data, Gstr3bData } from '../services/gst';
 import { SummaryCards } from '../components/gst/SummaryCards';
 import { Gstr1ReportView } from '../components/gst/Gstr1ReportView';
-import { Gstr3bChart } from '../components/gst/Gstr3bChart';
+import { Gstr3bReportView } from '../components/gst/Gstr3bReportView';
 import { FilterBar } from '../components/gst/FilterBar';
 
 const formatINR = (v: number) =>
@@ -40,8 +40,11 @@ export function GstReportPage() {
     const [gstr3bData, setGstr3bData] = useState<Gstr3bData | null>(null);
     const [loading, setLoading]     = useState(false);
     const [error, setError]         = useState<string | null>(null);
-    const [downloadingPdf, setDownloadingPdf]     = useState(false);
-    const [downloadingExcel, setDownloadingExcel] = useState(false);
+
+    // Holds the print function registered by the active report view
+    const printFnRef = useRef<(() => void) | null>(null);
+    // Holds the excel function registered by the active report view
+    const excelFnRef = useRef<(() => void) | null>(null);
 
     const hasReport = activeTab === 'gstr1' ? !!gstr1Data : !!gstr3bData;
 
@@ -78,39 +81,45 @@ export function GstReportPage() {
         }
     }
 
-    async function handleDownload(format: 'pdf' | 'excel') {
-        const setter = format === 'pdf' ? setDownloadingPdf : setDownloadingExcel;
-        setter(true);
-        try {
-            await downloadGstReport(activeTab, format, startDate, endDate);
-            toast.success(`${format.toUpperCase()} downloaded successfully`);
-        } catch {
-            toast.error(`Failed to download ${format.toUpperCase()}`);
-        } finally {
-            setter(false);
+    // FilterBar PDF button → triggers the formatted print window
+    function handleDownloadPdf() {
+        if (printFnRef.current) {
+            printFnRef.current();
+        } else {
+            toast.error('Generate a report first, then download PDF');
+        }
+    }
+
+    // FilterBar Excel button → triggers the in-browser Excel export
+    function handleDownloadExcel() {
+        if (excelFnRef.current) {
+            excelFnRef.current();
+        } else {
+            toast.error('Generate a report first, then download Excel');
         }
     }
 
     function handleTabChange(tab: 'gstr1' | 'gstr3b') {
         setActiveTab(tab);
         setError(null);
+        printFnRef.current = null;
+        excelFnRef.current = null;
     }
 
-    // ── GSTR-1 summary cards ──────────────────────────────────────────────────
+    // ── Summary cards ─────────────────────────────────────────────────────────
     const gstr1Cards = gstr1Data?.summary ? [
-        { label: 'Total Invoices', value: String(gstr1Data.summary.total_invoices ?? 0) },
+        { label: 'Total Invoices',      value: String(gstr1Data.summary.total_invoices ?? 0) },
         { label: 'Total Taxable Value', value: formatINR(gstr1Data.summary.total_taxable_value) },
-        { label: 'Total GST', value: formatINR(gstr1Data.summary.total_gst) },
+        { label: 'Total GST',           value: formatINR(gstr1Data.summary.total_gst) },
         { label: 'Total Invoice Value', value: formatINR(gstr1Data.summary.total_invoice_value), highlight: true },
     ] : [];
 
-    // ── GSTR-3B summary cards ─────────────────────────────────────────────────
     const gstr3bCards = gstr3bData?.summary ? [
-        { label: 'Total Sales', value: formatINR(gstr3bData.summary.total_sales) },
-        { label: 'Taxable Value', value: formatINR(gstr3bData.summary.taxable_value) },
-        { label: 'CGST', value: formatINR(gstr3bData.summary.cgst) },
-        { label: 'SGST', value: formatINR(gstr3bData.summary.sgst) },
-        { label: 'IGST', value: formatINR(gstr3bData.summary.igst) },
+        { label: 'Total Sales',       value: formatINR(gstr3bData.summary.total_sales) },
+        { label: 'Taxable Value',     value: formatINR(gstr3bData.summary.taxable_value) },
+        { label: 'CGST',              value: formatINR(gstr3bData.summary.cgst) },
+        { label: 'SGST',              value: formatINR(gstr3bData.summary.sgst) },
+        { label: 'IGST',              value: formatINR(gstr3bData.summary.igst) },
         { label: 'Net GST Liability', value: formatINR(gstr3bData.summary.net_gst_liability), highlight: true },
     ] : [];
 
@@ -126,7 +135,7 @@ export function GstReportPage() {
                     <div>
                         <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">GST Reports</h1>
                         <p className="text-sm text-gray-500 dark:text-gray-400">
-                            Generate GSTR-1 and GSTR-3B summaries for your warehouse
+                            Generate GSTR-1 and GSTR-3B in official format
                         </p>
                     </div>
                 </div>
@@ -155,13 +164,13 @@ export function GstReportPage() {
                 endDate={endDate}
                 loading={loading}
                 canDownload={hasReport}
-                downloadingPdf={downloadingPdf}
-                downloadingExcel={downloadingExcel}
+                downloadingPdf={false}
+                downloadingExcel={false}
                 onStartDateChange={setStartDate}
                 onEndDateChange={setEndDate}
                 onGenerate={handleGenerate}
-                onDownloadPdf={() => handleDownload('pdf')}
-                onDownloadExcel={() => handleDownload('excel')}
+                onDownloadPdf={handleDownloadPdf}
+                onDownloadExcel={handleDownloadExcel}
             />
 
             {/* ── Error ───────────────────────────────────────────────────── */}
@@ -186,6 +195,7 @@ export function GstReportPage() {
                         data={gstr1Data}
                         startDate={startDate}
                         endDate={endDate}
+                        onPrint={fn => { printFnRef.current = fn; }}
                     />
                 </div>
             )}
@@ -194,7 +204,12 @@ export function GstReportPage() {
             {!loading && activeTab === 'gstr3b' && gstr3bData && (
                 <div className="flex flex-col gap-5">
                     <SummaryCards cards={gstr3bCards} />
-                    <Gstr3bChart data={gstr3bData.trend ?? []} />
+                    <Gstr3bReportView
+                        data={gstr3bData}
+                        startDate={startDate}
+                        endDate={endDate}
+                        onPrint={fn => { printFnRef.current = fn; }}
+                    />
                 </div>
             )}
 

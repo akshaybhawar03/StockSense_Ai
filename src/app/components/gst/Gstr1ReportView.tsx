@@ -1,9 +1,9 @@
-import { useRef } from 'react';
-import { Printer } from 'lucide-react';
-import { Gstr1Data, B2BInvoice, B2CInvoice, HsnSummary } from '../../services/gst';
+import { useRef, useCallback } from 'react';
+import { Printer, FileSpreadsheet } from 'lucide-react';
+import * as XLSX from 'xlsx';
+import { Gstr1Data, B2BInvoice, B2CInvoice } from '../../services/gst';
 
 // ── Formatters ────────────────────────────────────────────────────────────────
-
 const fmtN = (v: number) =>
     new Intl.NumberFormat('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(v ?? 0);
 
@@ -12,80 +12,33 @@ const fmtDate = (d: string) => {
     return isNaN(dt.getTime()) ? d : dt.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
 };
 
-// ── Shared cell classes ───────────────────────────────────────────────────────
-
-const TH = 'px-3 py-2.5 text-left text-[11px] font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wide bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 whitespace-nowrap';
-const THR = 'px-3 py-2.5 text-right text-[11px] font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wide bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 whitespace-nowrap';
-const TD = 'px-3 py-2 text-[12px] text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700';
-const TDR = 'px-3 py-2 text-[12px] text-right text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 font-mono tabular-nums';
-const TDN = 'px-3 py-2 text-[12px] font-semibold text-right text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700 font-mono tabular-nums';
-
-// ── Section title ─────────────────────────────────────────────────────────────
-function SectionTitle({ num, title }: { num: string; title: string }) {
-    return (
-        <div className="flex items-baseline gap-2 mb-3">
-            <span className="text-sm font-bold text-gray-500 dark:text-gray-400 shrink-0">{num}.</span>
-            <h3 className="text-sm font-bold text-gray-900 dark:text-white">{title}</h3>
-        </div>
-    );
-}
-
-// ── Empty row ─────────────────────────────────────────────────────────────────
-function EmptyRow({ cols }: { cols: number }) {
-    return (
-        <tr>
-            <td colSpan={cols} className="py-6 text-center text-sm text-gray-400 dark:text-gray-500 italic border border-gray-200 dark:border-gray-700">
-                No data for this period
-            </td>
-        </tr>
-    );
-}
+// ── Shared cell styles ────────────────────────────────────────────────────────
+const TH  = 'border border-gray-400 dark:border-gray-500 px-2 py-1.5 text-[11px] font-bold text-gray-800 dark:text-gray-200 bg-gray-100 dark:bg-gray-700 text-center align-middle';
+const TD  = 'border border-gray-300 dark:border-gray-600 px-2 py-1.5 text-[11px] text-gray-700 dark:text-gray-300 align-top';
+const TDR = 'border border-gray-300 dark:border-gray-600 px-2 py-1.5 text-[11px] text-right text-gray-700 dark:text-gray-300 font-mono tabular-nums align-top';
+const TDN = 'border border-gray-300 dark:border-gray-600 px-2 py-1.5 text-[11px] text-right font-bold text-gray-900 dark:text-white font-mono tabular-nums align-top bg-gray-50 dark:bg-gray-800';
 
 // ── Props ─────────────────────────────────────────────────────────────────────
 interface Props {
     data: Gstr1Data;
     startDate: string;
     endDate: string;
+    onPrint?: (fn: () => void) => void;   // lets parent call our print fn
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────
-export function Gstr1ReportView({ data, startDate, endDate }: Props) {
+export function Gstr1ReportView({ data, startDate, endDate, onPrint }: Props) {
     const printRef = useRef<HTMLDivElement>(null);
 
-    const b2b = data.b2b_invoices ?? [];
-    const b2c = data.b2c_invoices ?? [];
-    const hsn = data.hsn_summary ?? [];
+    const b2b: B2BInvoice[] = data.b2b_invoices ?? [];
+    const b2c: B2CInvoice[] = data.b2c_invoices ?? [];
 
-    // Aggregate totals for Section 1 summary table
-    const sumB2B = b2b.reduce(
-        (acc, i) => ({
-            taxable: acc.taxable + (i.taxable_value ?? 0),
-            igst:    acc.igst    + (i.igst ?? 0),
-            cgst:    acc.cgst    + (i.cgst ?? 0),
-            sgst:    acc.sgst    + (i.sgst ?? 0),
-            total:   acc.total   + (i.total ?? 0),
-        }),
-        { taxable: 0, igst: 0, cgst: 0, sgst: 0, total: 0 }
-    );
-    const sumB2C = b2c.reduce(
-        (acc, i) => ({
-            taxable: acc.taxable + (i.taxable_value ?? 0),
-            igst:    acc.igst    + (i.igst ?? 0),
-            cgst:    acc.cgst    + (i.cgst ?? 0),
-            sgst:    acc.sgst    + (i.sgst ?? 0),
-            total:   acc.total   + (i.total ?? 0),
-        }),
-        { taxable: 0, igst: 0, cgst: 0, sgst: 0, total: 0 }
-    );
-    const grand = {
-        taxable: sumB2B.taxable + sumB2C.taxable,
-        igst:    sumB2B.igst    + sumB2C.igst,
-        cgst:    sumB2B.cgst    + sumB2C.cgst,
-        sgst:    sumB2B.sgst    + sumB2C.sgst,
-        total:   sumB2B.total   + sumB2C.total,
-    };
+    // Combine all sales (B2B has GSTIN, B2C shows —)
+    const allSales = [
+        ...b2b.map(i => ({ ...i, gstin: i.gstin || '—', isB2B: true })),
+        ...b2c.map(i => ({ ...i, gstin: '—', isB2B: false })),
+    ];
 
-    // Period label
     const periodLabel = (() => {
         const s = new Date(startDate);
         const e = new Date(endDate);
@@ -95,321 +48,308 @@ export function Gstr1ReportView({ data, startDate, endDate }: Props) {
         return sm === em ? sm : `${sm} – ${em}`;
     })();
 
-    // Print: open new window with clean HTML
-    const handlePrint = () => {
-        const node = printRef.current;
-        if (!node) return;
-        const win = window.open('', '_blank', 'width=960,height=720');
+    const companyName = localStorage.getItem('userName') || localStorage.getItem('userEmail') || 'My Company';
+
+    // ── Print ──────────────────────────────────────────────────────────────────
+    const handlePrint = useCallback(() => {
+        const body = printRef.current?.innerHTML ?? '';
+        const win = window.open('', '_blank', 'width=1000,height=720');
         if (!win) return;
         win.document.write(`<!DOCTYPE html><html><head><title>GSTR-1 Report</title>
 <style>
   *{margin:0;padding:0;box-sizing:border-box;}
-  body{font-family:Arial,sans-serif;font-size:12px;color:#111;padding:28px 36px;}
-  h1{font-size:17px;font-weight:700;text-align:center;text-decoration:underline;margin-bottom:24px;}
-  .section{margin-bottom:24px;}
-  .section-label{font-size:12px;font-weight:700;margin-bottom:8px;}
-  table{width:100%;border-collapse:collapse;font-size:11px;margin-bottom:4px;}
-  th{background:#f3f4f6;border:1px solid #9ca3af;padding:6px 8px;font-weight:700;text-align:left;white-space:nowrap;}
-  th.r{text-align:right;}
-  td{border:1px solid #d1d5db;padding:5px 8px;vertical-align:top;}
+  body{font-family:Arial,sans-serif;font-size:11px;color:#111;padding:24px 32px;}
+  h1{font-size:18px;font-weight:700;text-align:center;text-decoration:underline;margin-bottom:18px;}
+  .section-title{font-size:13px;font-weight:700;text-align:center;text-decoration:underline;margin:20px 0 8px;}
+  table{width:100%;border-collapse:collapse;font-size:10.5px;margin-bottom:4px;}
+  th{border:1px solid #666;padding:5px 6px;font-weight:700;text-align:center;background:#e5e7eb;vertical-align:middle;}
+  td{border:1px solid #9ca3af;padding:4px 6px;vertical-align:top;}
   td.r{text-align:right;font-family:monospace;}
-  td.bold{font-weight:700;background:#f9fafb;}
-  td.bold.r{text-align:right;font-weight:700;background:#f9fafb;font-family:monospace;}
-  .empty{color:#6b7280;font-style:italic;text-align:center;padding:10px;}
+  td.c{text-align:center;}
+  tr.total td{font-weight:700;background:#f3f4f6;}
+  .info-table td{border:1px solid #9ca3af;padding:5px 8px;}
+  .info-table td:first-child{font-weight:600;width:55%;}
+  .period-box{text-align:right;margin-bottom:10px;font-size:11px;}
 </style></head><body>
-<h1>GSTR-1 Report (${periodLabel})</h1>
-${node.innerHTML}
+<h1>GSTR1 Report</h1>
+${body}
 <script>window.onload=function(){window.print();window.close();}<\/script>
 </body></html>`);
         win.document.close();
+    }, []);
+
+    // Expose print fn to parent (for FilterBar PDF button)
+    if (onPrint) onPrint(handlePrint);
+
+    // ── Excel export ───────────────────────────────────────────────────────────
+    const handleExcel = () => {
+        const wb = XLSX.utils.book_new();
+
+        // Sheet 1: Sale
+        const saleRows = [
+            ['GSTR-1 Report', '', '', '', '', '', '', '', '', ''],
+            ['Period', periodLabel, '', '', '', '', '', '', '', ''],
+            [],
+            ['GSTIN/UIN', 'Invoice No.', 'Invoice Date', 'Invoice Value', 'Rate', 'Cess Rate', 'Taxable Value', 'Integrated Tax', 'Central Tax', 'State/UT Tax', 'Cess', 'Place of Supply'],
+            ...allSales.map(i => [
+                i.gstin,
+                i.invoice_number,
+                fmtDate(i.date),
+                (i as any).total ?? 0,
+                0,
+                0,
+                i.taxable_value,
+                i.igst,
+                i.cgst,
+                i.sgst,
+                0,
+                '—',
+            ]),
+            [],
+            ['Total', '', '', allSales.reduce((s, i) => s + ((i as any).total ?? 0), 0), '', '',
+                allSales.reduce((s, i) => s + i.taxable_value, 0),
+                allSales.reduce((s, i) => s + i.igst, 0),
+                allSales.reduce((s, i) => s + i.cgst, 0),
+                allSales.reduce((s, i) => s + i.sgst, 0),
+                0, ''],
+        ];
+        const ws1 = XLSX.utils.aoa_to_sheet(saleRows);
+        XLSX.utils.book_append_sheet(wb, ws1, 'Sale');
+
+        // Sheet 2: HSN
+        const hsnRows = [
+            ['HSN Code', 'Description', 'Quantity', 'Taxable Value', 'Integrated Tax', 'Central Tax', 'State/UT Tax', 'Cess'],
+            ...(data.hsn_summary ?? []).map(r => [r.hsn_code, r.description, r.quantity, r.taxable_value, r.igst, r.cgst, r.sgst, 0]),
+        ];
+        const ws2 = XLSX.utils.aoa_to_sheet(hsnRows);
+        XLSX.utils.book_append_sheet(wb, ws2, 'HSN Summary');
+
+        XLSX.writeFile(wb, `GSTR1_${startDate}.xlsx`);
     };
 
-    return (
-        <div className="flex flex-col gap-5">
+    // ── Totals ─────────────────────────────────────────────────────────────────
+    const totals = allSales.reduce(
+        (acc, i) => ({
+            value:   acc.value   + ((i as any).total ?? 0),
+            taxable: acc.taxable + (i.taxable_value ?? 0),
+            igst:    acc.igst    + (i.igst ?? 0),
+            cgst:    acc.cgst    + (i.cgst ?? 0),
+            sgst:    acc.sgst    + (i.sgst ?? 0),
+        }),
+        { value: 0, taxable: 0, igst: 0, cgst: 0, sgst: 0 }
+    );
 
-            {/* Print button */}
-            <div className="flex justify-end">
+    return (
+        <div className="flex flex-col gap-4">
+
+            {/* Action buttons */}
+            <div className="flex justify-end gap-2">
+                <button
+                    onClick={handleExcel}
+                    className="flex items-center gap-2 px-4 py-2 border border-emerald-600 text-emerald-700 dark:text-emerald-400 text-sm font-medium rounded-lg hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-colors"
+                >
+                    <FileSpreadsheet className="w-4 h-4" /> Download Excel
+                </button>
                 <button
                     onClick={handlePrint}
                     className="flex items-center gap-2 px-4 py-2 bg-[rgb(var(--accent-primary))] text-white text-sm font-medium rounded-lg hover:opacity-90 transition-opacity"
                 >
-                    <Printer className="w-4 h-4" /> Print / Download PDF
+                    <Printer className="w-4 h-4" /> Print / PDF
                 </button>
             </div>
 
             {/* ── Report card ──────────────────────────────────────────────── */}
             <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
 
-                {/* Report title */}
-                <div className="px-6 py-5 border-b border-gray-200 dark:border-gray-700 text-center">
-                    <h2 className="text-lg font-bold text-gray-900 dark:text-white underline underline-offset-4">
-                        GSTR-1 Report ({periodLabel})
+                {/* Title */}
+                <div className="px-6 pt-6 pb-2 text-center border-b border-gray-100 dark:border-gray-700">
+                    <h2 className="text-xl font-bold text-gray-900 dark:text-white underline underline-offset-4 tracking-wide">
+                        GSTR1 Report
                     </h2>
                 </div>
 
                 {/* Printable body */}
-                <div ref={printRef} className="px-6 py-6 flex flex-col gap-7">
+                <div ref={printRef} className="px-6 py-5 flex flex-col gap-6">
 
-                    {/* ── Section 1: Outward supplies summary ──────────────── */}
-                    <div className="section">
-                        <SectionTitle
-                            num="1"
-                            title="Details of outward supplies (Summary)"
-                        />
-                        <div className="overflow-x-auto">
-                            <table className="w-full border-collapse text-sm">
-                                <thead>
-                                    <tr>
-                                        <th className={TH} style={{ minWidth: 260 }}>Nature of Supplies</th>
-                                        <th className={THR}>Total Taxable Value (₹)</th>
-                                        <th className={THR}>Integrated Tax (₹)</th>
-                                        <th className={THR}>Central Tax (₹)</th>
-                                        <th className={THR}>State/UT Tax (₹)</th>
-                                        <th className={THR}>Cess (₹)</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr className="even:bg-gray-50/50 dark:even:bg-gray-700/20">
-                                        <td className={TD}>Outward taxable supplies to registered persons (B2B)</td>
-                                        <td className={TDR}>{fmtN(sumB2B.taxable)}</td>
-                                        <td className={TDR}>{fmtN(sumB2B.igst)}</td>
-                                        <td className={TDR}>{fmtN(sumB2B.cgst)}</td>
-                                        <td className={TDR}>{fmtN(sumB2B.sgst)}</td>
-                                        <td className={TDR}>0.00</td>
-                                    </tr>
-                                    <tr className="even:bg-gray-50/50 dark:even:bg-gray-700/20">
-                                        <td className={TD}>Outward taxable supplies to unregistered persons (B2C)</td>
-                                        <td className={TDR}>{fmtN(sumB2C.taxable)}</td>
-                                        <td className={TDR}>{fmtN(sumB2C.igst)}</td>
-                                        <td className={TDR}>{fmtN(sumB2C.cgst)}</td>
-                                        <td className={TDR}>{fmtN(sumB2C.sgst)}</td>
-                                        <td className={TDR}>0.00</td>
-                                    </tr>
-                                    <tr className="even:bg-gray-50/50 dark:even:bg-gray-700/20">
-                                        <td className={TD}>Other outward supplies (nil rated, exempted)</td>
-                                        <td className={TDR}>0.00</td>
-                                        <td className={TDR}>0.00</td>
-                                        <td className={TDR}>0.00</td>
-                                        <td className={TDR}>0.00</td>
-                                        <td className={TDR}>0.00</td>
-                                    </tr>
-                                    <tr className="bg-emerald-50/60 dark:bg-emerald-900/10">
-                                        <td className={`${TD} font-bold text-gray-900 dark:text-white`}>Total Outward Supplies</td>
-                                        <td className={TDN}>{fmtN(grand.taxable)}</td>
-                                        <td className={TDN}>{fmtN(grand.igst)}</td>
-                                        <td className={TDN}>{fmtN(grand.cgst)}</td>
-                                        <td className={TDN}>{fmtN(grand.sgst)}</td>
-                                        <td className={TDN}>0.00</td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                    {/* ── Period + Header info ────────────────────────────── */}
+                    <div>
+                        <div className="text-right text-xs text-gray-600 dark:text-gray-400 mb-2">
+                            <span className="font-semibold">Period</span>&nbsp;&nbsp;{periodLabel}
                         </div>
+                        <table className="w-full border-collapse text-sm info-table" style={{ maxWidth: 640 }}>
+                            <tbody>
+                                {[
+                                    ['1. GSTIN', ''],
+                                    ['2.a Legal name of the registered person', companyName],
+                                    ['2.b Trade name, if any', ''],
+                                    ['3.a Aggregate Turnover in the preceeding Financial Year.', ''],
+                                    ['3.b Aggregate Turnover, April to June 2017', ''],
+                                ].map(([label, val]) => (
+                                    <tr key={label}>
+                                        <td className={`${TD} w-[55%] font-semibold`}>{label}</td>
+                                        <td className={TD}>{val}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
                     </div>
 
-                    {/* ── Section 2: B2B invoice details ───────────────────── */}
-                    <div className="section">
-                        <SectionTitle
-                            num="2"
-                            title="Table 4A — Taxable outward supplies to registered persons (B2B)"
-                        />
+                    {/* ── Sale section ────────────────────────────────────── */}
+                    <div>
+                        <h3 className="text-sm font-bold text-gray-900 dark:text-white text-center underline underline-offset-4 mb-3">
+                            Sale
+                        </h3>
                         <div className="overflow-x-auto">
-                            <table className="w-full border-collapse text-sm">
+                            <table className="w-full border-collapse text-[11px]">
                                 <thead>
+                                    {/* Row 1 */}
                                     <tr>
-                                        <th className={TH}>#</th>
-                                        <th className={TH}>Invoice No.</th>
-                                        <th className={TH}>Invoice Date</th>
-                                        <th className={TH}>Customer Name</th>
-                                        <th className={TH}>GSTIN</th>
-                                        <th className={THR}>Taxable Value (₹)</th>
-                                        <th className={THR}>Integrated Tax (₹)</th>
-                                        <th className={THR}>Central Tax (₹)</th>
-                                        <th className={THR}>State/UT Tax (₹)</th>
-                                        <th className={THR}>Invoice Value (₹)</th>
+                                        <th className={TH} rowSpan={2}>GSTIN/<br />UIN</th>
+                                        <th className={TH} colSpan={3}>Invoice details</th>
+                                        <th className={TH} rowSpan={2}>Rate</th>
+                                        <th className={TH} rowSpan={2}>Cess<br />Rate</th>
+                                        <th className={TH} rowSpan={2}>Taxable<br />value</th>
+                                        <th className={TH} colSpan={4}>Amount</th>
+                                        <th className={TH} rowSpan={2}>Place of<br />Supply<br />(Name<br />of State)</th>
+                                    </tr>
+                                    {/* Row 2 */}
+                                    <tr>
+                                        <th className={TH}>No.</th>
+                                        <th className={TH}>Date</th>
+                                        <th className={TH}>Value</th>
+                                        <th className={TH}>Integrat<br />ed Tax</th>
+                                        <th className={TH}>Central<br />Tax</th>
+                                        <th className={TH}>State/UT<br />Tax</th>
+                                        <th className={TH}>Cess</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {b2b.length === 0
-                                        ? <EmptyRow cols={10} />
-                                        : b2b.map((inv: B2BInvoice, i) => (
-                                            <tr key={inv.invoice_number ?? i} className="even:bg-gray-50/50 dark:even:bg-gray-700/20 hover:bg-emerald-50/30 dark:hover:bg-emerald-900/5 transition-colors">
-                                                <td className={`${TD} text-gray-400 dark:text-gray-500 text-[11px] tabular-nums`}>{i + 1}</td>
-                                                <td className={`${TD} font-mono font-medium`}>{inv.invoice_number}</td>
-                                                <td className={`${TD} whitespace-nowrap`}>{fmtDate(inv.date)}</td>
-                                                <td className={`${TD} max-w-[140px]`}>
-                                                    <span className="block truncate">{inv.customer_name || '—'}</span>
-                                                </td>
-                                                <td className={`${TD} font-mono text-[11px]`}>{inv.gstin || '—'}</td>
-                                                <td className={TDR}>{fmtN(inv.taxable_value)}</td>
-                                                <td className={TDR}>{fmtN(inv.igst)}</td>
-                                                <td className={TDR}>{fmtN(inv.cgst)}</td>
-                                                <td className={TDR}>{fmtN(inv.sgst)}</td>
-                                                <td className={TDN}>{fmtN(inv.total)}</td>
-                                            </tr>
-                                        ))
-                                    }
-                                    {b2b.length > 0 && (
-                                        <tr className="bg-gray-100 dark:bg-gray-700/50">
-                                            <td colSpan={5} className={`${TD} font-bold text-gray-900 dark:text-white text-right`}>Total</td>
-                                            <td className={TDN}>{fmtN(sumB2B.taxable)}</td>
-                                            <td className={TDN}>{fmtN(sumB2B.igst)}</td>
-                                            <td className={TDN}>{fmtN(sumB2B.cgst)}</td>
-                                            <td className={TDN}>{fmtN(sumB2B.sgst)}</td>
-                                            <td className={TDN}>{fmtN(sumB2B.total)}</td>
+                                    {allSales.length === 0 ? (
+                                        <tr>
+                                            <td colSpan={12} className="py-8 text-center text-xs text-gray-400 dark:text-gray-500 italic border border-gray-200 dark:border-gray-700">
+                                                No sales for this period
+                                            </td>
                                         </tr>
+                                    ) : (
+                                        <>
+                                            {allSales.map((inv, i) => (
+                                                <tr key={i} className={i % 2 === 0 ? '' : 'bg-gray-50/60 dark:bg-gray-700/20'}>
+                                                    <td className={`${TD} font-mono text-[10px]`}>{inv.gstin}</td>
+                                                    <td className={`${TD} font-mono`}>{inv.invoice_number}</td>
+                                                    <td className={`${TD} whitespace-nowrap`}>{fmtDate(inv.date)}</td>
+                                                    <td className={TDR}>{fmtN((inv as any).total ?? 0)}</td>
+                                                    <td className={`${TD} text-center`}>—</td>
+                                                    <td className={`${TD} text-center`}>0</td>
+                                                    <td className={TDR}>{fmtN(inv.taxable_value)}</td>
+                                                    <td className={TDR}>{fmtN(inv.igst)}</td>
+                                                    <td className={TDR}>{fmtN(inv.cgst)}</td>
+                                                    <td className={TDR}>{fmtN(inv.sgst)}</td>
+                                                    <td className={`${TD} text-center`}>0</td>
+                                                    <td className={`${TD} text-center`}>—</td>
+                                                </tr>
+                                            ))}
+                                            {/* Total row */}
+                                            <tr className="bg-gray-100 dark:bg-gray-700">
+                                                <td colSpan={3} className={`${TDN} text-right`}>Total</td>
+                                                <td className={TDN}>{fmtN(totals.value)}</td>
+                                                <td className={`${TDN} text-center`}>—</td>
+                                                <td className={`${TDN} text-center`}>0</td>
+                                                <td className={TDN}>{fmtN(totals.taxable)}</td>
+                                                <td className={TDN}>{fmtN(totals.igst)}</td>
+                                                <td className={TDN}>{fmtN(totals.cgst)}</td>
+                                                <td className={TDN}>{fmtN(totals.sgst)}</td>
+                                                <td className={`${TDN} text-center`}>0</td>
+                                                <td className={`${TDN} text-center`}>—</td>
+                                            </tr>
+                                        </>
                                     )}
                                 </tbody>
                             </table>
                         </div>
                     </div>
 
-                    {/* ── Section 3: B2C invoice details ───────────────────── */}
-                    <div className="section">
-                        <SectionTitle
-                            num="3"
-                            title="Table 7 — Taxable outward supplies to unregistered persons (B2C)"
-                        />
+                    {/* ── Sale return section ─────────────────────────────── */}
+                    <div>
+                        <h3 className="text-sm font-bold text-gray-900 dark:text-white text-center underline underline-offset-4 mb-3">
+                            Sale return
+                        </h3>
                         <div className="overflow-x-auto">
-                            <table className="w-full border-collapse text-sm">
+                            <table className="w-full border-collapse text-[11px]">
                                 <thead>
+                                    {/* Row 1 */}
                                     <tr>
-                                        <th className={TH}>#</th>
-                                        <th className={TH}>Invoice No.</th>
-                                        <th className={TH}>Invoice Date</th>
-                                        <th className={TH}>Customer Name</th>
-                                        <th className={THR}>Taxable Value (₹)</th>
-                                        <th className={THR}>Integrated Tax (₹)</th>
-                                        <th className={THR}>Central Tax (₹)</th>
-                                        <th className={THR}>State/UT Tax (₹)</th>
-                                        <th className={THR}>Invoice Value (₹)</th>
+                                        <th className={TH} rowSpan={2}>GSTIN/<br />UIN</th>
+                                        <th className={TH} colSpan={5}>Cr. Note details</th>
+                                        <th className={TH} rowSpan={2}>Rate</th>
+                                        <th className={TH} rowSpan={2}>Cess<br />Rate</th>
+                                        <th className={TH} rowSpan={2}>Taxable<br />value</th>
+                                        <th className={TH} colSpan={4}>Amount</th>
+                                        <th className={TH} rowSpan={2}>Place of<br />Supply(Na<br />me of State)</th>
+                                    </tr>
+                                    {/* Row 2 */}
+                                    <tr>
+                                        <th className={TH}>Invoic<br />e No.</th>
+                                        <th className={TH}>Invoic<br />e Date</th>
+                                        <th className={TH}>Retur<br />n No.</th>
+                                        <th className={TH}>Retur<br />n<br />Date</th>
+                                        <th className={TH}>Value</th>
+                                        <th className={TH}>Integra<br />ted Tax</th>
+                                        <th className={TH}>Central<br />Tax</th>
+                                        <th className={TH}>State/U<br />T Tax</th>
+                                        <th className={TH}>Cess</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {b2c.length === 0
-                                        ? <EmptyRow cols={9} />
-                                        : b2c.map((inv: B2CInvoice, i) => (
-                                            <tr key={inv.invoice_number ?? i} className="even:bg-gray-50/50 dark:even:bg-gray-700/20 hover:bg-emerald-50/30 dark:hover:bg-emerald-900/5 transition-colors">
-                                                <td className={`${TD} text-gray-400 dark:text-gray-500 text-[11px] tabular-nums`}>{i + 1}</td>
-                                                <td className={`${TD} font-mono font-medium`}>{inv.invoice_number}</td>
-                                                <td className={`${TD} whitespace-nowrap`}>{fmtDate(inv.date)}</td>
-                                                <td className={`${TD} max-w-[160px]`}>
-                                                    <span className="block truncate">{inv.customer_name || '—'}</span>
-                                                </td>
-                                                <td className={TDR}>{fmtN(inv.taxable_value)}</td>
-                                                <td className={TDR}>{fmtN(inv.igst)}</td>
-                                                <td className={TDR}>{fmtN(inv.cgst)}</td>
-                                                <td className={TDR}>{fmtN(inv.sgst)}</td>
-                                                <td className={TDN}>{fmtN(inv.total)}</td>
-                                            </tr>
-                                        ))
-                                    }
-                                    {b2c.length > 0 && (
-                                        <tr className="bg-gray-100 dark:bg-gray-700/50">
-                                            <td colSpan={4} className={`${TD} font-bold text-gray-900 dark:text-white text-right`}>Total</td>
-                                            <td className={TDN}>{fmtN(sumB2C.taxable)}</td>
-                                            <td className={TDN}>{fmtN(sumB2C.igst)}</td>
-                                            <td className={TDN}>{fmtN(sumB2C.cgst)}</td>
-                                            <td className={TDN}>{fmtN(sumB2C.sgst)}</td>
-                                            <td className={TDN}>{fmtN(sumB2C.total)}</td>
-                                        </tr>
-                                    )}
+                                    <tr>
+                                        <td colSpan={14} className="py-8 text-center text-xs text-gray-400 dark:text-gray-500 italic border border-gray-200 dark:border-gray-700">
+                                            No credit notes / sale returns for this period
+                                        </td>
+                                    </tr>
                                 </tbody>
                             </table>
                         </div>
                     </div>
 
-                    {/* ── Section 4: HSN summary ────────────────────────────── */}
-                    <div className="section">
-                        <SectionTitle
-                            num="4"
-                            title="Table 12 — HSN-wise summary of outward supplies"
-                        />
-                        <div className="overflow-x-auto">
-                            <table className="w-full border-collapse text-sm">
-                                <thead>
-                                    <tr>
-                                        <th className={TH}>HSN Code</th>
-                                        <th className={TH}>Description</th>
-                                        <th className={THR}>Total Quantity</th>
-                                        <th className={THR}>Taxable Value (₹)</th>
-                                        <th className={THR}>Integrated Tax (₹)</th>
-                                        <th className={THR}>Central Tax (₹)</th>
-                                        <th className={THR}>State/UT Tax (₹)</th>
-                                        <th className={THR}>Cess (₹)</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {hsn.length === 0
-                                        ? <EmptyRow cols={8} />
-                                        : hsn.map((row: HsnSummary, i) => (
-                                            <tr key={row.hsn_code ?? i} className="even:bg-gray-50/50 dark:even:bg-gray-700/20 hover:bg-emerald-50/30 dark:hover:bg-emerald-900/5 transition-colors">
-                                                <td className={`${TD} font-mono font-semibold`}>{row.hsn_code || '—'}</td>
-                                                <td className={`${TD} max-w-[200px]`}>
-                                                    <span className="block truncate">{row.description || '—'}</span>
-                                                </td>
-                                                <td className={TDR}>{Number(row.quantity ?? 0).toLocaleString('en-IN')}</td>
-                                                <td className={TDR}>{fmtN(row.taxable_value)}</td>
-                                                <td className={TDR}>{fmtN(row.igst)}</td>
-                                                <td className={TDR}>{fmtN(row.cgst)}</td>
-                                                <td className={TDR}>{fmtN(row.sgst)}</td>
-                                                <td className={TDR}>0.00</td>
-                                            </tr>
-                                        ))
-                                    }
-                                    {hsn.length > 0 && (
-                                        <tr className="bg-gray-100 dark:bg-gray-700/50">
-                                            <td colSpan={3} className={`${TD} font-bold text-gray-900 dark:text-white text-right`}>Total</td>
-                                            <td className={TDN}>{fmtN(hsn.reduce((s, r) => s + (r.taxable_value ?? 0), 0))}</td>
-                                            <td className={TDN}>{fmtN(hsn.reduce((s, r) => s + (r.igst ?? 0), 0))}</td>
-                                            <td className={TDN}>{fmtN(hsn.reduce((s, r) => s + (r.cgst ?? 0), 0))}</td>
-                                            <td className={TDN}>{fmtN(hsn.reduce((s, r) => s + (r.sgst ?? 0), 0))}</td>
-                                            <td className={TDN}>0.00</td>
+                    {/* ── HSN summary ─────────────────────────────────────── */}
+                    {(data.hsn_summary ?? []).length > 0 && (
+                        <div>
+                            <h3 className="text-sm font-bold text-gray-900 dark:text-white text-center underline underline-offset-4 mb-3">
+                                HSN-wise Summary
+                            </h3>
+                            <div className="overflow-x-auto">
+                                <table className="w-full border-collapse text-[11px]">
+                                    <thead>
+                                        <tr>
+                                            <th className={TH}>HSN Code</th>
+                                            <th className={TH}>Description</th>
+                                            <th className={TH}>UQC</th>
+                                            <th className={TH}>Total Qty</th>
+                                            <th className={TH}>Taxable Value</th>
+                                            <th className={TH}>Integrated Tax</th>
+                                            <th className={TH}>Central Tax</th>
+                                            <th className={TH}>State/UT Tax</th>
+                                            <th className={TH}>Cess</th>
                                         </tr>
-                                    )}
-                                </tbody>
-                            </table>
+                                    </thead>
+                                    <tbody>
+                                        {data.hsn_summary.map((r, i) => (
+                                            <tr key={i} className={i % 2 === 0 ? '' : 'bg-gray-50/60 dark:bg-gray-700/20'}>
+                                                <td className={`${TD} font-mono font-semibold`}>{r.hsn_code || '—'}</td>
+                                                <td className={TD}>{r.description || '—'}</td>
+                                                <td className={`${TD} text-center`}>NOS</td>
+                                                <td className={TDR}>{Number(r.quantity ?? 0).toLocaleString('en-IN')}</td>
+                                                <td className={TDR}>{fmtN(r.taxable_value)}</td>
+                                                <td className={TDR}>{fmtN(r.igst)}</td>
+                                                <td className={TDR}>{fmtN(r.cgst)}</td>
+                                                <td className={TDR}>{fmtN(r.sgst)}</td>
+                                                <td className={`${TD} text-center`}>0</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
-                    </div>
-
-                    {/* ── Section 5: Grand totals ────────────────────────────── */}
-                    <div className="section">
-                        <SectionTitle
-                            num="5"
-                            title="Summary of tax liability"
-                        />
-                        <div className="overflow-x-auto">
-                            <table className="w-full border-collapse text-sm">
-                                <thead>
-                                    <tr>
-                                        <th className={TH} style={{ minWidth: 220 }}>Description</th>
-                                        <th className={THR}>Total Taxable Value (₹)</th>
-                                        <th className={THR}>Integrated Tax (₹)</th>
-                                        <th className={THR}>Central Tax (₹)</th>
-                                        <th className={THR}>State/UT Tax (₹)</th>
-                                        <th className={THR}>Total Tax (₹)</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr className="even:bg-gray-50/50 dark:even:bg-gray-700/20">
-                                        <td className={TD}>Total outward taxable supplies</td>
-                                        <td className={TDR}>{fmtN(grand.taxable)}</td>
-                                        <td className={TDR}>{fmtN(grand.igst)}</td>
-                                        <td className={TDR}>{fmtN(grand.cgst)}</td>
-                                        <td className={TDR}>{fmtN(grand.sgst)}</td>
-                                        <td className={TDN}>{fmtN(grand.igst + grand.cgst + grand.sgst)}</td>
-                                    </tr>
-                                    <tr className="bg-emerald-50/70 dark:bg-emerald-900/10">
-                                        <td className={`${TD} font-bold text-gray-900 dark:text-white`}>Net Tax Liability</td>
-                                        <td className={TDN}>{fmtN(grand.taxable)}</td>
-                                        <td className={TDN}>{fmtN(grand.igst)}</td>
-                                        <td className={TDN}>{fmtN(grand.cgst)}</td>
-                                        <td className={TDN}>{fmtN(grand.sgst)}</td>
-                                        <td className={`${TDN} text-[rgb(var(--accent-primary))]`}>{fmtN(grand.igst + grand.cgst + grand.sgst)}</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
+                    )}
 
                 </div>{/* end printRef */}
             </div>
