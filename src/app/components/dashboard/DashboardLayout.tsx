@@ -20,6 +20,7 @@ import {
     FileText,
     Receipt,
     ScanBarcode,
+    BookOpen,
 } from 'lucide-react';
 import { NotificationBell } from './NotificationBell';
 import { triggerScan } from '../../services/notificationService';
@@ -111,6 +112,7 @@ export function DashboardLayout() {
         { name: 'Invoices',    icon: FileText,        path: '/dashboard/invoices' },
         { name: 'GST Reports', icon: Receipt,         path: '/dashboard/gst' },
         { name: 'Barcode Billing', icon: ScanBarcode, path: '/dashboard/barcode-billing', badge: 'New' },
+        { name: 'Party Ledger',   icon: BookOpen,    path: '/dashboard/ledger', badge: 'New' },
         { name: 'Forecast',    icon: TrendingUp,      path: '/dashboard/forecast' },
         { name: 'AI Assistant',icon: Bot,             path: '/dashboard/ai-assistant', badge: 'AI' },
         { name: 'Alerts',      icon: Bell,            path: '/dashboard/alerts' },

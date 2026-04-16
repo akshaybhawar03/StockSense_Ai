@@ -28,6 +28,7 @@ import { PurchasesPage } from './components/dashboard/PurchasesPage';
 import { InvoicesPage } from './components/dashboard/InvoicesPage';
 import { GstReportPage } from './pages/GstReportPage';
 import { BarcodeBillingPage } from './components/dashboard/BarcodeBillingPage';
+import { LedgerPage } from './features/ledger/LedgerPage';
 
 export const router = createBrowserRouter([
   {
@@ -71,6 +72,7 @@ export const router = createBrowserRouter([
       { path: 'invoices', Component: InvoicesPage },
       { path: 'gst', Component: GstReportPage },
       { path: 'barcode-billing', Component: BarcodeBillingPage },
+      { path: 'ledger', Component: LedgerPage },
     ],
   },
 ]);
