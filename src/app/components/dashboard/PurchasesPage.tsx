@@ -47,11 +47,18 @@ export function PurchasesPage() {
 
     const { data, isLoading, error } = useQuery({
         queryKey: ['purchases', 'list'],
-        queryFn: ({ signal }) => getPurchases(signal).then(r => {
-            const d = r.data;
-            return Array.isArray(d) ? d : (d.items ?? d.data ?? d.purchases ?? []);
-        }),
+        queryFn: ({ signal }) =>
+            getPurchases(signal)
+                .then(r => {
+                    const d = r.data;
+                    return Array.isArray(d) ? d : (d.items ?? d.data ?? d.purchases ?? []);
+                })
+                .catch((err: any) => {
+                    if (err?.response?.status === 404) return [];
+                    throw err;
+                }),
         staleTime: 60_000,
+        retry: 1,
     });
 
     const purchases: any[] = (data ?? []).slice().sort(
@@ -84,7 +91,11 @@ export function PurchasesPage() {
             {/* Error */}
             {error && (
                 <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700/50 rounded-xl p-4">
-                    <p className="text-red-700 dark:text-red-400 text-sm">Failed to load purchases. Check backend connection.</p>
+                    <p className="text-red-700 dark:text-red-400 text-sm font-medium">Failed to load purchases</p>
+                    <p className="text-red-600 dark:text-red-300 text-xs mt-0.5">
+                        {(error as any)?.response?.data?.detail ?? (error as any)?.message ?? 'Unexpected error'}
+                        {(error as any)?.response?.status && ` (HTTP ${(error as any).response.status})`}
+                    </p>
                 </div>
             )}
 
