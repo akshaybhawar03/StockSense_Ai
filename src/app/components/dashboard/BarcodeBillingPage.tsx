@@ -15,8 +15,10 @@ import {
     X,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { getProductByBarcode, checkoutCart } from '../../services/barcode';
+import { getProductByBarcode, checkoutCartWithInvoice } from '../../services/barcode';
+import type { Invoice } from '../../services/barcode';
 import { useQueryClient } from '@tanstack/react-query';
+import { InvoiceModal } from './InvoiceModal';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -62,6 +64,8 @@ export function BarcodeBillingPage() {
     // Checkout state
     const [checkingOut, setCheckingOut] = useState(false);
     const [checkoutDone, setCheckoutDone] = useState(false);
+    const [invoice, setInvoice] = useState<Invoice | null>(null);
+    const [showInvoiceModal, setShowInvoiceModal] = useState(false);
 
     // USB scanner buffer (keyboard input)
     const scanBuffer = useRef('');
@@ -267,39 +271,63 @@ export function BarcodeBillingPage() {
     // ── Checkout ────────────────────────────────────────────────────────────
 
     const handleCheckout = async () => {
-        if (cart.length === 0) return;
+        if (cart.length === 0) {
+            toast.error('Cart is empty. Scan a product first.');
+            return;
+        }
+
         setCheckingOut(true);
         try {
-            await checkoutCart(
+            const res = await checkoutCartWithInvoice(
                 cart.map(i => ({
                     product_id: i.product_id,
                     quantity: i.quantity,
-                    sale_price: i.price,
+                    unit_price: i.price,
                 }))
             );
-            // Invalidate inventory & dashboard caches
+
+            // Invalidate caches so inventory/dashboard reflect the sale
             queryClient.invalidateQueries({ queryKey: ['inventory'] });
             queryClient.invalidateQueries({ queryKey: ['dashboard'] });
-            window.dispatchEvent(new Event('csv-uploaded')); // reuse existing convention
+            window.dispatchEvent(new Event('csv-uploaded'));
 
-            setCheckoutDone(true);
-            setTimeout(() => {
-                setCheckoutDone(false);
-                clearCart();
-                setLastScanned(null);
-            }, 2500);
-            toast.success('Checkout successful!');
-        } catch (err: any) {
-            toast.error(err?.response?.data?.detail ?? 'Checkout failed');
-        } finally {
+            setInvoice(res.data);
+            setShowInvoiceModal(true);
+            // Loading state stays true until modal opens; reset it now
             setCheckingOut(false);
+        } catch (err: any) {
+            setCheckingOut(false);
+            const detail: string = err?.response?.data?.detail ?? '';
+            if (detail.toLowerCase().includes('insufficient stock') || detail.toLowerCase().includes('available')) {
+                toast.error(detail);
+            } else {
+                toast.error('Checkout failed. Please try again.');
+            }
         }
+    };
+
+    const handleInvoiceClose = () => {
+        setShowInvoiceModal(false);
+        setInvoice(null);
+        setCheckoutDone(false);
+        clearCart();
+        setLastScanned(null);
+        setManualInput('');
+        // Refocus barcode input if manual mode is active
+        if (inputMode === 'manual') {
+            setTimeout(() => manualRef.current?.focus(), 50);
+        }
+        const itemCount = invoice?.item_count ?? 0;
+        toast.success(`Sale recorded. Stock updated for ${itemCount} item(s)`);
     };
 
     // ── Render ──────────────────────────────────────────────────────────────
 
     return (
         <div className="space-y-6">
+            {showInvoiceModal && invoice && (
+                <InvoiceModal invoice={invoice} onClose={handleInvoiceClose} />
+            )}
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div>

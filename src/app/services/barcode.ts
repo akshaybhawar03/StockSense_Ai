@@ -33,3 +33,46 @@ export const checkoutCart = (lines: CheckoutLine[]) =>
             })
         )
     );
+
+// ─── Invoice checkout ────────────────────────────────────────────────────────
+
+export interface InvoiceCheckoutLine {
+    product_id: string;
+    quantity: number;
+    unit_price: number;
+}
+
+export interface InvoiceItem {
+    product_name: string;
+    sku: string;
+    unit_price: number;
+    quantity: number;
+    line_total: number;
+}
+
+export interface Invoice {
+    id?: string;
+    invoice_number: string;
+    created_at: string;
+    subtotal: number;
+    gst_rate: number;
+    gst_amount: number;
+    total_amount: number;
+    item_count: number;
+    status: string;
+    items: InvoiceItem[];
+}
+
+/**
+ * POST /invoices/checkout
+ * Creates a GST invoice and decrements stock for each cart line.
+ * Returns the full Invoice object from the backend.
+ */
+export const checkoutCartWithInvoice = (
+    lines: InvoiceCheckoutLine[],
+    gstRate = 18,
+): Promise<{ data: Invoice }> =>
+    api.post('/invoices/checkout', {
+        items: lines,
+        gst_rate: gstRate,
+    });
