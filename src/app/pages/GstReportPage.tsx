@@ -114,13 +114,16 @@ export function GstReportPage() {
         { label: 'Total Invoice Value', value: formatINR(gstr1Data.summary.total_invoice_value), highlight: true },
     ] : [];
 
-    const gstr3bCards = gstr3bData?.summary ? [
-        { label: 'Total Sales',       value: formatINR(gstr3bData.summary.total_sales) },
-        { label: 'Taxable Value',     value: formatINR(gstr3bData.summary.taxable_value) },
-        { label: 'CGST',              value: formatINR(gstr3bData.summary.cgst) },
-        { label: 'SGST',              value: formatINR(gstr3bData.summary.sgst) },
-        { label: 'IGST',              value: formatINR(gstr3bData.summary.igst) },
-        { label: 'Net GST Liability', value: formatINR(gstr3bData.summary.net_gst_liability), highlight: true },
+    // Normalise: backend may return summary at root level instead of nested
+    const g3bRaw = gstr3bData as any;
+    const g3b = gstr3bData?.summary ?? g3bRaw?.data?.summary ?? g3bRaw?.gstr3b?.summary ?? g3bRaw;
+    const gstr3bCards = g3b?.taxable_value !== undefined ? [
+        { label: 'Total Sales',       value: formatINR(g3b.total_sales ?? 0) },
+        { label: 'Taxable Value',     value: formatINR(g3b.taxable_value ?? 0) },
+        { label: 'CGST',              value: formatINR(g3b.cgst ?? 0) },
+        { label: 'SGST',              value: formatINR(g3b.sgst ?? 0) },
+        { label: 'IGST',              value: formatINR(g3b.igst ?? 0) },
+        { label: 'Net GST Liability', value: formatINR(g3b.net_gst_liability ?? (g3b.igst + g3b.cgst + g3b.sgst)), highlight: true },
     ] : [];
 
     return (

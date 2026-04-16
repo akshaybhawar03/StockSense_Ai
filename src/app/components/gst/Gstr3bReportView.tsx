@@ -34,7 +34,26 @@ interface Props {
 
 export function Gstr3bReportView({ data, startDate, endDate, onPrint }: Props) {
     const printRef = useRef<HTMLDivElement>(null);
-    const s = data.summary;
+
+    // Normalise: backend may return summary nested or at root level
+    const raw = data as any;
+    const s = data.summary ?? raw.data?.summary ?? raw.gstr3b?.summary ?? raw;
+
+    // Guard: if core fields are still missing, show an error card
+    if (!s || s.taxable_value === undefined) {
+        return (
+            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700/50 rounded-xl p-6 text-center text-sm text-red-700 dark:text-red-400">
+                <p className="font-semibold mb-1">Could not parse GSTR-3B response</p>
+                <p className="text-xs text-red-500">
+                    Expected <code>summary.taxable_value</code> in API response.
+                    Check Network tab for the actual response shape.
+                </p>
+                <pre className="mt-3 text-left text-[10px] bg-red-100 dark:bg-red-900/40 rounded p-2 overflow-auto max-h-40">
+                    {JSON.stringify(data, null, 2)}
+                </pre>
+            </div>
+        );
+    }
 
     const periodLabel = (() => {
         const sd = new Date(startDate);
