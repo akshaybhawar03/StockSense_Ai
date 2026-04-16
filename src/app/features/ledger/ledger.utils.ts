@@ -1,8 +1,9 @@
 import { format, parseISO, isBefore, startOfDay } from 'date-fns';
 import type { BillStatus } from './ledger.types';
 
-export function formatINR(amount: number): string {
-  return '₹' + amount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+export function formatINR(amount: number | null | undefined): string {
+  const n = amount ?? 0;
+  return '₹' + n.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
 export function formatDate(dateStr: string): string {

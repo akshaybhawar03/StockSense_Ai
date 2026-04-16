@@ -23,7 +23,7 @@ export function PartyCard({
 }: PartyCardProps) {
   const initials = getInitials(party.name);
   const avatarColor = getAvatarColor(party.id);
-  const hasOutstanding = party.outstanding_amount > 0;
+  const hasOutstanding = (party.outstanding_amount ?? 0) > 0;
 
   return (
     <div
@@ -77,7 +77,7 @@ export function PartyCard({
               hasOutstanding ? 'text-red-600 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400'
             }`}
           >
-            {hasOutstanding ? formatINR(party.outstanding_amount) : 'Settled'}
+            {hasOutstanding ? formatINR(party.outstanding_amount ?? 0) : 'Settled'}
           </p>
           <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">outstanding</p>
         </div>

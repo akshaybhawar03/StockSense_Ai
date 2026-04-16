@@ -42,7 +42,7 @@ export function SummaryStrip({ type }: SummaryStripProps) {
   const cards = [
     {
       label: isReceivables ? 'Total Receivables' : 'Total Payables',
-      value: data.total_outstanding,
+      value: data.total_outstanding ?? 0,
       icon: TrendingDown,
       valueClass: data.total_outstanding > 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-900 dark:text-white',
       iconBg: 'bg-red-50 dark:bg-red-900/20',
@@ -50,7 +50,7 @@ export function SummaryStrip({ type }: SummaryStripProps) {
     },
     {
       label: 'Overdue 30+ Days',
-      value: data.overdue_30_plus,
+      value: data.overdue_30_plus ?? 0,
       icon: AlertTriangle,
       valueClass: data.overdue_30_plus > 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-900 dark:text-white',
       iconBg: 'bg-orange-50 dark:bg-orange-900/20',
@@ -58,7 +58,7 @@ export function SummaryStrip({ type }: SummaryStripProps) {
     },
     {
       label: isReceivables ? 'Collected This Month' : 'Paid This Month',
-      value: data.collected_this_month,
+      value: data.collected_this_month ?? 0,
       icon: TrendingUp,
       valueClass: 'text-emerald-600 dark:text-emerald-400',
       iconBg: 'bg-emerald-50 dark:bg-emerald-900/20',
