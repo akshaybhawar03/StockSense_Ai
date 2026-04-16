@@ -16,7 +16,6 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { getProductByBarcode, checkoutCart } from '../../services/barcode';
-import { recordSale } from '../../services/inventory';
 import { useQueryClient } from '@tanstack/react-query';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -99,7 +98,7 @@ export function BarcodeBillingPage() {
             }
 
             const price =
-                product.selling_price ?? product.sale_price ?? product.price ?? 0;
+                product.unit_price ?? product.selling_price ?? product.sale_price ?? product.price ?? 0;
             const stock =
                 product.quantity ?? product.stock ?? product.current_stock ?? 0;
 
