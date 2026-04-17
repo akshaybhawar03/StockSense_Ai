@@ -361,7 +361,7 @@ export function InventoryManager() {
                                                     <button
                                                         onClick={() => setEditItem(item)}
                                                         title="Edit"
-                                                        className="p-1 rounded text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors opacity-0 group-hover:opacity-100"
+                                                        className="p-1 rounded text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                                                     >
                                                         <Pencil className="w-3 h-3" />
                                                     </button>
@@ -371,7 +371,7 @@ export function InventoryManager() {
                                                         className={`p-1 rounded transition-colors ${
                                                             item.barcode
                                                                 ? 'text-[rgb(var(--accent-primary))] hover:bg-[rgb(var(--accent-primary))]/10'
-                                                                : 'text-gray-300 dark:text-gray-600 hover:text-gray-500 dark:hover:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 opacity-0 group-hover:opacity-100'
+                                                                : 'text-gray-300 dark:text-gray-600 hover:text-gray-500 dark:hover:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
                                                         }`}
                                                     >
                                                         <ScanBarcode className="w-3 h-3" />
