@@ -3,7 +3,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { X, Loader2, CheckCircle, Download, Search, ChevronDown, ShoppingCart, Receipt } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { getInventory } from '../../services/inventory';
-import { createSale, downloadInvoice } from '../../services/sales';
+import { createSale } from '../../services/sales';
+import { generateInvoicePDF } from '../../utils/generateInvoicePDF';
 
 interface Props {
     isOpen: boolean;
@@ -34,7 +35,7 @@ export function SaleModal({ isOpen, onClose, onSuccess }: Props) {
     const [customerName, setCustomerName] = useState('');
     const [date, setDate]                 = useState(today());
     const [errors, setErrors]             = useState<Record<string, string>>({});
-    const [successData, setSuccessData]   = useState<{ invoiceId: string } | null>(null);
+    const [successData, setSuccessData]   = useState<{ invoiceId: string; productName: string; qty: number; price: number; customer: string; date: string } | null>(null);
 
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [searchQuery, setSearchQuery]       = useState('');
@@ -117,29 +118,47 @@ export function SaleModal({ isOpen, onClose, onSuccess }: Props) {
             date,
         }),
         onSuccess: (res) => {
-            const invoiceId: string = res.data?.invoice_id ?? res.data?.id ?? '';
+            const invoiceId: string = res.data?.invoice_id ?? res.data?.id ?? 'INV-' + Date.now();
             toast.success('Sale recorded! Invoice generated.');
             queryClient.invalidateQueries({ queryKey: ['sales'] });
             queryClient.invalidateQueries({ queryKey: ['dashboard'] });
             queryClient.invalidateQueries({ queryKey: ['inventory'] });
-            if (invoiceId) setSuccessData({ invoiceId });
-            else { onSuccess(); handleClose(); }
+            setSuccessData({
+                invoiceId,
+                productName: selectedProduct?.name ?? 'Product',
+                qty: Number(quantity),
+                price: Number(salePrice),
+                customer: customerName,
+                date,
+            });
         },
         onError: (err: any) => {
             toast.error(err?.response?.data?.detail || err?.message || 'Failed to record sale');
         },
     });
 
-    async function handleDownloadInvoice() {
-        if (!successData?.invoiceId) return;
-        try {
-            const res = await downloadInvoice(successData.invoiceId);
-            const url = window.URL.createObjectURL(new Blob([res.data]));
-            const a = Object.assign(document.createElement('a'), { href: url, download: `invoice_${successData.invoiceId}.pdf` });
-            a.click();
-            window.URL.revokeObjectURL(url);
-        } catch { toast.error('Could not download invoice'); }
-        finally { onSuccess(); handleClose(); }
+    function handleDownloadInvoice() {
+        if (!successData) return;
+        const total = successData.qty * successData.price;
+        generateInvoicePDF({
+            invoice_number: successData.invoiceId,
+            date:           successData.date,
+            customer_name:  successData.customer,
+            subtotal:       total,
+            gst:            0,
+            total:          total,
+            received:       total,
+            balance:        0,
+            payment_mode:   'Cash',
+            items: [{
+                name:       successData.productName,
+                quantity:   successData.qty,
+                unit_price: successData.price,
+                amount:     total,
+            }],
+        });
+        onSuccess();
+        handleClose();
     }
 
     const totalAmt = Number(quantity) > 0 && Number(salePrice) > 0
