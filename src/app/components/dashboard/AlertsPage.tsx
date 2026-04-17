@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getAlerts } from '../../services/ai';
-import toast from 'react-hot-toast';
 import { AlertsSkeleton } from '../skeletons/AlertsSkeleton';
+import { useLocation as useLocationCtx } from '../../contexts/LocationContext';
+import { LocationSwitcher } from '../locations/LocationSwitcher';
 
 // These are the 5 groups the backend returns
 const GROUPS = [
@@ -15,10 +16,11 @@ const GROUPS = [
 
 export function AlertsPage() {
     const [open, setOpen] = useState<Record<string, boolean>>({ out_of_stock: true });
+    const { selectedLocationId } = useLocationCtx();
 
     const { data, isLoading, error } = useQuery({
-        queryKey: ['alerts', 'active'],
-        queryFn: ({ signal }) => getAlerts(signal).then(r => r.data),
+        queryKey: ['alerts', 'active', selectedLocationId],
+        queryFn: ({ signal }) => getAlerts(signal, selectedLocationId ? { location_id: selectedLocationId } : undefined).then(r => r.data),
         staleTime: 60_000,
     });
 
@@ -34,13 +36,16 @@ export function AlertsPage() {
 
     return (
         <div className='max-w-4xl mx-auto'>
-            <div className='flex flex-wrap items-center gap-3 mb-6'>
+            <div className='flex flex-wrap items-center gap-3 mb-4'>
                 <h1 className='text-xl sm:text-2xl font-semibold text-gray-900 dark:text-white'>Stock Alerts</h1>
                 {total > 0 && (
                     <span className='bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-400 text-sm font-medium px-3 py-0.5 rounded-full'>
                         {total} items need attention
                     </span>
                 )}
+            </div>
+            <div className='mb-6'>
+                <LocationSwitcher />
             </div>
 
             {isLoading && (
@@ -71,19 +76,29 @@ export function AlertsPage() {
                             </button>
                             {isOpen && (
                                 <div className='bg-white dark:bg-gray-900/50 divide-y divide-gray-100 dark:divide-gray-700/50'>
-                                    {items.map((item: any) => (
+                                    {items.map((item: any) => {
+                                        const qty = item.quantity ?? item.current_stock ?? item.stock ?? item.qty ?? 0;
+                                        const locationName = item.location_name ?? item.location ?? '';
+                                        return (
                                         <div key={item.id} className='flex items-start sm:items-center justify-between gap-3 px-4 py-3'>
                                             <div className='min-w-0 flex-1'>
                                                 <p className='text-sm font-medium text-gray-900 dark:text-white truncate'>{item.name}</p>
                                                 <p className='text-xs text-gray-500 dark:text-gray-400 mt-0.5 font-mono truncate'>
                                                     {item.sku} · {item.category}
+                                                    {locationName ? ` · ${locationName}` : ''}
                                                 </p>
                                             </div>
                                             <div className='flex items-center gap-3 shrink-0'>
-                                                <span className='text-sm text-gray-600 dark:text-gray-300 whitespace-nowrap'>Qty: {item.quantity ?? item.current_stock ?? item.stock ?? item.qty ?? 0}</span>
+                                                {locationName && (
+                                                    <span className='hidden sm:inline-block text-xs px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 rounded-full whitespace-nowrap'>
+                                                        {locationName}
+                                                    </span>
+                                                )}
+                                                <span className='text-sm text-gray-600 dark:text-gray-300 whitespace-nowrap'>Qty: {qty}</span>
                                             </div>
                                         </div>
-                                    ))}
+                                        );
+                                    })}
                                 </div>
                             )}
                         </div>

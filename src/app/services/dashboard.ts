@@ -27,7 +27,9 @@ export interface DeadStockAnalysis {
 }
 
 // ── API Calls ────────────────────────────────────────────────────
-export const getDashboardStats = (signal?: AbortSignal) => api.get('/dashboard', { signal });
-export const getHealthScore = (signal?: AbortSignal) => api.get('/dashboard/health', { signal });
-export const getDeadStockAnalysis = (signal?: AbortSignal) =>
-    api.get<DeadStockAnalysis>('/dashboard/dead-stock-analysis', { signal });
+export const getDashboardStats = (signal?: AbortSignal, params?: Record<string, any>) =>
+    api.get('/dashboard', { signal, params });
+export const getHealthScore = (signal?: AbortSignal, params?: Record<string, any>) =>
+    api.get('/dashboard/health', { signal, params });
+export const getDeadStockAnalysis = (signal?: AbortSignal, params?: Record<string, any>) =>
+    api.get<DeadStockAnalysis>('/dashboard/dead-stock-analysis', { signal, params });

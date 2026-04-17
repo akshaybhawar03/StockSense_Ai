@@ -3,7 +3,8 @@ import { api } from './api';
 export const runAnalysis = () => api.get('/ai/analyse');
 export const getLowStockInsight = () => api.get('/ai/insights/low-stock');
 export const getDeadStockInsight = () => api.get('/ai/insights/dead-stock');
-export const getAlerts = (signal?: AbortSignal) => api.get('/alerts', { signal });
+export const getAlerts = (signal?: AbortSignal, params?: Record<string, any>) =>
+    api.get('/alerts', { signal, params });
 export const chat = (messages: any[]) => api.post('/ai/chat', { messages });
 
 export const streamAnalysis = () => {

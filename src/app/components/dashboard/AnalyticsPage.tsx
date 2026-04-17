@@ -1,20 +1,67 @@
 import { useQuery } from '@tanstack/react-query';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { getInventory } from '../../services/inventory';
-import toast from 'react-hot-toast';
+import { getLocationComparison } from '../../services/analytics';
+import { useLocation as useLocationCtx } from '../../contexts/LocationContext';
+import { LocationSwitcher } from '../locations/LocationSwitcher';
 
 import StockHealthDonut from '../charts/StockHealthDonut';
 import CategoryBarChart from '../charts/CategoryBarChart';
 import TopProductsBar from '../charts/TopProductsBar';
 import LowStockBar from '../charts/LowStockBar';
 import { AnalyticsSkeleton } from '../skeletons/AnalyticsSkeleton';
-
 import { useStockHealth } from '../../hooks/useStockHealth';
 
+// Location Comparison uses the analytics service
+function LocationComparisonSection({ fromDate, toDate }: { fromDate: string; toDate: string }) {
+    const { data: compRes, isLoading } = useQuery({
+        queryKey: ['analytics', 'location-comparison', fromDate, toDate],
+        queryFn: () => getLocationComparison({ from_date: fromDate || undefined, to_date: toDate || undefined }),
+        staleTime: 60_000,
+    });
+
+    const compData: any[] = Array.isArray(compRes?.data)
+        ? compRes.data
+        : (compRes?.data?.locations ?? compRes?.data?.data ?? []);
+
+    if (isLoading) return <div className="h-48 animate-pulse bg-gray-100 dark:bg-gray-700 rounded-xl" />;
+    if (!compData.length) return null;
+
+    const chartData = compData.map((l: any) => ({
+        name: l.name ?? l.location_name ?? '?',
+        Sales: l.total_sales ?? 0,
+        Purchases: l.total_purchases ?? 0,
+        'Inventory Value': l.inventory_value ?? l.total_stock_value ?? 0,
+    }));
+
+    return (
+        <div className='bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm rounded-xl p-5'>
+            <h2 className='text-sm font-medium text-gray-700 dark:text-gray-300 mb-4'>Location Comparison</h2>
+            <ResponsiveContainer width="100%" height={260}>
+                <BarChart data={chartData} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(156,163,175,0.3)" />
+                    <XAxis dataKey="name" tick={{ fontSize: 11 }} />
+                    <YAxis tick={{ fontSize: 11 }} />
+                    <Tooltip />
+                    <Legend wrapperStyle={{ fontSize: 11 }} />
+                    <Bar dataKey="Sales" fill="#3b82f6" radius={[4,4,0,0]} />
+                    <Bar dataKey="Purchases" fill="#10b981" radius={[4,4,0,0]} />
+                    <Bar dataKey="Inventory Value" fill="#f59e0b" radius={[4,4,0,0]} />
+                </BarChart>
+            </ResponsiveContainer>
+        </div>
+    );
+}
+
 export function AnalyticsPage() {
+    const { selectedLocationId } = useLocationCtx();
+    const [fromDate] = useState('');
+    const [toDate]   = useState('');
+
     const { data: responseData, isLoading, error } = useQuery({
-        queryKey: ['products', 'all'],
-        queryFn: ({ signal }) => getInventory({ limit: 1000 }, signal).then(r => r.data),
+        queryKey: ['products', 'all', selectedLocationId],
+        queryFn: ({ signal }) => getInventory({ limit: 1000, location_id: selectedLocationId || undefined }, signal).then(r => r.data),
         staleTime: 60_000,
     });
 
@@ -121,7 +168,10 @@ export function AnalyticsPage() {
 
     return (
         <div className='max-w-7xl mx-auto'>
-            <h1 className='text-xl sm:text-2xl font-semibold text-gray-900 dark:text-white mb-6'>Analytics</h1>
+            <div className='flex flex-wrap items-center justify-between gap-3 mb-6'>
+                <h1 className='text-xl sm:text-2xl font-semibold text-gray-900 dark:text-white'>Analytics</h1>
+                <LocationSwitcher />
+            </div>
 
             <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-6'>
                 <div className='bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm rounded-xl p-4'>
@@ -168,6 +218,13 @@ export function AnalyticsPage() {
                     <LowStockBar data={lowStockData} />
                 </div>
             </div>
+
+            {/* Location Comparison — shown when All Locations selected */}
+            {!selectedLocationId && (
+                <div className='mt-6'>
+                    <LocationComparisonSection fromDate={fromDate} toDate={toDate} />
+                </div>
+            )}
         </div>
     );
 }

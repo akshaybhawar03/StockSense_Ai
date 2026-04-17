@@ -21,7 +21,10 @@ import {
     Receipt,
     ScanBarcode,
     BookOpen,
+    MapPin,
+    ArrowLeftRight,
 } from 'lucide-react';
+import { useLocation as useLocationCtx } from '../../contexts/LocationContext';
 import { NotificationBell } from './NotificationBell';
 import { triggerScan } from '../../services/notificationService';
 import { useAuth } from '../../contexts/AuthContext';
@@ -87,6 +90,7 @@ const prefetchMap: Record<string, { queryKey: any[]; queryFn: () => Promise<any>
 export function DashboardLayout() {
     const { user, logout } = useAuth();
     const location = useLocation();
+    const { locationsList } = useLocationCtx();
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [isUploadOpen, setIsUploadOpen] = useState(false);
     const queryClient = useQueryClient();
@@ -104,10 +108,21 @@ export function DashboardLayout() {
         }
     }, [location.pathname]);
 
+    const activeLocCount = locationsList.filter(l => l.is_active).length;
+    const hasOutOfStock  = locationsList.some(l => (l.out_of_stock_count ?? 0) > 0);
+
     const navItems = [
-        { name: 'Dashboard',   icon: LayoutDashboard, path: '/dashboard' },
-        { name: 'Inventory',   icon: Package,         path: '/dashboard/inventory' },
-        { name: 'Sales',       icon: ShoppingCart,    path: '/dashboard/sales' },
+        { name: 'Dashboard',      icon: LayoutDashboard, path: '/dashboard' },
+        { name: 'Inventory',      icon: Package,         path: '/dashboard/inventory' },
+        {
+            name: 'Locations',
+            icon: MapPin,
+            path: '/dashboard/locations',
+            badge: activeLocCount > 1 ? String(activeLocCount) : undefined,
+            indicator: hasOutOfStock,
+        },
+        { name: 'Transfers',      icon: ArrowLeftRight,  path: '/dashboard/transfers' },
+        { name: 'Sales',          icon: ShoppingCart,    path: '/dashboard/sales' },
         { name: 'Purchases',   icon: ShoppingBag,     path: '/dashboard/purchases' },
         { name: 'Invoices',    icon: FileText,        path: '/dashboard/invoices' },
         { name: 'GST Reports', icon: Receipt,         path: '/dashboard/gst' },
@@ -176,8 +191,11 @@ export function DashboardLayout() {
                                     : 'text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-800/50'
                                     }`}
                             >
-                                <div className="flex items-center gap-3">
+                                <div className="flex items-center gap-3 relative">
                                     <item.icon className={`w-5 h-5 ${isActive ? 'text-green-600 dark:text-green-400' : 'text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300'}`} />
+                                    {(item as any).indicator && (
+                                        <span className="absolute -top-0.5 -left-0.5 w-2 h-2 rounded-full bg-red-500" />
+                                    )}
                                     <span className={`text-sm font-medium ${isActive ? 'text-green-600 dark:text-green-400' : ''}`}>
                                         {item.name}
                                     </span>

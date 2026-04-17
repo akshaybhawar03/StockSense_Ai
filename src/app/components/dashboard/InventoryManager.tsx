@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'motion/react';
-import { Search, ArrowUp, ArrowDown, ChevronsUpDown, Package, ChevronLeft, ChevronRight, ScanBarcode, Loader2, Pencil } from 'lucide-react';
+import { Search, ArrowUp, ArrowDown, ChevronsUpDown, Package, ChevronLeft, ChevronRight, ScanBarcode, Loader2, Pencil, Info } from 'lucide-react';
 import { getInventory, deleteItem, getCategories } from '../../services/inventory';
 import { bulkGenerateBarcodes } from '../../services/barcode';
 import { useDebounce } from 'use-debounce';
@@ -8,6 +8,7 @@ import toast from 'react-hot-toast';
 import { EditItemModal } from '../inventory/EditItemModal';
 import { BarcodeModal } from '../inventory/BarcodeModal';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useLocation as useLocationCtx } from '../../contexts/LocationContext';
 
 // ─── Status helpers ──────────────────────────────────────────────────────────
 
@@ -40,6 +41,8 @@ function SortIcon({ field, sortField, sortOrder }: { field: string; sortField: s
 
 export function InventoryManager() {
     const queryClient = useQueryClient();
+    const { selectedLocationId, selectedLocationName, locationsList } = useLocationCtx();
+    const activeLocations = locationsList.filter(l => l.is_active);
 
     const [search, setSearch]   = useState('');
     const [category, setCategory] = useState('');
@@ -48,6 +51,8 @@ export function InventoryManager() {
     const [editItem, setEditItem] = useState<any>(null);
     const [barcodeItem, setBarcodeItem] = useState<any>(null);
     const [bulkGenerating, setBulkGenerating] = useState(false);
+    // Local location override; defaults to global context selection
+    const [localLocationId, setLocalLocationId] = useState<string>(() => selectedLocationId ?? '');
     const PAGE_SIZE = 50;
     const [debouncedSearch] = useDebounce(search, 300);
 
@@ -60,7 +65,12 @@ export function InventoryManager() {
         setPage(1);
     };
 
-    const filters = { search: debouncedSearch, category, status, page, sortField, sortOrder };
+    const effectiveLocationId = localLocationId || selectedLocationId || '';
+    const effectiveLocationName = effectiveLocationId
+        ? (activeLocations.find(l => l.id === effectiveLocationId)?.name ?? selectedLocationName ?? '')
+        : '';
+
+    const filters = { search: debouncedSearch, category, status, page, sortField, sortOrder, locationId: effectiveLocationId };
 
     const { data: inventoryData, isLoading } = useQuery({
         queryKey: ['inventory', 'list', filters],
@@ -72,6 +82,7 @@ export function InventoryManager() {
             page_size: PAGE_SIZE,
             sort_by: sortField,
             sort_dir: sortOrder,
+            location_id: effectiveLocationId || undefined,
         }, signal).then(res => {
             const d = res.data;
             const itemsList  = d.items || d.data || d.products || [];
@@ -221,6 +232,18 @@ export function InventoryManager() {
                         <option value="dead">Dead Stock</option>
                     </select>
 
+                    {/* Location filter */}
+                    {activeLocations.length > 0 && (
+                        <select
+                            value={localLocationId}
+                            onChange={e => { setLocalLocationId(e.target.value); setPage(1); }}
+                            className="h-7 text-xs rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 px-2 focus:outline-none focus:ring-1 focus:ring-[rgb(var(--accent-primary))]"
+                        >
+                            <option value="">All Locations</option>
+                            {activeLocations.map(l => <option key={l.id} value={l.id}>{l.name}</option>)}
+                        </select>
+                    )}
+
                     {/* Generate All Barcodes */}
                     <button
                         onClick={handleBulkGenerate}
@@ -261,7 +284,11 @@ export function InventoryManager() {
                                 <th className="px-2 py-2 text-[11px] font-semibold text-gray-400 dark:text-gray-500 text-center border-r border-gray-200 dark:border-gray-700 select-none">#</th>
                                 <Col field="name"     label="Product"    />
                                 <Col field="category" label="Category"   />
-                                <Col field="quantity" label="Stock"      className="text-right" />
+                                <Col
+                                    field="quantity"
+                                    label={effectiveLocationId ? `Stock at ${effectiveLocationName}` : 'Total Stock'}
+                                    className="text-right"
+                                />
                                 <Col field="price"    label="Unit Price" className="text-right" />
                                 <th className="px-2 py-2 text-left text-[11px] font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide border-r border-gray-200 dark:border-gray-700 select-none">
                                     Status

@@ -29,6 +29,9 @@ import { InvoicesPage } from './components/dashboard/InvoicesPage';
 import { GstReportPage } from './pages/GstReportPage';
 import { BarcodeBillingPage } from './components/dashboard/BarcodeBillingPage';
 import { LedgerPage } from './features/ledger/LedgerPage';
+import { LocationsPage } from './pages/locations/LocationsPage';
+import { LocationDetailPage } from './pages/locations/LocationDetailPage';
+import { TransfersPage } from './pages/TransfersPage';
 
 export const router = createBrowserRouter([
   {
@@ -73,6 +76,9 @@ export const router = createBrowserRouter([
       { path: 'gst', Component: GstReportPage },
       { path: 'barcode-billing', Component: BarcodeBillingPage },
       { path: 'ledger', Component: LedgerPage },
+      { path: 'locations', Component: LocationsPage },
+      { path: 'locations/:id', Component: LocationDetailPage },
+      { path: 'transfers', Component: TransfersPage },
     ],
   },
 ]);

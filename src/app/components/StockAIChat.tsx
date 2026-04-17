@@ -4,6 +4,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Card } from './ui/card';
 import { useAuth } from '../contexts/AuthContext';
+import { useLocation as useLocationCtx } from '../contexts/LocationContext';
 import { askStockQuestion, reindexStock, checkRAGHealth } from '../services/ragService';
 import {
   Bot,
@@ -36,6 +37,12 @@ const SUGGESTED_QUESTIONS = [
 
 export function StockAIChat({ className = '' }: { className?: string } = {}) {
   const { user, isLoggedIn } = useAuth();
+  const { locationsList, selectedLocationId } = useLocationCtx();
+  const [aiLocationId, setAiLocationId] = useState<string>('');
+  const aiLocationName = aiLocationId
+    ? (locationsList.find(l => l.id === aiLocationId)?.name ?? '')
+    : '';
+
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -116,6 +123,11 @@ export function StockAIChat({ className = '' }: { className?: string } = {}) {
     try {
       const ownerId = user.id || user.email;
 
+      // Append location context to API payload only (not shown in chat bubble)
+      const apiQuery = aiLocationName
+        ? `${question.trim()} at ${aiLocationName}`
+        : question.trim();
+
       // 1b: 60-second timeout
       const TIMEOUT_MS = 60_000;
       const timeoutPromise = new Promise<never>((_, reject) =>
@@ -123,7 +135,7 @@ export function StockAIChat({ className = '' }: { className?: string } = {}) {
       );
 
       const answer = await Promise.race([
-        askStockQuestion(question.trim(), ownerId),
+        askStockQuestion(apiQuery, ownerId),
         timeoutPromise,
       ]);
 
@@ -370,6 +382,22 @@ export function StockAIChat({ className = '' }: { className?: string } = {}) {
 
       {/* Input Area */}
       <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+        {/* Location context selector */}
+        {locationsList.filter(l => l.is_active).length > 0 && (
+          <div className="flex items-center gap-2 mb-2">
+            <span className="text-xs text-gray-400 dark:text-gray-500">Context:</span>
+            <select
+              value={aiLocationId}
+              onChange={e => setAiLocationId(e.target.value)}
+              className="h-6 text-xs rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 px-2 focus:outline-none focus:ring-1 focus:ring-[rgb(var(--accent-primary))]"
+            >
+              <option value="">All Locations</option>
+              {locationsList.filter(l => l.is_active).map(l => (
+                <option key={l.id} value={l.id}>{l.name}</option>
+              ))}
+            </select>
+          </div>
+        )}
         <div className="flex items-center gap-2">
           <input
             type="text"

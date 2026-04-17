@@ -4,6 +4,7 @@ import { Card } from '../components/ui/card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../components/ui/tooltip';
 import { CloudUpload, Package, DollarSign, AlertTriangle, TrendingUp, TrendingDown, Clock, Activity, RefreshCw, X, Maximize, BarChart3, HelpCircle, ShoppingCart, ShoppingBag, ArrowRightLeft, Star, Plus } from 'lucide-react';
 import { useData } from '../contexts/DataContext';
+import { useLocation as useLocationCtx } from '../contexts/LocationContext';
 import { CsvUploadModal } from '../components/dashboard/CsvUploadModal';
 import { GlobalCharts } from '../components/dashboard/GlobalCharts';
 import { CashFlowOptimizer } from '../components/dashboard/CashFlowOptimizer';
@@ -13,7 +14,10 @@ import { PowerBIDashboard } from '../components/dashboard/PowerBIDashboard';
 import { SalesPurchaseChart } from '../components/dashboard/SalesPurchaseChart';
 import { SaleModal } from '../components/dashboard/SaleModal';
 import { PurchaseModal } from '../components/dashboard/PurchaseModal';
+import { LocationSwitcher } from '../components/locations/LocationSwitcher';
+import { LocationStockHealthCard } from '../components/locations/LocationStockHealthCard';
 import { getDashboardStats, getHealthScore, getDeadStockAnalysis } from '../services/dashboard';
+import { getLocationsSummary } from '../services/locations';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { DashboardSkeleton } from '../components/skeletons/DashboardSkeleton';
 import toast from 'react-hot-toast';
@@ -38,6 +42,7 @@ function resolveDeadStock(
 
 export function Dashboard() {
   const { datasets, kpis } = useData();
+  const { selectedLocationId } = useLocationCtx();
   const [isUploadOpen, setIsUploadOpen]     = useState(false);
   const [isFullscreenPowerBI, setIsFullscreenPowerBI] = useState(false);
   const [isSaleOpen, setIsSaleOpen]         = useState(false);
@@ -51,12 +56,14 @@ export function Dashboard() {
     });
   };
 
-  // React Query: Fetch all 3 dashboard endpoints
+  // React Query: Fetch all 3 dashboard endpoints (location-aware)
+  const locationParam = selectedLocationId ? { location_id: selectedLocationId } : {};
+
   const { data: statsRes, isLoading: statsLoading, isError: statsError } = useQuery({
-    queryKey: ['dashboard', 'stats'],
+    queryKey: ['dashboard', 'stats', selectedLocationId],
     queryFn: async ({ signal }) => {
       try {
-        const r = await getDashboardStats(signal);
+        const r = await getDashboardStats(signal, locationParam);
         return r.data;
       } catch (err) {
         toast.error('Failed to load dashboard statistics.');
@@ -67,14 +74,25 @@ export function Dashboard() {
   });
 
   const { data: healthData } = useQuery({
-    queryKey: ['dashboard', 'health'],
-    queryFn: ({ signal }) => getHealthScore(signal).then(r => r.data),
+    queryKey: ['dashboard', 'health', selectedLocationId],
+    queryFn: ({ signal }) => getHealthScore(signal, locationParam).then(r => r.data),
     staleTime: 60_000,
   });
 
   const { data: deadStockData, isLoading: deadStockLoading, isError: deadStockError } = useQuery({
-    queryKey: ['dashboard', 'deadStock'],
-    queryFn: ({ signal }) => getDeadStockAnalysis(signal).then(r => r.data),
+    queryKey: ['dashboard', 'deadStock', selectedLocationId],
+    queryFn: ({ signal }) => getDeadStockAnalysis(signal, locationParam).then(r => r.data),
+    staleTime: 60_000,
+  });
+
+  // Location health summary — only when All Locations selected
+  const { data: locationsSummaryData } = useQuery({
+    queryKey: ['dashboard', 'locationsSummary'],
+    queryFn: () => getLocationsSummary().then(r => {
+      const d = r.data;
+      return Array.isArray(d) ? d : (d?.locations ?? d?.items ?? d?.data ?? []);
+    }),
+    enabled: !selectedLocationId,
     staleTime: 60_000,
   });
 
@@ -201,6 +219,11 @@ export function Dashboard() {
         )
       ) : (
         <>
+          {/* Location Switcher */}
+          <div className="flex flex-wrap items-center gap-3">
+            <LocationSwitcher />
+          </div>
+
           <div className="flex flex-wrap justify-between items-center gap-3">
             <h2 className="text-xl font-bold font-heading text-gray-900 dark:text-white">{stats?.warehouse_name || 'Overview'}</h2>
             <div className="flex flex-wrap items-center gap-2">
@@ -389,6 +412,18 @@ export function Dashboard() {
               </>
             );
           })()}
+
+          {/* Stock Health by Location — shown only when All Locations selected */}
+          {!selectedLocationId && locationsSummaryData && locationsSummaryData.length > 0 && (
+            <div>
+              <p className="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-3">Stock Health by Location</p>
+              <div className="flex gap-3 overflow-x-auto pb-2">
+                {locationsSummaryData.map((loc: any) => (
+                  <LocationStockHealthCard key={loc.id} location={loc} />
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Global Overview Charts */}
           <GlobalCharts stats={stats} />
