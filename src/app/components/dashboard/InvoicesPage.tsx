@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { FileText, Download } from 'lucide-react';
-import toast from 'react-hot-toast';
-import { getInvoices, downloadInvoice } from '../../services/sales';
+import { getInvoices } from '../../services/sales';
+import { generateInvoicePDF } from '../../utils/generateInvoicePDF';
 
 function formatDate(dateStr: string) {
     return new Date(dateStr).toLocaleDateString('en-IN', {
@@ -39,19 +39,8 @@ function TableSkeleton() {
     );
 }
 
-async function handleDownload(invoiceId: string, invoiceNumber?: string) {
-    try {
-        const res  = await downloadInvoice(invoiceId);
-        const blob = new Blob([res.data], { type: 'application/pdf' });
-        const url  = window.URL.createObjectURL(blob);
-        const a    = document.createElement('a');
-        a.href     = url;
-        a.download = `invoice_${invoiceNumber ?? invoiceId}.pdf`;
-        a.click();
-        window.URL.revokeObjectURL(url);
-    } catch {
-        toast.error('Could not download invoice');
-    }
+function handleDownload(inv: Record<string, unknown>): void {
+    generateInvoicePDF(inv);
 }
 
 export function InvoicesPage() {
@@ -158,7 +147,7 @@ export function InvoicesPage() {
                                             </td>
                                             <td className="px-3 py-2.5 sm:px-4 sm:py-3">
                                                 <button
-                                                    onClick={() => handleDownload(inv.id, inv.invoice_number ?? inv.number)}
+                                                    onClick={() => handleDownload(inv)}
                                                     className="flex items-center gap-1.5 text-xs font-medium text-purple-600 hover:text-purple-800 dark:text-purple-400 dark:hover:text-purple-300 transition-colors"
                                                 >
                                                     <Download className="w-3.5 h-3.5" /> Download

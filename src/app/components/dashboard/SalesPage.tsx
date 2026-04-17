@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { ShoppingCart, Download, Plus } from 'lucide-react';
-import toast from 'react-hot-toast';
-import { getSales, downloadInvoice } from '../../services/sales';
+import { getSales } from '../../services/sales';
+import { generateInvoicePDF } from '../../utils/generateInvoicePDF';
 import { SaleModal } from './SaleModal';
 import { Button } from '../ui/button';
 
@@ -67,19 +67,32 @@ export function SalesPage() {
         (a: any, b: any) => new Date(b.date ?? b.created_at).getTime() - new Date(a.date ?? a.created_at).getTime()
     );
 
-    async function handleDownload(invoiceId: string, invoiceNumber?: string) {
-        try {
-            const res = await downloadInvoice(invoiceId);
-            const blob = new Blob([res.data], { type: 'application/pdf' });
-            const url  = window.URL.createObjectURL(blob);
-            const a    = document.createElement('a');
-            a.href     = url;
-            a.download = `invoice_${invoiceNumber ?? invoiceId}.pdf`;
-            a.click();
-            window.URL.revokeObjectURL(url);
-        } catch {
-            toast.error('Could not download invoice');
-        }
+    function handleDownload(sale: Record<string, unknown>) {
+        const unitPrice = Number(sale.sale_price ?? sale.unit_price ?? sale.price ?? 0);
+        const qty       = Number(sale.quantity ?? sale.qty ?? 1);
+        const total     = Number(sale.total_amount ?? sale.total ?? unitPrice * qty);
+        const productName = String(sale.product_name ?? (sale.product as any)?.name ?? 'Product');
+        const invNum = String(
+            sale.invoice_number ?? sale.invoice_id ?? sale.id ?? 'INV-0001'
+        );
+
+        generateInvoicePDF({
+            invoice_number: invNum,
+            date:           String(sale.date ?? sale.created_at ?? new Date().toISOString()),
+            customer_name:  String(sale.customer_name ?? ''),
+            subtotal:       total,
+            gst:            0,
+            total:          total,
+            received:       total,
+            balance:        0,
+            payment_mode:   String(sale.payment_mode ?? 'Cash'),
+            items: [{
+                name:       productName,
+                quantity:   qty,
+                unit_price: unitPrice,
+                amount:     total,
+            }],
+        });
     }
 
     return (
@@ -156,7 +169,6 @@ export function SalesPage() {
                                     const unitPrice = sale.sale_price ?? sale.unit_price ?? sale.price ?? 0;
                                     const qty       = sale.quantity ?? sale.qty ?? 0;
                                     const total     = sale.total_amount ?? sale.total ?? (unitPrice * qty);
-                                    const invoiceId = sale.invoice_id ?? sale.invoice?.id;
 
                                     return (
                                         <tr
@@ -185,16 +197,12 @@ export function SalesPage() {
                                                 {formatINR(total)}
                                             </td>
                                             <td className="px-3 py-2.5 sm:px-4 sm:py-3">
-                                                {invoiceId ? (
-                                                    <button
-                                                        onClick={() => handleDownload(invoiceId, sale.invoice_number)}
-                                                        className="flex items-center gap-1.5 text-xs font-medium text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
-                                                    >
-                                                        <Download className="w-3.5 h-3.5" /> Download
-                                                    </button>
-                                                ) : (
-                                                    <span className="text-gray-400 dark:text-gray-500 text-xs">—</span>
-                                                )}
+                                                <button
+                                                    onClick={() => handleDownload(sale)}
+                                                    className="flex items-center gap-1.5 text-xs font-medium text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
+                                                >
+                                                    <Download className="w-3.5 h-3.5" /> Download
+                                                </button>
                                             </td>
                                         </tr>
                                     );
