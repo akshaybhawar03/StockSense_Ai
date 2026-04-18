@@ -22,6 +22,14 @@ export const createSale    = (data: SalePayload)    => api.post('/sales', data);
 export const getPurchases   = (signal?: AbortSignal) => api.get('/purchases', { signal });
 export const createPurchase = (data: PurchasePayload) => api.post('/purchases', data);
 
-export const getInvoices    = (signal?: AbortSignal) => api.get('/invoices', { signal });
+export const getInvoices = (
+    date: string,
+    tzOffset: number,
+    signal?: AbortSignal,
+) =>
+    api.get('/invoices/', {
+        params: { date, tz_offset: tzOffset, limit: 200 },
+        signal,
+    });
 export const downloadInvoice = (id: string)          =>
     api.get(`/invoices/${id}/download`, { responseType: 'blob' });

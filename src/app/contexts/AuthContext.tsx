@@ -1,5 +1,14 @@
 import React, { createContext, useContext, useState, useEffect, useMemo } from "react";
-import { api } from "../services/api";
+import axios from "axios";
+import {
+    api,
+    setAccessToken,
+    setRefreshToken,
+    getRefreshToken,
+    clearAuthTokens,
+} from "../services/api";
+
+const API_URL = import.meta.env.VITE_API_URL || 'https://stocksense-backend-wijr.onrender.com/api/v1';
 
 export interface User {
     id?: string;
@@ -10,9 +19,9 @@ export interface User {
 interface AuthContextType {
     isLoggedIn: boolean;
     user: User | null;
-    login: (username: string, password: string, name?: string) => Promise<void>;
+    login: (email: string, password: string) => Promise<void>;
     register: (name: string, email: string, password: string, confirmPassword?: string, inviteCode?: string) => Promise<void>;
-    logout: () => void;
+    logout: () => Promise<void>;
     isLoading: boolean;
 }
 
@@ -22,41 +31,53 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
-    // Restore login from localStorage
+    // ── Silent refresh on app load ─────────────────────────────────────────────
     useEffect(() => {
-        const token = localStorage.getItem("access_token");
-        const userEmail = localStorage.getItem("userEmail");
-        const userName = localStorage.getItem("userName");
+        const silentRefresh = async () => {
+            const refreshToken = getRefreshToken();
 
-        if (token && userEmail) {
-            setUser({ email: userEmail, name: userName || undefined });
-        }
-
-        setIsLoading(false);
-    }, []);
-
-    // ---------------- LOGIN ----------------
-    const login = async (email: string, password: string, name?: string) => {
-        setIsLoading(true);
-
-        try {
-            // Send email and password as JSON format
-            const response = await api.post("/auth/login", {
-                email,
-                password,
-            });
-
-            const token = response.data.access_token;
-
-            if (!token) throw new Error("No token received");
-
-            localStorage.setItem("access_token", token);
-            localStorage.setItem("userEmail", email);
-            if (name) {
-                localStorage.setItem("userName", name);
+            if (!refreshToken) {
+                setIsLoading(false);
+                return;
             }
 
-            setUser({ email, name });
+            try {
+                const { data } = await axios.post(`${API_URL}/auth/refresh`, {
+                    refresh_token: refreshToken,
+                });
+
+                setAccessToken(data.access_token);
+                if (data.refresh_token) setRefreshToken(data.refresh_token);
+
+                const email = localStorage.getItem("userEmail") || "";
+                const name = localStorage.getItem("userName") || undefined;
+                setUser({ email, name });
+            } catch {
+                // Refresh token invalid/expired — clear everything
+                clearAuthTokens();
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        silentRefresh();
+    }, []);
+
+    // ── LOGIN ──────────────────────────────────────────────────────────────────
+    const login = async (email: string, password: string) => {
+        setIsLoading(true);
+        try {
+            const { data } = await api.post("/auth/login", { email, password });
+
+            if (!data.access_token) throw new Error("No access token received");
+
+            setAccessToken(data.access_token);
+            setRefreshToken(data.refresh_token ?? null);
+
+            localStorage.setItem("userEmail", email);
+            if (data.user?.name) localStorage.setItem("userName", data.user.name);
+
+            setUser({ email, name: data.user?.name });
         } catch (error) {
             console.error("Login failed:", error);
             throw error;
@@ -65,10 +86,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
     };
 
-    // ---------------- REGISTER ----------------
-    const register = async (name: string, email: string, password: string, confirmPassword?: string, inviteCode?: string) => {
+    // ── REGISTER ───────────────────────────────────────────────────────────────
+    const register = async (
+        name: string,
+        email: string,
+        password: string,
+        confirmPassword?: string,
+        inviteCode?: string
+    ) => {
         setIsLoading(true);
-
         try {
             await api.post("/auth/register", {
                 full_name: name,
@@ -77,9 +103,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 confirm_password: confirmPassword || password,
                 invite_code: inviteCode,
             });
-
-            // After register redirect to login
-            console.log("Registration successful");
         } catch (error) {
             console.error("Registration failed:", error);
             throw error;
@@ -88,12 +111,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
     };
 
-    // ---------------- LOGOUT ----------------
-    const logout = () => {
-        localStorage.removeItem("access_token");
-        localStorage.removeItem("userEmail");
-        localStorage.removeItem("userName");
-        setUser(null);
+    // ── LOGOUT ─────────────────────────────────────────────────────────────────
+    const logout = async () => {
+        const refreshToken = getRefreshToken();
+        try {
+            if (refreshToken) {
+                await api.post("/auth/logout", { refresh_token: refreshToken });
+            }
+        } catch {
+            // Best-effort — proceed with local cleanup regardless
+        } finally {
+            clearAuthTokens();
+            setUser(null);
+        }
     };
 
     const contextValue = useMemo(
@@ -109,13 +139,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     );
 }
 
-// ---------------- HOOK ----------------
 export function useAuth() {
     const context = useContext(AuthContext);
-
-    if (!context) {
-        throw new Error("useAuth must be used within AuthProvider");
-    }
-
+    if (!context) throw new Error("useAuth must be used within AuthProvider");
     return context;
 }

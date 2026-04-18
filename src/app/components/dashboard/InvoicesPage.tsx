@@ -1,6 +1,11 @@
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { FileText, Download } from 'lucide-react';
 import { getInvoices } from '../../services/sales';
+
+function todayLocal() {
+    return new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD
+}
 import { generateInvoicePDF } from '../../utils/generateInvoicePDF';
 
 function formatDate(dateStr: string) {
@@ -44,10 +49,13 @@ function handleDownload(inv: Record<string, unknown>): void {
 }
 
 export function InvoicesPage() {
+    const [selectedDate, setSelectedDate] = useState(todayLocal);
+    const tzOffset = -(new Date().getTimezoneOffset());
+
     const { data, isLoading, error } = useQuery({
-        queryKey: ['invoices', 'list'],
+        queryKey: ['invoices', 'list', selectedDate],
         queryFn: ({ signal }) =>
-            getInvoices(signal)
+            getInvoices(selectedDate, tzOffset, signal)
                 .then(r => {
                     const d = r.data;
                     return Array.isArray(d) ? d : (d.items ?? d.data ?? d.invoices ?? []);
@@ -67,16 +75,25 @@ export function InvoicesPage() {
     return (
         <div className="space-y-6">
             {/* Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
-                    <FileText className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
+                        <FileText className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                    </div>
+                    <div>
+                        <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">Invoice History</h1>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                            {invoices.length > 0 ? `${invoices.length} invoices` : 'No invoices for this date'}
+                        </p>
+                    </div>
                 </div>
-                <div>
-                    <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">Invoice History</h1>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
-                        {invoices.length > 0 ? `${invoices.length} invoices` : 'All generated invoices'}
-                    </p>
-                </div>
+                <input
+                    type="date"
+                    value={selectedDate}
+                    max={todayLocal()}
+                    onChange={e => setSelectedDate(e.target.value)}
+                    className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+                />
             </div>
 
             {/* Error */}
