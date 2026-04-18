@@ -13,6 +13,7 @@ import {
     Menu,
     X,
     UploadCloud,
+    Camera,
     Sparkles,
     BarChart3,
     ShoppingCart,
@@ -30,6 +31,7 @@ import { triggerScan } from '../../services/notificationService';
 import { useAuth } from '../../contexts/AuthContext';
 import { Button } from '../ui/button';
 import { CsvUploadModal } from './CsvUploadModal';
+import { ScanBillModal } from './ScanBillModal';
 import { ChatPanel } from '../ai/ChatPanel';
 import { GlobalLoadingBar } from '../GlobalLoadingBar';
 import { useQueryClient } from '@tanstack/react-query';
@@ -93,6 +95,7 @@ export function DashboardLayout() {
     const { locationsList } = useLocationCtx();
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [isUploadOpen, setIsUploadOpen] = useState(false);
+    const [isScanOpen, setIsScanOpen] = useState(false);
     const queryClient = useQueryClient();
 
     useEffect(() => {
@@ -251,6 +254,14 @@ export function DashboardLayout() {
 
                     <div className="flex items-center gap-4">
                         <Button
+                            onClick={() => setIsScanOpen(true)}
+                            className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2"
+                            size="sm"
+                        >
+                            <Camera className="w-4 h-4" />
+                            <span className="hidden sm:inline">Scan Bill</span>
+                        </Button>
+                        <Button
                             onClick={() => setIsUploadOpen(true)}
                             className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2"
                             size="sm"
@@ -283,6 +294,7 @@ export function DashboardLayout() {
             )}
 
             <CsvUploadModal isOpen={isUploadOpen} onClose={() => setIsUploadOpen(false)} />
+            <ScanBillModal isOpen={isScanOpen} onClose={() => setIsScanOpen(false)} />
             
             {/* Global AI Chat Widget */}
             <ChatPanel />
