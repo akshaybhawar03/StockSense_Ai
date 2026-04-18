@@ -36,6 +36,8 @@ export function ScanBillModal({ isOpen, onClose }: Props) {
     const [error, setError] = useState<string | null>(null);
     const [progress, setProgress] = useState(0);
     const [isDragging, setIsDragging] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [submitError, setSubmitError] = useState<string | null>(null);
     const cameraInputRef = useRef<HTMLInputElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const autoCloseRef = useRef<number | null>(null);
@@ -164,8 +166,16 @@ export function ScanBillModal({ isOpen, onClose }: Props) {
             toast.error('Add at least one product.');
             return;
         }
+        const invalid = payload.find(p => !p.name || !p.name.trim());
+        if (invalid) {
+            setSubmitError('Every product needs a name.');
+            return;
+        }
+        setIsSubmitting(true);
+        setSubmitError(null);
         try {
-            await confirmScanBill(payload, supplier || undefined);
+            const result = await confirmScanBill(payload, supplier || undefined);
+            console.log('[ScanBill] confirm result:', result);
             window.dispatchEvent(new Event('csv-uploaded'));
             toast.success(`${payload.length} products added to inventory`);
             setScreen('success');
@@ -173,8 +183,18 @@ export function ScanBillModal({ isOpen, onClose }: Props) {
                 handleClose();
             }, 3000);
         } catch (err: any) {
-            const msg = err?.response?.data?.detail || err?.message || 'Failed to add products to inventory.';
-            toast.error(msg);
+            console.error('[ScanBill] confirm failed:', err);
+            const data = err?.response?.data;
+            const msg =
+                data?.detail ||
+                data?.error ||
+                data?.message ||
+                err?.message ||
+                'Failed to add products to inventory.';
+            setSubmitError(typeof msg === 'string' ? msg : JSON.stringify(msg));
+            toast.error(typeof msg === 'string' ? msg : 'Upload failed');
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -236,12 +256,14 @@ export function ScanBillModal({ isOpen, onClose }: Props) {
                             products={products}
                             supplier={supplier}
                             totalAmount={totalAmount}
+                            isSubmitting={isSubmitting}
+                            submitError={submitError}
                             onChangeSupplier={setSupplier}
                             onUpdate={updateProduct}
                             onRemove={removeProduct}
                             onAdd={addProduct}
                             onConfirm={confirmAdd}
-                            onBack={() => { setScreen('upload'); setProducts([]); }}
+                            onBack={() => { setScreen('upload'); setProducts([]); setSubmitError(null); }}
                         />
                     )}
 
@@ -395,6 +417,8 @@ function ReviewScreen(props: {
     products: ReviewProduct[];
     supplier: string;
     totalAmount: number;
+    isSubmitting: boolean;
+    submitError: string | null;
     onChangeSupplier: (v: string) => void;
     onUpdate: (id: string, patch: Partial<ScannedProduct>) => void;
     onRemove: (id: string) => void;
@@ -402,7 +426,7 @@ function ReviewScreen(props: {
     onConfirm: () => void;
     onBack: () => void;
 }) {
-    const { products, supplier, totalAmount, onChangeSupplier,
+    const { products, supplier, totalAmount, isSubmitting, submitError, onChangeSupplier,
         onUpdate, onRemove, onAdd, onConfirm, onBack } = props;
 
     return (
@@ -519,14 +543,25 @@ function ReviewScreen(props: {
                 </span>
             </div>
 
+            {submitError && (
+                <div className="mt-4 p-3 bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-lg text-sm flex items-start gap-2">
+                    <AlertCircle className="w-5 h-5 shrink-0" />
+                    <span>{submitError}</span>
+                </div>
+            )}
+
             <div className="mt-6 flex flex-col-reverse sm:flex-row justify-end gap-3">
-                <Button variant="outline" onClick={onBack}>Edit / Go Back</Button>
+                <Button variant="outline" onClick={onBack} disabled={isSubmitting}>Back</Button>
                 <Button
                     onClick={onConfirm}
-                    disabled={products.length === 0}
-                    className="bg-green-600 hover:bg-green-700 text-white"
+                    disabled={products.length === 0 || isSubmitting}
+                    className="bg-green-600 hover:bg-green-700 text-white min-w-[180px]"
                 >
-                    Add all to inventory
+                    {isSubmitting ? (
+                        <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Adding…</>
+                    ) : (
+                        'Add all to inventory'
+                    )}
                 </Button>
             </div>
         </div>
