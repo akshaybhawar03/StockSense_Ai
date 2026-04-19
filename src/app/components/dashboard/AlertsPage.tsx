@@ -21,7 +21,7 @@ export function AlertsPage() {
     const { data, isLoading, error } = useQuery({
         queryKey: ['alerts', 'active', selectedLocationId],
         queryFn: ({ signal }) => getAlerts(signal, selectedLocationId ? { location_id: selectedLocationId } : undefined).then(r => r.data),
-        staleTime: 60_000,
+        staleTime: 5 * 60 * 1000,
     });
 
     if (error) return (

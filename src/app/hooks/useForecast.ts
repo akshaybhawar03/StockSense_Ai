@@ -22,7 +22,7 @@ export function useForecast(weeksCount: number = 6): UseForecastResult {
   const { data: apiData, isLoading: isApiLoading } = useQuery({
     queryKey: ['forecast', 'weekly', weeksCount],
     queryFn: ({ signal }) => getForecast(signal).then(r => r.data),
-    staleTime: 60_000,
+    staleTime: 5 * 60 * 1000,
   });
 
   const isLoading = isApiLoading;

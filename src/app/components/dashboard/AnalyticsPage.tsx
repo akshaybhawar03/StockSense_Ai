@@ -18,7 +18,7 @@ function LocationComparisonSection({ fromDate, toDate }: { fromDate: string; toD
     const { data: compRes, isLoading } = useQuery({
         queryKey: ['analytics', 'location-comparison', fromDate, toDate],
         queryFn: () => getLocationComparison({ from_date: fromDate || undefined, to_date: toDate || undefined }),
-        staleTime: 60_000,
+        staleTime: 5 * 60 * 1000,
     });
 
     const compData: any[] = Array.isArray(compRes?.data)
@@ -62,7 +62,7 @@ export function AnalyticsPage() {
     const { data: responseData, isLoading, error } = useQuery({
         queryKey: ['products', 'all', selectedLocationId],
         queryFn: ({ signal }) => getInventory({ limit: 1000, location_id: selectedLocationId || undefined }, signal).then(r => r.data),
-        staleTime: 60_000,
+        staleTime: 5 * 60 * 1000,
     });
 
     const products = Array.isArray(responseData) ? responseData : (responseData?.data ?? []);

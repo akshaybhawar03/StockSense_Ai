@@ -28,7 +28,7 @@ export function LocationsPage() {
       const d = res.data;
       return Array.isArray(d) ? d : (d?.items ?? d?.locations ?? d?.data ?? []);
     }),
-    staleTime: 30_000,
+    staleTime: 5 * 60 * 1000,
   });
 
   const locations: Location[] = data ?? [];

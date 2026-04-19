@@ -47,7 +47,7 @@ export function PurchaseModal({ isOpen, onClose, onSuccess }: Props) {
                 const d = r.data;
                 return d.items || d.data || d.products || [];
             }),
-        staleTime: 60_000,
+        staleTime: 5 * 60 * 1000,
         enabled: isOpen,
     });
     const products: any[] = productsRes ?? [];

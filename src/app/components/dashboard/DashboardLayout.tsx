@@ -148,7 +148,7 @@ export function DashboardLayout() {
         const configs = prefetchMap[path];
         if (!configs) return;
         configs.forEach(({ queryKey, queryFn }) => {
-            queryClient.prefetchQuery({ queryKey, queryFn, staleTime: 60_000 });
+            queryClient.prefetchQuery({ queryKey, queryFn, staleTime: 5 * 60 * 1000 });
         });
     }, [queryClient]);
 

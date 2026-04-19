@@ -51,7 +51,7 @@ export function TransfersPage() {
       const total = d.total ?? d.count ?? items.length;
       return { items, total };
     }),
-    staleTime: 30_000,
+    staleTime: 5 * 60 * 1000,
   });
 
   const cancelMutation = useMutation({

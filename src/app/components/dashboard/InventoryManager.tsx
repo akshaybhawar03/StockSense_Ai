@@ -89,7 +89,7 @@ export function InventoryManager() {
             const totalCount = d.total  || d.count || itemsList.length;
             return { items: itemsList, total: totalCount };
         }),
-        staleTime: 60_000,
+        staleTime: 5 * 60 * 1000,
     });
 
     const items = inventoryData?.items ?? [];
@@ -98,7 +98,7 @@ export function InventoryManager() {
     const { data: categoriesData } = useQuery({
         queryKey: ['inventory', 'categories'],
         queryFn: ({ signal }) => getCategories(signal).then(r => r.data.categories || []),
-        staleTime: 60_000,
+        staleTime: 5 * 60 * 1000,
     });
     const categories: string[] = categoriesData ?? [];
 

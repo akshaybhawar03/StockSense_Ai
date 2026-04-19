@@ -70,19 +70,19 @@ export function Dashboard() {
         throw err;
       }
     },
-    staleTime: 60_000,
+    staleTime: 5 * 60 * 1000,
   });
 
   const { data: healthData } = useQuery({
     queryKey: ['dashboard', 'health', selectedLocationId],
     queryFn: ({ signal }) => getHealthScore(signal, locationParam).then(r => r.data),
-    staleTime: 60_000,
+    staleTime: 5 * 60 * 1000,
   });
 
   const { data: deadStockData, isLoading: deadStockLoading, isError: deadStockError } = useQuery({
     queryKey: ['dashboard', 'deadStock', selectedLocationId],
     queryFn: ({ signal }) => getDeadStockAnalysis(signal, locationParam).then(r => r.data),
-    staleTime: 60_000,
+    staleTime: 5 * 60 * 1000,
   });
 
   // Location health summary — only when All Locations selected
@@ -93,7 +93,7 @@ export function Dashboard() {
       return Array.isArray(d) ? d : (d?.locations ?? d?.items ?? d?.data ?? []);
     }),
     enabled: !selectedLocationId,
-    staleTime: 60_000,
+    staleTime: 5 * 60 * 1000,
   });
 
   const stats = statsRes ?? null;

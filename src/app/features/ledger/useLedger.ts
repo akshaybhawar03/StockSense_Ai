@@ -29,7 +29,7 @@ export function usePartySummary(type: PartyType) {
       const { data } = await api.get('/ledger/summary', { params: { type } });
       return data;
     },
-    staleTime: 30_000,
+    staleTime: 5 * 60 * 1000,
   });
 }
 
@@ -42,7 +42,7 @@ export function useParties(type: PartyType, search: string, sortBy: SortBy) {
       });
       return Array.isArray(data) ? data : data.items ?? data.data ?? [];
     },
-    staleTime: 30_000,
+    staleTime: 5 * 60 * 1000,
   });
 }
 
@@ -54,7 +54,7 @@ export function usePartyBills(partyId: string | null) {
       return Array.isArray(data) ? data : data.items ?? data.data ?? [];
     },
     enabled: !!partyId,
-    staleTime: 30_000,
+    staleTime: 5 * 60 * 1000,
   });
 }
 
@@ -66,7 +66,7 @@ export function usePartyLedger(partyId: string | null) {
       return Array.isArray(data) ? data : data.items ?? data.data ?? [];
     },
     enabled: !!partyId,
-    staleTime: 30_000,
+    staleTime: 5 * 60 * 1000,
   });
 }
 

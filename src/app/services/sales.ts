@@ -28,7 +28,7 @@ export const getInvoices = (
     signal?: AbortSignal,
 ) =>
     api.get('/invoices/', {
-        params: { date, tz_offset: tzOffset, limit: 200 },
+        params: { date, tz_offset: tzOffset, limit: 50 },
         signal,
     });
 export const downloadInvoice = (id: string)          =>

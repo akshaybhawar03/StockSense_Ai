@@ -20,14 +20,14 @@ export function LocationDetailPage() {
     queryKey: ['location', id],
     queryFn: () => getLocation(id!).then(r => r.data),
     enabled: !!id,
-    staleTime: 60_000,
+    staleTime: 5 * 60 * 1000,
   });
 
   const { data: statsData } = useQuery({
     queryKey: ['location', id, 'stats'],
     queryFn: () => getLocationStats(id!).then(r => r.data),
     enabled: !!id,
-    staleTime: 60_000,
+    staleTime: 5 * 60 * 1000,
   });
 
   const { data: inventoryData, isLoading: inventoryLoading } = useQuery({
@@ -39,7 +39,7 @@ export function LocationDetailPage() {
       return { items, total };
     }),
     enabled: !!id,
-    staleTime: 60_000,
+    staleTime: 5 * 60 * 1000,
   });
 
   const location = locationData;
