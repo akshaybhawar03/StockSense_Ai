@@ -1,10 +1,12 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Bell, AlertTriangle, TrendingDown, RefreshCw, Clock, Upload, Sparkles, X, CheckCircle2 } from 'lucide-react';
 import { fetchNotifications, markAsRead, markAllAsRead, deleteNotification, Notification } from '../../services/notificationService';
 import { useNavigate } from 'react-router';
 import toast from 'react-hot-toast';
 
-const POLLING_INTERVAL = 60000;
+// Lightweight unread check every 2 minutes; full refresh at most every 5 minutes
+const UNREAD_CHECK_INTERVAL = 2 * 60 * 1000;
+const FULL_REFRESH_INTERVAL = 5 * 60 * 1000;
 
 export const NotificationBell: React.FC = () => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -15,33 +17,77 @@ export const NotificationBell: React.FC = () => {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
-  const loadNotifications = async (showLoading = false) => {
+  const lastUnreadRef = useRef(0);
+  const lastFullFetchRef = useRef(0);
+  const unreadCheckTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const fullRefreshTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const clearAllTimers = () => {
+    if (unreadCheckTimerRef.current) clearInterval(unreadCheckTimerRef.current);
+    if (fullRefreshTimerRef.current) clearInterval(fullRefreshTimerRef.current);
+    unreadCheckTimerRef.current = null;
+    fullRefreshTimerRef.current = null;
+  };
+
+  const fetchFullList = useCallback(async (showLoading = false) => {
     try {
       if (showLoading) setLoading(true);
-      const token = localStorage.getItem('access_token') || undefined;
-      const data = await fetchNotifications(token, filter === 'unread', 50);
-      
-      const prevUnreadCount = unreadCount;
+      const data = await fetchNotifications(undefined, false, 50);
+      lastFullFetchRef.current = Date.now();
+      lastUnreadRef.current = data.unread_count || 0;
       setNotifications(data.notifications || []);
       setUnreadCount(data.unread_count || 0);
-
-      // Toast if new unread notifications arrived in polling
-      if (!showLoading && data.unread_count > prevUnreadCount) {
-        const diff = data.unread_count - prevUnreadCount;
-        toast.success(`You have ${diff} new alert${diff > 1 ? 's' : ''} — click the bell to view`, { duration: 4000 });
-      }
     } catch (err) {
       console.error('Failed to load notifications', err);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
+  const checkUnreadCount = useCallback(async () => {
+    try {
+      // Lightweight: fetch only 1 unread item just to get the count
+      const data = await fetchNotifications(undefined, true, 1);
+      const newCount = data.unread_count || 0;
+
+      if (newCount > lastUnreadRef.current) {
+        const diff = newCount - lastUnreadRef.current;
+        lastUnreadRef.current = newCount;
+        setUnreadCount(newCount);
+        toast.success(`You have ${diff} new alert${diff > 1 ? 's' : ''} — click the bell to view`, { duration: 4000 });
+      }
+    } catch (err) {
+      console.error('Failed to check unread count', err);
+    }
+  }, []);
+
+  // On mount: fetch full list once, then start lightweight unread checks + 5-min full refresh
   useEffect(() => {
-    loadNotifications(true);
-    const interval = setInterval(() => loadNotifications(false), POLLING_INTERVAL);
-    return () => clearInterval(interval);
-  }, [filter]);
+    fetchFullList(true);
+
+    unreadCheckTimerRef.current = setInterval(checkUnreadCount, UNREAD_CHECK_INTERVAL);
+    fullRefreshTimerRef.current = setInterval(() => fetchFullList(false), FULL_REFRESH_INTERVAL);
+
+    // Refresh when a sale/CSV upload happens
+    const handleDataEvent = () => fetchFullList(false);
+    window.addEventListener('csv-uploaded', handleDataEvent);
+    window.addEventListener('sale-recorded', handleDataEvent);
+
+    return () => {
+      clearAllTimers();
+      window.removeEventListener('csv-uploaded', handleDataEvent);
+      window.removeEventListener('sale-recorded', handleDataEvent);
+    };
+  }, [fetchFullList, checkUnreadCount]);
+
+  // When user opens the bell: fetch fresh full list, do NOT reset polling timers
+  const handleBellClick = () => {
+    const opening = !isOpen;
+    setIsOpen(opening);
+    if (opening) {
+      fetchFullList(true);
+    }
+  };
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -116,8 +162,8 @@ export const NotificationBell: React.FC = () => {
 
   return (
     <div className="relative" ref={dropdownRef}>
-      <button 
-        onClick={() => setIsOpen(!isOpen)} 
+      <button
+        onClick={handleBellClick}
         className="relative p-2 rounded-full hover:bg-gray-100 transition-colors"
       >
         <Bell className="w-5 h-5 text-gray-600" />
@@ -174,9 +220,12 @@ export const NotificationBell: React.FC = () => {
                   </div>
                 ))}
               </div>
-            ) : notifications.length > 0 ? (
+            ) : (() => {
+              // Client-side filter — no extra API call
+              const displayed = filter === 'unread' ? notifications.filter(n => !n.is_read) : notifications;
+              return displayed.length > 0 ? (
               <div className="divide-y divide-gray-50">
-                {notifications.map((notif) => {
+                {displayed.map((notif) => {
                   const style = getNotificationStyle(notif.type);
                   return (
                     <div 
@@ -219,7 +268,8 @@ export const NotificationBell: React.FC = () => {
                 <p className="font-medium text-gray-600">You're all caught up!</p>
                 <p className="text-sm mt-1">No {filter === 'unread' ? 'unread ' : ''}notifications at this time.</p>
               </div>
-            )}
+            );
+            })()}
           </div>
         </div>
       )}
