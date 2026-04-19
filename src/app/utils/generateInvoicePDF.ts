@@ -62,9 +62,15 @@ export function generateInvoicePDF(inv: Record<string, unknown>): void {
   const customer_name  = String(inv.customer_name ?? '');
   const customer_addr  = String(inv.customer_address ?? inv.billing_address ?? '');
   const customer_phone = String(inv.customer_phone ?? '');
-  const subtotal       = Number(inv.subtotal ?? inv.sub_total ?? 0);
-  const gst            = Number(inv.gst ?? inv.tax ?? inv.tax_amount ?? 0);
-  const total          = Number(inv.total ?? inv.total_amount ?? subtotal + gst);
+  const subtotal  = Number(inv.subtotal ?? inv.sub_total ?? 0);
+  // Support unified gst field OR split Indian GST (cgst + sgst) OR igst
+  const rawGst    = Number(inv.gst ?? inv.tax ?? inv.tax_amount ?? inv.igst ?? 0)
+                  + Number(inv.cgst ?? 0)
+                  + Number(inv.sgst ?? 0);
+  const rawTotal  = Number(inv.total ?? inv.total_amount ?? 0);
+  // If backend bakes tax into `total` without exposing breakdown, derive it
+  const gst       = rawGst > 0 ? rawGst : (rawTotal > subtotal ? rawTotal - subtotal : 0);
+  const total     = rawTotal > 0 ? rawTotal : subtotal + gst;
   const received       = Number(inv.received ?? inv.paid ?? inv.paid_amount ?? 0);
   const balance        = Number(inv.balance ?? (total - received));
   const payment_mode   = String(inv.payment_mode ?? inv.mode ?? 'Credit');
@@ -77,7 +83,13 @@ export function generateInvoicePDF(inv: Record<string, unknown>): void {
         name:       String(it.name ?? it.product_name ?? it.item_name ?? `Item ${idx + 1}`),
         quantity:   Number(it.quantity ?? it.qty ?? 1),
         unit_price: Number(it.unit_price ?? it.price ?? it.rate ?? 0),
-        amount:     Number(it.amount ?? it.total ?? 0),
+        amount:     (() => {
+          const a = Number(it.amount ?? it.line_total ?? it.total ?? 0);
+          const q = Number(it.quantity ?? it.qty ?? 1);
+          const p = Number(it.unit_price ?? it.price ?? it.rate ?? 0);
+          // fallback: calculate from qty × price if backend doesn't send amount
+          return a > 0 ? a : q * p;
+        })(),
       }));
     }
     return [{ name: 'Services / Goods', quantity: 1, unit_price: subtotal, amount: subtotal }];
@@ -216,7 +228,7 @@ export function generateInvoicePDF(inv: Record<string, unknown>): void {
     <div class="totals-box">
       <table>
         <tr><td>Sub Total :</td><td>${formatINR(subtotal)}</td></tr>
-        ${gst > 0 ? `<tr><td>GST :</td><td>${formatINR(gst)}</td></tr>` : ''}
+        ${gst > 0 ? `<tr><td>GST / Tax :</td><td>${formatINR(gst)}</td></tr>` : ''}
         <tr class="grand"><td>Total :</td><td>${formatINR(total)}</td></tr>
         <tr><td style="font-size:11px;color:#555;">Received :</td><td style="font-size:11px;color:#555;">${formatINR(received)}</td></tr>
         <tr><td style="font-size:11.5px;font-weight:bold;">Balance :</td><td style="font-size:11.5px;font-weight:bold;">${formatINR(balance)}</td></tr>
