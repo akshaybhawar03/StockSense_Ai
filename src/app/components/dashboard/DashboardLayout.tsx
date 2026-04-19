@@ -98,18 +98,21 @@ export function DashboardLayout() {
     const [isScanOpen, setIsScanOpen] = useState(false);
     const queryClient = useQueryClient();
 
+    // Trigger a backend scan once on dashboard mount (max once per 10 min).
+    // Runs on mount only — NOT on every route change, to avoid flooding the backend.
     useEffect(() => {
+        const SCAN_COOLDOWN = 10 * 60 * 1000;
         const lastScan = localStorage.getItem('lastNotificationScan');
         const now = Date.now();
-        if (!lastScan || now - parseInt(lastScan, 10) > 5 * 60 * 1000) {
+        if (!lastScan || now - parseInt(lastScan, 10) > SCAN_COOLDOWN) {
             const token = localStorage.getItem('access_token');
             if (token) {
-                triggerScan(token).then(() => {
-                    localStorage.setItem('lastNotificationScan', now.toString());
-                }).catch(console.error);
+                // Write timestamp immediately to prevent concurrent calls during async POST
+                localStorage.setItem('lastNotificationScan', now.toString());
+                triggerScan(token).catch(console.error);
             }
         }
-    }, [location.pathname]);
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     const activeLocCount = locationsList.filter(l => l.is_active).length;
     const hasOutOfStock  = locationsList.some(l => (l.out_of_stock_count ?? 0) > 0);
