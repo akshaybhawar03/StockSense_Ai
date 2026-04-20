@@ -33,11 +33,59 @@ export function fileToBase64(file: File): Promise<string> {
     });
 }
 
+const MAX_IMAGE_BYTES = 3 * 1024 * 1024; // 3 MB
+
+function compressImage(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        const url = URL.createObjectURL(file);
+        img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Image load failed')); };
+        img.onload = () => {
+            URL.revokeObjectURL(url);
+            let quality = 0.8;
+            let scale = 1.0;
+
+            const tryCompress = () => {
+                const canvas = document.createElement('canvas');
+                canvas.width = Math.floor(img.width * scale);
+                canvas.height = Math.floor(img.height * scale);
+                const ctx = canvas.getContext('2d');
+                if (!ctx) { reject(new Error('Canvas not available')); return; }
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+                canvas.toBlob((blob) => {
+                    if (!blob) { reject(new Error('Canvas toBlob failed')); return; }
+                    if (blob.size <= MAX_IMAGE_BYTES || quality <= 0.4) {
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            const dataUrl = e.target!.result as string;
+                            const comma = dataUrl.indexOf(',');
+                            resolve(comma >= 0 ? dataUrl.slice(comma + 1) : dataUrl);
+                        };
+                        reader.onerror = () => reject(reader.error);
+                        reader.readAsDataURL(blob);
+                    } else {
+                        quality -= 0.1;
+                        if (quality < 0.4) scale *= 0.75;
+                        tryCompress();
+                    }
+                }, 'image/jpeg', quality);
+            };
+
+            tryCompress();
+        };
+        img.src = url;
+    });
+}
+
 export async function scanBill(file: File) {
-    const image = await fileToBase64(file);
+    // PDFs cannot be canvas-compressed; images are compressed to stay under 3 MB.
+    const isPdf = file.type === 'application/pdf';
+    const image = isPdf ? await fileToBase64(file) : await compressImage(file);
+    const mediaType = isPdf ? file.type : 'image/jpeg';
     const payload: ScanBillPayload = {
         image,
-        mediaType: file.type,
+        mediaType,
         fileName: file.name,
     };
     const res = await api.post<ScanBillResponse>('/scan-bill', payload);
