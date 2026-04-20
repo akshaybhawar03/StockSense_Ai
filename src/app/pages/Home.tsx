@@ -23,10 +23,12 @@ import {
   X
 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../components/ui/dialog';
+import { TrialModal } from '../components/TrialModal';
 
 export function Home() {
   const { t } = useLanguage();
   const [showROICalculator, setShowROICalculator] = useState(false);
+  const [showTrialModal, setShowTrialModal] = useState(false);
   const [inventoryValue, setInventoryValue] = useState('');
 
   const calculateROI = () => {
@@ -67,8 +69,8 @@ export function Home() {
                 India's #1 AI-powered inventory management platform. Predict demand with 95% accuracy, get WhatsApp alerts for low stock, and recover trapped working capital in weeks.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 mb-8">
-                <Button className="bg-[#22C55E] hover:bg-[#22C55E]/90 text-white px-8 py-7 text-[16px] font-semibold rounded-[10px] flex items-center justify-center gap-3 transition-colors shadow-md">
-                  Start 14-Day Free Trial 
+                <Button onClick={() => setShowTrialModal(true)} className="bg-[#22C55E] hover:bg-[#22C55E]/90 text-white px-8 py-7 text-[16px] font-semibold rounded-[10px] flex items-center justify-center gap-3 transition-colors shadow-md">
+                  Start 14-Day Free Trial
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
                 </Button>
                 <Button variant="outline" className="px-8 py-7 text-[16px] font-semibold rounded-[10px] flex items-center justify-center gap-3 bg-white text-[#0F172A] border border-gray-200 shadow-sm hover:bg-gray-50 transition-colors">
@@ -385,12 +387,15 @@ export function Home() {
             <p className="text-xl text-gray-600 dark:text-gray-400 mb-8">
               Join 2,500+ sellers who have recovered over ₹50 crores
             </p>
-            <Button size="lg" className="bg-[rgb(var(--accent-primary))] hover:bg-[rgb(var(--accent-primary))]/90 text-white">
+            <Button size="lg" onClick={() => setShowTrialModal(true)} className="bg-[rgb(var(--accent-primary))] hover:bg-[rgb(var(--accent-primary))]/90 text-white">
               Start Your Free Trial
             </Button>
           </motion.div>
         </div>
       </section>
+
+      {/* Trial Request Modal */}
+      <TrialModal open={showTrialModal} onClose={() => setShowTrialModal(false)} />
 
       {/* ROI Calculator Modal */}
       <Dialog open={showROICalculator} onOpenChange={setShowROICalculator}>
@@ -425,7 +430,7 @@ export function Home() {
                 </p>
               </motion.div>
             )}
-            <Button className="w-full bg-[rgb(var(--accent-primary))] hover:bg-[rgb(var(--accent-primary))]/90 text-white">
+            <Button onClick={() => setShowTrialModal(true)} className="w-full bg-[rgb(var(--accent-primary))] hover:bg-[rgb(var(--accent-primary))]/90 text-white">
               Start Free Trial
             </Button>
           </div>
