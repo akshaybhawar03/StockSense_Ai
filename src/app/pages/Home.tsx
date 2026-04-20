@@ -116,7 +116,7 @@ export function Home() {
             {[
               { img: 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png', title: t('problem.moneyStuck'), extraClass: 'grayscale sepia hue-rotate-[320deg] saturate-[5000%] brightness-110 drop-shadow-md' },
               { img: 'https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Symbols/Warning.png', title: t('problem.stockouts') },
-              { img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/73/Microsoft_Excel_2013-2019_logo.svg/1200px-Microsoft_Excel_2013-2019_logo.svg.png', title: t('problem.excelForecasting') },
+              { img: null, title: t('problem.excelForecasting') },
               { img: 'https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Magnifying%20Glass%20Tilted%20Right.png', title: t('problem.noVisibility') },
             ].map((problem, index) => (
               <motion.div
@@ -128,13 +128,17 @@ export function Home() {
                 className="h-full flex"
               >
                 <Card className="p-8 w-full flex flex-col items-center text-center bg-white dark:bg-gray-800 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-100 dark:border-gray-800 group">
-                  <div className="w-20 h-20 mb-6 group-hover:scale-110 group-hover:-translate-y-2 transition-transform duration-300">
-                    <img
-                      src={problem.img}
-                      alt={problem.title}
-                      className={`w-full h-full object-contain drop-shadow-xl ${problem.extraClass || ''}`}
-                      loading="lazy"
-                    />
+                  <div className="w-20 h-20 mb-6 group-hover:scale-110 group-hover:-translate-y-2 transition-transform duration-300 flex items-center justify-center">
+                    {problem.img ? (
+                      <img
+                        src={problem.img}
+                        alt={problem.title}
+                        className={`w-full h-full object-contain drop-shadow-xl ${problem.extraClass || ''}`}
+                        loading="lazy"
+                      />
+                    ) : (
+                      <FileSpreadsheet className="w-16 h-16 text-green-600 drop-shadow-md" />
+                    )}
                   </div>
                   <h3 className="text-lg font-bold text-gray-900 dark:text-white leading-snug">{problem.title}</h3>
                 </Card>
@@ -304,33 +308,6 @@ export function Home() {
               Calculate Your ROI
             </Button>
           </motion.div>
-        </div>
-      </section>
-
-      {/* Social Proof */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-white dark:bg-gray-900">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid md:grid-cols-3 gap-8">
-            {[
-              { value: '₹50Cr+', label: 'Cash Recovered for Sellers' },
-              { value: '2,500+', label: 'Active Stores' },
-              { value: '95%', label: 'Prediction Accuracy' },
-            ].map((stat, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, scale: 0.5, y: 30 }}
-                whileInView={{ opacity: 1, scale: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.3 }}
-                transition={{ delay: index * 0.1, duration: 0.5, type: "spring" }}
-                className="text-center"
-              >
-                <div className="text-4xl md:text-5xl font-bold text-[rgb(var(--accent-primary))] mb-2">
-                  {stat.value}
-                </div>
-                <div className="text-gray-600 dark:text-gray-400">{stat.label}</div>
-              </motion.div>
-            ))}
-          </div>
         </div>
       </section>
 
