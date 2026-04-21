@@ -59,24 +59,40 @@ export const NotificationBell: React.FC = () => {
     }
   }, [fetchFullList]);
 
+  const startPolling = useCallback(() => {
+    stopPolling();
+    unreadTimerRef.current = setInterval(checkUnreadCount, UNREAD_CHECK_MS);
+    fullTimerRef.current   = setInterval(() => fetchFullList(false), FULL_REFRESH_MS);
+  }, [checkUnreadCount, fetchFullList, stopPolling]);
+
   // On mount: one initial full fetch, then start slow background timers
   useEffect(() => {
     fetchFullList(true);
-
-    unreadTimerRef.current = setInterval(checkUnreadCount, UNREAD_CHECK_MS);
-    fullTimerRef.current   = setInterval(() => fetchFullList(false), FULL_REFRESH_MS);
+    startPolling();
 
     // Refresh immediately when a sale or CSV upload happens
     const onDataChanged = () => fetchFullList(false);
     window.addEventListener('csv-uploaded',  onDataChanged);
     window.addEventListener('sale-recorded', onDataChanged);
 
+    // Stop polling when tab is hidden; resume + fetch immediately when visible again
+    const handleVisibility = () => {
+      if (document.hidden) {
+        stopPolling();
+      } else {
+        fetchFullList(false);
+        startPolling();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+
     return () => {
       stopPolling();
       window.removeEventListener('csv-uploaded',  onDataChanged);
       window.removeEventListener('sale-recorded', onDataChanged);
+      document.removeEventListener('visibilitychange', handleVisibility);
     };
-  }, [fetchFullList, checkUnreadCount, stopPolling]);
+  }, [fetchFullList, checkUnreadCount, stopPolling, startPolling]);
 
   // Click outside → close
   useEffect(() => {
