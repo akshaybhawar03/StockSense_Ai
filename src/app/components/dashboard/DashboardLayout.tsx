@@ -25,6 +25,8 @@ import {
     MapPin,
     ArrowLeftRight,
     MoreHorizontal,
+    Maximize,
+    Minimize,
 } from 'lucide-react';
 import { useLocation as useLocationCtx } from '../../contexts/LocationContext';
 import { NotificationBell } from './NotificationBell';
@@ -97,6 +99,21 @@ export function DashboardLayout() {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [isUploadOpen, setIsUploadOpen] = useState(false);
     const [isScanOpen, setIsScanOpen] = useState(false);
+    const [isFullscreen, setIsFullscreen] = useState(false);
+
+    useEffect(() => {
+        const onChange = () => setIsFullscreen(!!document.fullscreenElement);
+        document.addEventListener('fullscreenchange', onChange);
+        return () => document.removeEventListener('fullscreenchange', onChange);
+    }, []);
+
+    const toggleFullscreen = useCallback(() => {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen().catch(() => {});
+        } else {
+            document.exitFullscreen().catch(() => {});
+        }
+    }, []);
     const queryClient = useQueryClient();
 
     // Trigger a backend scan once on dashboard mount (max once per 10 min).
@@ -278,6 +295,13 @@ export function DashboardLayout() {
                             <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
                             Live Sync
                         </div>
+                        <button
+                            onClick={toggleFullscreen}
+                            title={isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
+                            className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                        >
+                            {isFullscreen ? <Minimize className="w-4 h-4" /> : <Maximize className="w-4 h-4" />}
+                        </button>
                         <NotificationBell />
                     </div>
                 </header>
