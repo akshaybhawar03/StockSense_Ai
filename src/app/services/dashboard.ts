@@ -26,6 +26,14 @@ export interface DeadStockAnalysis {
     summary: DeadStockSummary;
 }
 
+// ── Combined Dashboard Type ──────────────────────────────────────
+export interface DashboardCombined {
+    summary: Record<string, any>;
+    health: Record<string, any>;
+    dead_stock: DeadStockAnalysis;
+    locations: Array<Record<string, any>>;
+}
+
 // ── API Calls ────────────────────────────────────────────────────
 export const getDashboardStats = (signal?: AbortSignal, params?: Record<string, any>) =>
     api.get('/dashboard', { signal, params });
@@ -33,3 +41,5 @@ export const getHealthScore = (signal?: AbortSignal, params?: Record<string, any
     api.get('/dashboard/health', { signal, params });
 export const getDeadStockAnalysis = (signal?: AbortSignal, params?: Record<string, any>) =>
     api.get<DeadStockAnalysis>('/dashboard/dead-stock-analysis', { signal, params });
+export const getDashboardCombined = (signal?: AbortSignal, params?: Record<string, any>) =>
+    api.get<DashboardCombined>('/dashboard/combined', { signal, params });

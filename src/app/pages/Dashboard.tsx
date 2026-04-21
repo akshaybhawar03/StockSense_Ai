@@ -16,8 +16,8 @@ import { SaleModal } from '../components/dashboard/SaleModal';
 import { PurchaseModal } from '../components/dashboard/PurchaseModal';
 import { LocationSwitcher } from '../components/locations/LocationSwitcher';
 import { LocationStockHealthCard } from '../components/locations/LocationStockHealthCard';
-import { getDashboardStats, getHealthScore, getDeadStockAnalysis } from '../services/dashboard';
-import { getLocationsSummary } from '../services/locations';
+import { getDashboardCombined } from '../services/dashboard';
+import type { DeadStockAnalysis } from '../services/dashboard';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { DashboardSkeleton } from '../components/skeletons/DashboardSkeleton';
 import toast from 'react-hot-toast';
@@ -56,14 +56,14 @@ export function Dashboard() {
     });
   };
 
-  // React Query: Fetch all 3 dashboard endpoints (location-aware)
+  // Single combined query replaces 4 separate dashboard calls
   const locationParam = selectedLocationId ? { location_id: selectedLocationId } : {};
 
-  const { data: statsRes, isLoading: statsLoading, isError: statsError } = useQuery({
-    queryKey: ['dashboard', 'stats', selectedLocationId],
+  const { data: combinedData, isLoading: statsLoading, isError: statsError } = useQuery({
+    queryKey: ['dashboard', 'combined', selectedLocationId],
     queryFn: async ({ signal }) => {
       try {
-        const r = await getDashboardStats(signal, locationParam);
+        const r = await getDashboardCombined(signal, locationParam);
         return r.data;
       } catch (err) {
         toast.error('Failed to load dashboard statistics.');
@@ -73,30 +73,12 @@ export function Dashboard() {
     staleTime: 5 * 60 * 1000,
   });
 
-  const { data: healthData } = useQuery({
-    queryKey: ['dashboard', 'health', selectedLocationId],
-    queryFn: ({ signal }) => getHealthScore(signal, locationParam).then(r => r.data),
-    staleTime: 5 * 60 * 1000,
-  });
-
-  const { data: deadStockData, isLoading: deadStockLoading, isError: deadStockError } = useQuery({
-    queryKey: ['dashboard', 'deadStock', selectedLocationId],
-    queryFn: ({ signal }) => getDeadStockAnalysis(signal, locationParam).then(r => r.data),
-    staleTime: 5 * 60 * 1000,
-  });
-
-  // Location health summary — only when All Locations selected
-  const { data: locationsSummaryData } = useQuery({
-    queryKey: ['dashboard', 'locationsSummary'],
-    queryFn: () => getLocationsSummary().then(r => {
-      const d = r.data;
-      return Array.isArray(d) ? d : (d?.locations ?? d?.items ?? d?.data ?? []);
-    }),
-    enabled: !selectedLocationId,
-    staleTime: 5 * 60 * 1000,
-  });
-
-  const stats = statsRes ?? null;
+  const stats = combinedData?.summary ?? null;
+  const healthData = combinedData?.health ?? null;
+  const deadStockData: DeadStockAnalysis | null = combinedData?.dead_stock ?? null;
+  const deadStockLoading = statsLoading;
+  const deadStockError = statsError;
+  const locationsSummaryData = combinedData?.locations ?? null;
   const loading = statsLoading;
 
   // Invalidate dashboard queries when CSV is uploaded
