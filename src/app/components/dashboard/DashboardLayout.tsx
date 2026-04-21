@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
-import { Outlet, NavLink, useLocation } from 'react-router';
+import { Outlet, NavLink, useLocation, useNavigate } from 'react-router';
 import {
     LayoutDashboard,
     Package,
@@ -24,6 +24,7 @@ import {
     BookOpen,
     MapPin,
     ArrowLeftRight,
+    MoreHorizontal,
 } from 'lucide-react';
 import { useLocation as useLocationCtx } from '../../contexts/LocationContext';
 import { NotificationBell } from './NotificationBell';
@@ -92,8 +93,9 @@ const prefetchMap: Record<string, { queryKey: any[]; queryFn: () => Promise<any>
 export function DashboardLayout() {
     const { user, logout } = useAuth();
     const location = useLocation();
+    const navigate = useNavigate();
     const { locationsList } = useLocationCtx();
-    const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [isUploadOpen, setIsUploadOpen] = useState(false);
     const [isScanOpen, setIsScanOpen] = useState(false);
     const queryClient = useQueryClient();
@@ -192,6 +194,7 @@ export function DashboardLayout() {
                                 key={item.name}
                                 to={item.path}
                                 onMouseEnter={() => handleNavHover(item.path)}
+                                onClick={() => setIsSidebarOpen(false)}
                                 className={`flex items-center justify-between px-3 py-2.5 rounded-lg transition-colors group ${isActive
                                     ? 'bg-green-50/50 text-green-600 dark:bg-green-900/20 dark:text-green-400'
                                     : 'text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-800/50'
@@ -281,7 +284,7 @@ export function DashboardLayout() {
                 </header>
 
                 {/* Scrollable Page Content */}
-                <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+                <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 pb-20 lg:pb-8">
                     <div className="max-w-7xl mx-auto">
                         <Outlet />
                     </div>
@@ -296,11 +299,63 @@ export function DashboardLayout() {
                 />
             )}
 
+            {/* Bottom Navigation — mobile only */}
+            <BottomNav
+                currentPath={location.pathname}
+                onNavigate={(path) => { navigate(path); }}
+                onMoreClick={() => setIsSidebarOpen(true)}
+            />
+
             <CsvUploadModal isOpen={isUploadOpen} onClose={() => setIsUploadOpen(false)} />
             <ScanBillModal isOpen={isScanOpen} onClose={() => setIsScanOpen(false)} />
-            
+
             {/* Global AI Chat Widget */}
             <ChatPanel />
         </div>
+    );
+}
+
+/* ─────────── Bottom Navigation Bar (mobile only) ─────────── */
+interface BottomNavProps {
+    currentPath: string;
+    onNavigate: (path: string) => void;
+    onMoreClick: () => void;
+}
+
+const BOTTOM_NAV_ITEMS = [
+    { name: 'Dashboard', icon: LayoutDashboard, path: '/dashboard' },
+    { name: 'Inventory', icon: Package,         path: '/dashboard/inventory' },
+    { name: 'Sales',     icon: ShoppingCart,    path: '/dashboard/sales' },
+    { name: 'Purchases', icon: ShoppingBag,     path: '/dashboard/purchases' },
+] as const;
+
+function BottomNav({ currentPath, onNavigate, onMoreClick }: BottomNavProps) {
+    return (
+        <nav className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-white dark:bg-gray-800 border-t border-gray-100 dark:border-gray-700 flex items-stretch h-16 safe-area-pb">
+            {BOTTOM_NAV_ITEMS.map(({ name, icon: Icon, path }) => {
+                const isActive = currentPath === path;
+                return (
+                    <button
+                        key={name}
+                        onClick={() => onNavigate(path)}
+                        className={`flex-1 flex flex-col items-center justify-center gap-0.5 min-h-[44px] transition-colors ${
+                            isActive
+                                ? 'text-green-600 dark:text-green-400'
+                                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
+                        }`}
+                    >
+                        <Icon className="w-5 h-5" />
+                        <span className="text-[10px] font-medium leading-none">{name}</span>
+                    </button>
+                );
+            })}
+            <button
+                onClick={onMoreClick}
+                className="flex-1 flex flex-col items-center justify-center gap-0.5 min-h-[44px] text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors"
+            >
+                <MoreHorizontal className="w-5 h-5" />
+                <span className="text-[10px] font-medium leading-none">More</span>
+            </button>
+        </nav>
     );
 }
