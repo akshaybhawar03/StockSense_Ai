@@ -33,7 +33,6 @@ import { useAuth } from '../../contexts/AuthContext';
 import { Button } from '../ui/button';
 import { CsvUploadModal } from './CsvUploadModal';
 import { ScanBillModal } from './ScanBillModal';
-import { ChatPanel } from '../ai/ChatPanel';
 import { GlobalLoadingBar } from '../GlobalLoadingBar';
 import { useQueryClient } from '@tanstack/react-query';
 import { getDashboardStats, getHealthScore, getDeadStockAnalysis } from '../../services/dashboard';
@@ -309,8 +308,6 @@ export function DashboardLayout() {
             <CsvUploadModal isOpen={isUploadOpen} onClose={() => setIsUploadOpen(false)} />
             <ScanBillModal isOpen={isScanOpen} onClose={() => setIsScanOpen(false)} />
 
-            {/* Global AI Chat Widget */}
-            <ChatPanel />
         </div>
     );
 }
