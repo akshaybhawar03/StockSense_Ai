@@ -73,7 +73,21 @@ export function Dashboard() {
     staleTime: 5 * 60 * 1000,
   });
 
-  const stats = combinedData?.summary ?? null;
+  // Normalize summary: backend may put counts only inside statCards (camelCase).
+  // Use || so a 0 at the flat level also falls back to statCards (avoids false "no data").
+  const _summary = combinedData?.summary ?? null;
+  const _sc = _summary?.statCards;
+  const stats: Record<string, any> | null = _summary ? {
+    ..._summary,
+    total_products:   _summary.total_products   || _sc?.totalProducts,
+    total_sales:      _summary.total_sales      || _sc?.totalSales,
+    monthly_revenue:  _summary.monthly_revenue  || _sc?.monthlyRevenue,
+    turnover_rate:    _summary.turnover_rate    || _sc?.turnoverRate,
+    low_stock_items:  _summary.low_stock_items  || _sc?.lowStockItems,
+    out_of_stock:     _summary.out_of_stock     || _sc?.outOfStockItems,
+    dead_stock_items: _summary.dead_stock_items || _sc?.deadStockItems,
+    inventory_value:  _summary.inventory_value  || _sc?.totalValue,
+  } : null;
   const healthData = combinedData?.health ?? null;
   const deadStockData: DeadStockAnalysis | null = combinedData?.dead_stock ?? null;
   const deadStockLoading = statsLoading;
