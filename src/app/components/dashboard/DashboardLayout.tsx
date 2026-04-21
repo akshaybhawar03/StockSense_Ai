@@ -37,7 +37,7 @@ import { CsvUploadModal } from './CsvUploadModal';
 import { ScanBillModal } from './ScanBillModal';
 import { GlobalLoadingBar } from '../GlobalLoadingBar';
 import { useQueryClient } from '@tanstack/react-query';
-import { getDashboardCombined } from '../../services/dashboard';
+import { getDashboardStats, getHealthScore, getDeadStockAnalysis } from '../../services/dashboard';
 import { getInventory } from '../../services/inventory';
 import { getForecast } from '../../services/forecast';
 import { getAnalytics } from '../../services/analytics';
@@ -47,7 +47,9 @@ import { getSales, getPurchases, getInvoices } from '../../services/sales';
 // Map nav paths to their prefetch configs
 const prefetchMap: Record<string, { queryKey: any[]; queryFn: () => Promise<any> }[]> = {
     '/dashboard': [
-        { queryKey: ['dashboard', 'combined', null], queryFn: () => getDashboardCombined().then(r => r.data) },
+        { queryKey: ['dashboard', 'stats'], queryFn: () => getDashboardStats().then(r => r.data) },
+        { queryKey: ['dashboard', 'health'], queryFn: () => getHealthScore().then(r => r.data) },
+        { queryKey: ['dashboard', 'deadStock'], queryFn: () => getDeadStockAnalysis().then(r => r.data) },
     ],
     '/dashboard/inventory': [
         {

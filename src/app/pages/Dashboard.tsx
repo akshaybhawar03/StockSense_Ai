@@ -16,8 +16,8 @@ import { SaleModal } from '../components/dashboard/SaleModal';
 import { PurchaseModal } from '../components/dashboard/PurchaseModal';
 import { LocationSwitcher } from '../components/locations/LocationSwitcher';
 import { LocationStockHealthCard } from '../components/locations/LocationStockHealthCard';
-import { getDashboardCombined } from '../services/dashboard';
-import type { DeadStockAnalysis } from '../services/dashboard';
+import { getDashboardStats, getHealthScore, getDeadStockAnalysis } from '../services/dashboard';
+import { getLocationsSummary } from '../services/locations';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { DashboardSkeleton } from '../components/skeletons/DashboardSkeleton';
 import toast from 'react-hot-toast';
@@ -56,14 +56,14 @@ export function Dashboard() {
     });
   };
 
-  // Single combined query replaces 4 separate dashboard calls
+  // React Query: Fetch all dashboard endpoints (location-aware)
   const locationParam = selectedLocationId ? { location_id: selectedLocationId } : {};
 
-  const { data: combinedData, isLoading: statsLoading, isError: statsError } = useQuery({
-    queryKey: ['dashboard', 'combined', selectedLocationId],
+  const { data: statsRes, isLoading: statsLoading, isError: statsError } = useQuery({
+    queryKey: ['dashboard', 'stats', selectedLocationId],
     queryFn: async ({ signal }) => {
       try {
-        const r = await getDashboardCombined(signal, locationParam);
+        const r = await getDashboardStats(signal, locationParam);
         return r.data;
       } catch (err) {
         toast.error('Failed to load dashboard statistics.');
@@ -73,26 +73,30 @@ export function Dashboard() {
     staleTime: 5 * 60 * 1000,
   });
 
-  // Normalize summary: backend may put counts only inside statCards (camelCase).
-  // Use || so a 0 at the flat level also falls back to statCards (avoids false "no data").
-  const _summary = combinedData?.summary ?? null;
-  const _sc = _summary?.statCards;
-  const stats: Record<string, any> | null = _summary ? {
-    ..._summary,
-    total_products:   _summary.total_products   || _sc?.totalProducts,
-    total_sales:      _summary.total_sales      || _sc?.totalSales,
-    monthly_revenue:  _summary.monthly_revenue  || _sc?.monthlyRevenue,
-    turnover_rate:    _summary.turnover_rate    || _sc?.turnoverRate,
-    low_stock_items:  _summary.low_stock_items  || _sc?.lowStockItems,
-    out_of_stock:     _summary.out_of_stock     || _sc?.outOfStockItems,
-    dead_stock_items: _summary.dead_stock_items || _sc?.deadStockItems,
-    inventory_value:  _summary.inventory_value  || _sc?.totalValue,
-  } : null;
-  const healthData = combinedData?.health ?? null;
-  const deadStockData: DeadStockAnalysis | null = combinedData?.dead_stock ?? null;
-  const deadStockLoading = statsLoading;
-  const deadStockError = statsError;
-  const locationsSummaryData = combinedData?.locations ?? null;
+  const { data: healthData } = useQuery({
+    queryKey: ['dashboard', 'health', selectedLocationId],
+    queryFn: ({ signal }) => getHealthScore(signal, locationParam).then(r => r.data),
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const { data: deadStockData, isLoading: deadStockLoading, isError: deadStockError } = useQuery({
+    queryKey: ['dashboard', 'deadStock', selectedLocationId],
+    queryFn: ({ signal }) => getDeadStockAnalysis(signal, locationParam).then(r => r.data),
+    staleTime: 5 * 60 * 1000,
+  });
+
+  // Location health summary — only when All Locations selected
+  const { data: locationsSummaryData } = useQuery({
+    queryKey: ['dashboard', 'locationsSummary'],
+    queryFn: () => getLocationsSummary().then(r => {
+      const d = r.data;
+      return Array.isArray(d) ? d : (d?.locations ?? d?.items ?? d?.data ?? []);
+    }),
+    enabled: !selectedLocationId,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const stats = statsRes ?? null;
   const loading = statsLoading;
 
   // Invalidate dashboard queries when CSV is uploaded
