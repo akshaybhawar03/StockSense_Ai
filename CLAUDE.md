@@ -11,7 +11,7 @@ Claude Code ke liye project context. Ye file project ki architecture, patterns, 
 **Type:** AI-powered inventory management SaaS  
 **Stack:** React 18 + Vite 6 + TypeScript 5 + Tailwind CSS v4  
 **Backend:** Separate Python FastAPI repo hosted on Render  
-**Backend base URL:** `https://stocksense-backend-wijr.onrender.com/api/v1`  
+**Backend base URL:** `https://stocksense-backend-ge7h.onrender.com/api/v1`  
 **Env var to override:** `VITE_API_URL`
 
 ---

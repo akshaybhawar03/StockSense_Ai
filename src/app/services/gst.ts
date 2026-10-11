@@ -87,7 +87,7 @@ export async function downloadGstReport(
     endDate: string,
 ): Promise<void> {
     const token = localStorage.getItem('access_token');
-    const baseUrl = import.meta.env.VITE_API_URL || 'https://stocksense-backend-wijr.onrender.com/api/v1';
+    const baseUrl = import.meta.env.VITE_API_URL || 'https://stocksense-backend-ge7h.onrender.com/api/v1';
     const url = `${baseUrl}/gst/download?type=${type}&format=${format}&start_date=${startDate}&end_date=${endDate}`;
 
     const res = await fetch(url, {

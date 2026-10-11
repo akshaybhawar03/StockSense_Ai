@@ -84,7 +84,7 @@ const prefetchMap: Record<string, { queryKey: any[]; queryFn: () => Promise<any>
         }) },
     ],
     '/dashboard/invoices': [
-        { queryKey: ['invoices', 'list'], queryFn: () => getInvoices().then(r => {
+        { queryKey: ['invoices', 'list', new Date().toLocaleDateString('en-CA')], queryFn: () => getInvoices().then(r => {
             const d = r.data;
             return Array.isArray(d) ? d : (d.items ?? d.data ?? d.invoices ?? []);
         }) },

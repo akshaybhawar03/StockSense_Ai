@@ -8,7 +8,7 @@ import {
     clearAuthTokens,
 } from "../services/api";
 
-const API_URL = import.meta.env.VITE_API_URL || 'https://stocksense-backend-wijr.onrender.com/api/v1';
+const API_URL = import.meta.env.VITE_API_URL || 'https://stocksense-backend-ge7h.onrender.com/api/v1';
 
 export interface User {
     id?: string;

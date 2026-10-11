@@ -9,6 +9,6 @@ export const chat = (messages: any[]) => api.post('/ai/chat', { messages });
 
 export const streamAnalysis = () => {
     const token = localStorage.getItem('access_token');
-    const base = import.meta.env.VITE_API_URL || 'https://stocksense-backend-wijr.onrender.com/api/v1';
+    const base = import.meta.env.VITE_API_URL || 'https://stocksense-backend-ge7h.onrender.com/api/v1';
     return new EventSource(`${base}/ai/analyse/stream?token=${token}`);
 };

@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL || 'https://stocksense-backend-wijr.onrender.com/api/v1';
+const API_URL = import.meta.env.VITE_API_URL || 'https://stocksense-backend-ge7h.onrender.com/api/v1';
 
 // ─── In-memory access token (never in localStorage) ───────────────────────────
 let _accessToken: string | null = null;

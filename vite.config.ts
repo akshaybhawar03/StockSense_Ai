@@ -7,7 +7,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'https://stocksense-backend-wijr.onrender.com',
+        target: 'https://stocksense-backend-ge7h.onrender.com',
         changeOrigin: true,
         secure: false,
       }

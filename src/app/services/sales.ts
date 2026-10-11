@@ -23,8 +23,8 @@ export const getPurchases   = (signal?: AbortSignal) => api.get('/purchases', { 
 export const createPurchase = (data: PurchasePayload) => api.post('/purchases', data);
 
 export const getInvoices = (
-    date: string,
-    tzOffset: number,
+    date: string = new Date().toLocaleDateString('en-CA'),
+    tzOffset: number = -(new Date().getTimezoneOffset()),
     signal?: AbortSignal,
 ) =>
     api.get('/invoices/', {

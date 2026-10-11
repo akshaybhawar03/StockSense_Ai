@@ -1,4 +1,4 @@
-import api from './axios';
+import api from '../app/services/api';
 
 export const uploadCSV = (file) => {
   const formData = new FormData();
