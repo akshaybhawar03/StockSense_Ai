@@ -101,7 +101,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 email,
                 password,
                 confirm_password: confirmPassword || password,
-                invite_code: inviteCode,
+                invite_code: inviteCode?.trim() || null,
             });
         } catch (error) {
             console.error("Registration failed:", error);

@@ -32,10 +32,7 @@ export function Register() {
             return;
         }
 
-        if (!inviteCode) {
-            setError("Invite code is required");
-            return;
-        }
+
 
         if (password !== confirmPassword) {
             setError("Passwords do not match.");
@@ -244,13 +241,12 @@ export function Register() {
                             </div>
 
                             <div className="group">
-                                <label className="block text-[13px] font-semibold text-gray-700 mb-1.5 uppercase tracking-wide">INVITE CODE</label>
+                                <label className="block text-[13px] font-semibold text-gray-700 mb-1.5 uppercase tracking-wide">INVITE CODE (OPTIONAL)</label>
                                 <Input
                                     type="text"
-                                    placeholder="Enter your invite code"
+                                    placeholder="Enter invite code if you have one"
                                     value={inviteCode}
                                     onChange={(e) => setInviteCode(e.target.value.toUpperCase())}
-                                    required
                                     className="w-full h-12 px-4 rounded-xl border border-gray-200 bg-gray-50/50 hover:bg-white focus:bg-white focus:ring-2 focus:ring-[rgb(var(--accent-primary))]/50 focus:border-[rgb(var(--accent-primary))] transition-all text-base shadow-sm placeholder:normal-case"
                                 />
                             </div>
